@@ -1,0 +1,35 @@
+## Python
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+
+## Data (never commit real medical images / restricted data)
+data_manifests/raw/
+data_manifests/*.cache
+data/raw/
+data/processed/
+*.nii.gz
+*.dcm
+
+## Experiment artifacts (large / regenerable)
+logs/*.log
+logs/**/checkpoints/
+experiments/**/checkpoints/
+*.pt
+*.pth
+*.ckpt
+
+## LaTeX build junk
+paper/*.aux
+paper/*.log
+paper/*.out
+paper/*.bbl
+paper/*.blg
+paper/*.fls
+paper/*.fdb_latexmk
+paper/*.synctex.gz
+
+## OS / editor
+.DS_Store
+.vscode/

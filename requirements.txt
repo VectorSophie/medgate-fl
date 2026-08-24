@@ -1,0 +1,16 @@
+# Direct dependencies. Install order matters for CPU-only torch:
+#   pip install torch --index-url https://download.pytorch.org/whl/cpu
+#   pip install -r requirements.txt
+# Full pinned transitive closure captured after install: requirements.lock.txt
+torch                # CPU wheel installed separately, see above
+numpy
+pandas
+scikit-learn
+Pillow
+matplotlib
+tqdm
+pytest
+pyyaml
+opacus               # DP-SGD (Phase 4)
+imagehash            # perceptual-hash dedup audit (Phase 0 manifest)
+cryptography         # AES-GCM adapter-at-rest (Phase 3 crypto layer)
