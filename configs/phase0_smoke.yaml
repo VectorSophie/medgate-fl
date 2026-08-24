@@ -1,0 +1,23 @@
+# Phase 0 smoke-test config. Traceability: this config + the git commit
+# that ran it + the seed below fully determine tests/test_phase0_*.py's
+# behavior (docs/execution_plan.md reproducibility requirement).
+phase: 0
+data:
+  source: synthetic          # medgate.data.synthetic — real data is license-gated, see
+                              # scripts/download_fed_isic2019_INSTRUCTIONS.md
+  num_centers: 6
+  samples_per_center: 32
+  image_size: 32
+  seed: 42
+model:
+  feature_dim: 64
+  adapter_rank: 4
+train:
+  epochs_per_round: 1
+  batch_size: 8
+  lr: 0.01
+  optimizer: adam
+notes: >
+  Not a benchmark config. Exists only to make the Phase 0 smoke test
+  (scripts/smoke_test.sh) traceable to a config file per the
+  reproducibility requirements in docs/research_scope.md.

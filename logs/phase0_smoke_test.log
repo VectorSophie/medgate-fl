@@ -1,0 +1,33 @@
+== hardware snapshot ==
+{
+  "captured_at_utc": "2026-08-24T16:58:33.808881+00:00",
+  "platform": "Linux-6.17.0-14-generic-x86_64-with-glibc2.39",
+  "python_version": "3.12.3 (main, Jan 22 2026, 20:57:42) [GCC 13.3.0]",
+  "cpu_count_logical": 8,
+  "gpus": [],
+  "mem": {
+    "MemTotal": "7739112 kB",
+    "MemAvailable": "3378172 kB",
+    "SwapTotal": "2097148 kB"
+  },
+  "disk_free_gb": 55.7,
+  "disk_total_gb": 232.4,
+  "torch": {
+    "torch_version": "2.13.0+cpu",
+    "cuda_available": false,
+    "mps_available": false
+  },
+  "git_commit": "4a373e487a1a9a20e54f0c5d2fe599fd592cace7"
+}
+== Phase 0 tests ==
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0 -- /home/vectorsophie/Desktop/Workspace/FLB/.venv/bin/python
+cachedir: .pytest_cache
+rootdir: /home/vectorsophie/Desktop/Workspace/FLB
+collecting ... collected 3 items
+
+tests/test_phase0_fedavg_round.py::test_two_client_fedavg_round_changes_and_preserves_the_model PASSED [ 33%]
+tests/test_phase0_forward_backward.py::test_forward_backward_pass_produces_finite_gradients PASSED [ 66%]
+tests/test_phase0_forward_backward.py::test_zero_init_adapter_starts_as_identity_residual PASSED [100%]
+
+============================== 3 passed in 7.51s ===============================

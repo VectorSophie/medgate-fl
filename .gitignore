@@ -3,6 +3,7 @@ __pycache__/
 *.pyc
 .venv/
 *.egg-info/
+.pytest_cache/
 
 ## Data (never commit real medical images / restricted data)
 data_manifests/raw/
@@ -12,8 +13,10 @@ data/processed/
 *.nii.gz
 *.dcm
 
-## Experiment artifacts (large / regenerable)
-logs/*.log
+## Experiment artifacts (large / regenerable) — small phase-level smoke/
+## summary logs ARE committed as reproducibility evidence; only bulk
+## per-run training logs and checkpoints are excluded.
+logs/runs/
 logs/**/checkpoints/
 experiments/**/checkpoints/
 *.pt

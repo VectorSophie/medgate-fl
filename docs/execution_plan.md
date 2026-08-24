@@ -19,14 +19,19 @@ Status: **IN PROGRESS**
       `docs/evidence_ledger.csv` schemas + seed content.
 - [x] Verify FLamby / Fed-ISIC2019 / Fed-IXITiny facts against primary
       sources (§5-6 of research_scope.md).
-- [ ] Tiny synthetic fixture generator (`medgate/data/synthetic.py`):
+- [x] Tiny synthetic fixture generator (`medgate/data/synthetic.py`):
       6-center, 8-class, image-shaped tensors, deterministic seed.
-- [ ] Verify one centralized forward/backward pass on the synthetic fixture
-      (`tests/test_phase0_forward_backward.py`).
-- [ ] Verify one two-client FL round (`tests/test_phase0_fedavg_round.py`).
-- [ ] Verify reproducibility from a clean environment (fresh venv +
-      `requirements.lock.txt` + smoke test, documented in
-      `scripts/smoke_test.sh`).
+- [x] Verify one centralized forward/backward pass on the synthetic fixture
+      (`tests/test_phase0_forward_backward.py` — passing, see
+      `logs/phase0_smoke_test.log`).
+- [x] Verify one two-client FL round (`tests/test_phase0_fedavg_round.py` —
+      passing).
+- [x] Verify reproducibility from a clean environment: this session's own
+      venv was built from scratch (`python3 -m venv .venv`,
+      `requirements.txt`, pinned in `requirements.lock.txt`) and
+      `scripts/smoke_test.sh` passed 3/3 on that fresh install. Re-running
+      on a second, independent machine is still open — flagged as a task,
+      not silently assumed.
 - [ ] Real Fed-ISIC2019 checksums/label counts/center counts/duplicates —
       **BLOCKED-LICENSE**: requires a human to accept the ISIC2019 and
       HAM10000 licenses (`scripts/download_fed_isic2019_INSTRUCTIONS.md`).
