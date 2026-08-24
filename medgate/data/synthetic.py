@@ -59,3 +59,13 @@ def make_synthetic_centers(
         SyntheticFedISIC(samples_per_center, image_size=image_size, seed=seed + c)
         for c in range(NUM_CENTERS)
     ]
+
+
+def make_synthetic_train_test_centers(
+    samples_per_center: int = 64, image_size: int = 32, seed: int = 0
+) -> tuple[list[SyntheticFedISIC], list[SyntheticFedISIC]]:
+    """Disjoint train/test synthetic datasets per center (offset seeds so
+    train and test never draw the same generator state)."""
+    train = make_synthetic_centers(samples_per_center, image_size, seed)
+    test = make_synthetic_centers(samples_per_center, image_size, seed + 10_000)
+    return train, test

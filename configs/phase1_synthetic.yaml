@@ -1,0 +1,26 @@
+# Phase 1 primary utility baseline, SYNTHETIC TIER ONLY.
+#
+# This is a pipeline-validation run, not a scientific result: the fixture
+# (medgate/data/synthetic.py) draws images and labels independently at
+# random, so there is no real signal for any model to learn. Expected
+# outcome is nothing above chance level; a run that scores much ABOVE
+# chance here would indicate a leakage bug, not a good model.
+# Real Fed-ISIC2019 numbers are BLOCKED-LICENSE (docs/execution_plan.md).
+data:
+  source: synthetic
+  num_centers: 6
+  samples_per_center: 32
+  image_size: 32
+  data_seed: 0          # fixed dataset split across all seeds/baselines (statistical protocol)
+model:
+  feature_dim: 64
+  adapter_rank: 4
+train:
+  rounds: 3              # federated communication rounds (centralized/local-only ignore this)
+  epochs_per_round: 1
+  batch_size: 8
+  lr: 0.01
+  fedprox_mu: 0.01
+seeds: [0, 1, 2, 3, 4]    # 5 seeds, feasible at this scale (statistical protocol asks for 5 where feasible)
+baselines: [centralized, local_only, fedavg, fedprox, fedlora]
+output_dir: experiments/phase1_synthetic

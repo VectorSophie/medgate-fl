@@ -1,0 +1,89 @@
+{
+  "baseline": "local_only",
+  "seed": 4,
+  "git_commit": "2296c0ec0c6c0bffc75c6f0c59ff4ac566967d7b",
+  "config": {
+    "data": {
+      "source": "synthetic",
+      "num_centers": 6,
+      "samples_per_center": 32,
+      "image_size": 32,
+      "data_seed": 0
+    },
+    "model": {
+      "feature_dim": 64,
+      "adapter_rank": 4
+    },
+    "train": {
+      "rounds": 3,
+      "epochs_per_round": 1,
+      "batch_size": 8,
+      "lr": 0.01,
+      "fedprox_mu": 0.01
+    },
+    "seeds": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "baselines": [
+      "centralized",
+      "local_only",
+      "fedavg",
+      "fedprox",
+      "fedlora"
+    ],
+    "output_dir": "experiments/phase1_synthetic"
+  },
+  "dataset_manifest_hash": "874a6cfad139fea2",
+  "wall_clock_seconds": 2.061,
+  "metrics": {
+    "pooled": {
+      "coarse_macro_f1": 0.16363007852369557,
+      "coarse_balanced_accuracy": 0.3333333333333333,
+      "fine_macro_f1": 0.027129230070406542,
+      "fine_balanced_accuracy": 0.125
+    },
+    "per_institution": [
+      {
+        "coarse_macro_f1": 0.2127659574468085,
+        "coarse_balanced_accuracy": 0.3333333333333333,
+        "fine_macro_f1": 0.033783783783783786,
+        "fine_balanced_accuracy": 0.125
+      },
+      {
+        "coarse_macro_f1": 0.0900900900900901,
+        "coarse_balanced_accuracy": 0.3333333333333333,
+        "fine_macro_f1": 0.02142857142857143,
+        "fine_balanced_accuracy": 0.125
+      },
+      {
+        "coarse_macro_f1": 0.2127659574468085,
+        "coarse_balanced_accuracy": 0.3333333333333333,
+        "fine_macro_f1": 0.014705882352941176,
+        "fine_balanced_accuracy": 0.125
+      },
+      {
+        "coarse_macro_f1": 0.0900900900900901,
+        "coarse_balanced_accuracy": 0.3333333333333333,
+        "fine_macro_f1": 0.02142857142857143,
+        "fine_balanced_accuracy": 0.125
+      },
+      {
+        "coarse_macro_f1": 0.25641025641025644,
+        "coarse_balanced_accuracy": 0.3333333333333333,
+        "fine_macro_f1": 0.05,
+        "fine_balanced_accuracy": 0.125
+      },
+      {
+        "coarse_macro_f1": 0.11965811965811966,
+        "coarse_balanced_accuracy": 0.3333333333333333,
+        "fine_macro_f1": 0.02142857142857143,
+        "fine_balanced_accuracy": 0.125
+      }
+    ],
+    "worst_institution_fine_macro_f1": 0.014705882352941176
+  }
+}

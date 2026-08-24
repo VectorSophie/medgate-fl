@@ -39,14 +39,35 @@ Status: **IN PROGRESS**
       that happens.
 
 ## Phase 1 — primary utility baseline (Fed-ISIC2019)
-Status: **PENDING** (synthetic-tier can start once Phase 0 tests pass;
-real-data tier is `BLOCKED-LICENSE`)
+Status: **synthetic tier DONE (pipeline validation only)**; **real-data
+tier BLOCKED-LICENSE**
 
 Centralized, local-only, FedAvg, FedProx, plain FedLoRA. Spec asks for 5
 seeds where feasible, else 3 for development + 5 for final. Given the CPU-only
 hardware (`docs/hardware_report.md`), the plan is:
-1. Synthetic-fixture tier: 5 seeds, runs in seconds each — establishes that
-   the training/eval/metrics-recording pipeline itself is correct.
+1. Synthetic-fixture tier — **done**: 5 seeds x 5 baselines = 25 runs,
+   `scripts/run_phase1_synthetic.py` (config `configs/phase1_synthetic.yaml`),
+   raw per-run JSON in `experiments/phase1_synthetic/`, aggregated table in
+   `paper/tables/phase1_utility_synthetic.{csv,md}` via
+   `scripts/make_phase1_table.py`. All 25 runs completed in ~66s wall-clock
+   on the hardware in `docs/hardware_report.md`.
+   **Reading the numbers**: the synthetic fixture draws images and labels
+   independently at random, so there is no learnable signal. Every
+   baseline lands near or below the constant-predictor macro-F1 for its
+   label space (~0.22 for 3-way coarse, ~0.03 for 8-way fine — matches a
+   model that collapses to predicting the marginal-majority class, the
+   only thing there is to learn from noise). Centralized/FedAvg/FedProx
+   land on *identical* numbers across all 5 seeds, which is the expected
+   signature of that same degenerate collapse rather than a bug — with a
+   fixed dataset split and no real gradient signal, different
+   initializations converge to the same marginal-frequency shortcut.
+   local-only and fedlora show more seed variance because each client
+   model (local-only) or the frozen-random-backbone + LoRA-only path
+   (fedlora) doesn't share the same aggregated trajectory. **This tier
+   confirms the training/aggregation/eval/table pipeline works and does not
+   produce impossible above-chance numbers (which would indicate a leakage
+   bug) — it is not evidence about capability isolation or federated
+   learning quality, and must never be quoted as such in `paper/main.tex`.**
 2. Real-data tier, once unblocked: start with 3 seeds on a small
    deterministic subset + a tiny CNN backbone, time one run, then decide
    with recorded numbers (not a guess) whether 5 seeds / full 23,247 images
