@@ -14,10 +14,12 @@ import time
 
 import numpy as np
 import torch
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import balanced_accuracy_score, f1_score
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neural_network import MLPClassifier
+from sklearn.svm import SVC
 
 
 @torch.no_grad()
@@ -61,6 +63,23 @@ def knn_probe(Z_train, y_train, Z_test, y_test, k: int = 5) -> dict:
     return _fit_eval(clf, Z_train, y_train, Z_test, y_test)
 
 
+def svm_probe(Z_train, y_train, Z_test, y_test, seed: int = 0) -> dict:
+    """RBF-kernel SVM (P1-8: 'RBF-SVM if feasible' — feasible at this
+    project's dataset scale; not attempted on anything larger without
+    re-checking cost, SVC training scales poorly with N)."""
+    clf = SVC(kernel="rbf", random_state=seed)  # only .predict() is used, no need for probability estimates
+    return _fit_eval(clf, Z_train, y_train, Z_test, y_test)
+
+
+def tree_probe(Z_train, y_train, Z_test, y_test, seed: int = 0) -> dict:
+    """Random forest (P1-8: 'tree/boosting probe if feasible' — a forest
+    rather than a boosted model specifically for training-time cost at
+    this project's scale, and because sklearn's forest needs no extra
+    tuning to be a reasonable probe out of the box)."""
+    clf = RandomForestClassifier(n_estimators=100, random_state=seed)
+    return _fit_eval(clf, Z_train, y_train, Z_test, y_test)
+
+
 def fewshot_probe(Z_train, y_train, Z_test, y_test, k_per_class: int = 5, seed: int = 0) -> dict:
     """Linear probe trained on only k_per_class examples per fine class
     (deterministically subsampled) — tests whether an attacker with very
@@ -101,12 +120,50 @@ def output_only_probe(model, train_dataset, test_dataset, batch_size: int = 32, 
     return linear_probe(O_train, y_train, O_test, y_test, seed=seed)
 
 
-def run_all_probes(model, train_dataset, test_dataset, batch_size: int = 32, seed: int = 0) -> dict:
-    Z_train, y_train = extract_representations(model, train_dataset, batch_size)
-    Z_test, y_test = extract_representations(model, test_dataset, batch_size)
-    return {
+def run_all_probes_on_features(Z_train, y_train, Z_test, y_test, seed: int = 0, include_slow: bool = True) -> dict:
+    """The full probe family (P1-8: a disjoint battery from whatever
+    adversary_head was used DURING training — none of these share any
+    weights with the model's own gradient-reversal adversary; they are
+    independently-fit sklearn classifiers on frozen features).
+    `include_slow=False` drops SVM/tree (still available individually)
+    for callers on a tight compute budget — RFC (residual_fine_capability)
+    is a max over whichever probes were actually run, so dropping some
+    only makes RFC more conservative, never wrong."""
+    probes = {
         "linear_probe": linear_probe(Z_train, y_train, Z_test, y_test, seed),
         "nonlinear_probe": nonlinear_probe(Z_train, y_train, Z_test, y_test, seed),
         "knn_probe": knn_probe(Z_train, y_train, Z_test, y_test),
         "fewshot_probe_k5": fewshot_probe(Z_train, y_train, Z_test, y_test, k_per_class=5, seed=seed),
     }
+    if include_slow:
+        probes["svm_probe"] = svm_probe(Z_train, y_train, Z_test, y_test, seed)
+        probes["tree_probe"] = tree_probe(Z_train, y_train, Z_test, y_test, seed)
+    return probes
+
+
+def run_all_probes(model, train_dataset, test_dataset, batch_size: int = 32, seed: int = 0, include_slow: bool = True) -> dict:
+    Z_train, y_train = extract_representations(model, train_dataset, batch_size)
+    Z_test, y_test = extract_representations(model, test_dataset, batch_size)
+    return run_all_probes_on_features(Z_train, y_train, Z_test, y_test, seed, include_slow)
+
+
+@torch.no_grad()
+def extract_adapter_residual(model, dataset, batch_size: int = 32):
+    """A_phi(f_theta(x)) alone (medgate.models.backbone.MedGateModel.adapter_residual)
+    + the FINE label — P1-9: probe the adapter's own residual contribution
+    separately from the shared representation z, to see whether fine-label
+    information specifically concentrates in the 'restricted' component or
+    is already present in the 'public' one (or both)."""
+    model.eval()
+    loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size)
+    ds, ys = [], []
+    for images, y_fine, _y_coarse in loader:
+        ds.append(model.adapter_residual(images))
+        ys.append(y_fine)
+    return torch.cat(ds).numpy(), torch.cat(ys).numpy()
+
+
+def run_all_probes_on_residual(model, train_dataset, test_dataset, batch_size: int = 32, seed: int = 0, include_slow: bool = True) -> dict:
+    D_train, y_train = extract_adapter_residual(model, train_dataset, batch_size)
+    D_test, y_test = extract_adapter_residual(model, test_dataset, batch_size)
+    return run_all_probes_on_features(D_train, y_train, D_test, y_test, seed, include_slow)

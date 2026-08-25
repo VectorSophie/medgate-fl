@@ -137,11 +137,45 @@ def orthogonality_loss(z: torch.Tensor, delta: torch.Tensor) -> torch.Tensor:
     residual contribution delta=A_phi(z), averaged over the batch. Not
     claimed to be the only or the best operationalization; Phase 2 compares
     it against the simpler alternatives (no orth term at all, adapter-only,
-    adversarial-only) rather than assuming it helps."""
+    adversarial-only) rather than assuming it helps.
+
+    IMPORTANT SCOPE LIMIT (P1-9 review finding, stated here so it travels
+    with the loss itself, not just in a paper paragraph someone could
+    miss): a small cosine similarity between z and delta means the two
+    live in geometrically different directions in representation space.
+    It does NOT mean they are INFORMATION-independent -- two orthogonal
+    vectors can still both be deterministic functions of, and equally
+    predictive of, the same fine label (e.g. z could encode "is it MEL"
+    on one axis and delta could encode the identical bit on a completely
+    orthogonal axis). This loss is a geometric regularizer, not an
+    independence guarantee; whether isolation actually holds is decided
+    empirically by probe performance (medgate/attacks/probes.py run on
+    BOTH z and delta separately, see extract_adapter_residual below),
+    never by this loss's value alone. See cosine_similarity_stats for the
+    raw diagnostic numbers to report alongside probe results."""
     z_n = nn.functional.normalize(z, dim=-1, eps=1e-8)
     d_n = nn.functional.normalize(delta, dim=-1, eps=1e-8)
     cos_sim = (z_n * d_n).sum(dim=-1)
     return (cos_sim ** 2).mean()
+
+
+def cosine_similarity_stats(z: torch.Tensor, delta: torch.Tensor) -> dict:
+    """RAW per-sample cosine similarity statistics between z and delta —
+    report this alongside orthogonality_loss's scalar value (which is the
+    mean of the SQUARED similarity, obscuring sign and spread). A loss
+    near 0 with high variance (some samples near +1, some near -1) reads
+    very differently from a loss near 0 with all samples near 0 exactly,
+    and only the raw stats here distinguish those cases."""
+    with torch.no_grad():
+        z_n = nn.functional.normalize(z, dim=-1, eps=1e-8)
+        d_n = nn.functional.normalize(delta, dim=-1, eps=1e-8)
+        cos_sim = (z_n * d_n).sum(dim=-1)
+        return {
+            "mean": cos_sim.mean().item(),
+            "std": cos_sim.std().item() if cos_sim.numel() > 1 else 0.0,
+            "min": cos_sim.min().item(),
+            "max": cos_sim.max().item(),
+        }
 
 
 class MedGateModel(nn.Module):
@@ -196,3 +230,16 @@ class MedGateModel(nn.Module):
     def orth_term(self, x: torch.Tensor) -> torch.Tensor:
         z = self.representation(x)
         return orthogonality_loss(z, self.adapter(z))
+
+    def adapter_residual(self, x: torch.Tensor) -> torch.Tensor:
+        """A_phi(f_theta(x)) alone -- the adapter's residual contribution,
+        WITHOUT adding it to z. Used by medgate/attacks/probes.py to probe
+        the residual's own fine-label information separately from z's
+        (P1-9: report probe results for BOTH representations, not just
+        the combined z + A_phi(z) authorized path)."""
+        z = self.representation(x)
+        return self.adapter(z)
+
+    def orth_stats(self, x: torch.Tensor) -> dict:
+        z = self.representation(x)
+        return cosine_similarity_stats(z, self.adapter(z))
