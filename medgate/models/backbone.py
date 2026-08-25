@@ -66,8 +66,51 @@ class LoRAAdapter(nn.Module):
         return self.up(self.down(z))
 
 
+class GradReverse(torch.autograd.Function):
+    """Gradient reversal (standard DANN-style trick): identity on the
+    forward pass, negated+scaled gradient on the backward pass. Lets one
+    optimizer jointly (a) train an adversary head to predict the fine
+    label from the public representation as well as it can, while (b)
+    pushing the backbone to make that representation *less* predictive —
+    the two effects share the same loss term because of the sign flip
+    here, no separate min/max loop needed."""
+
+    @staticmethod
+    def forward(ctx, x, lambd):
+        ctx.lambd = lambd
+        return x.view_as(x)
+
+    @staticmethod
+    def backward(ctx, grad_output):
+        return -ctx.lambd * grad_output, None
+
+
+def grad_reverse(x: torch.Tensor, lambd: float = 1.0) -> torch.Tensor:
+    return GradReverse.apply(x, lambd)
+
+
+def orthogonality_loss(z: torch.Tensor, delta: torch.Tensor) -> torch.Tensor:
+    """One candidate operationalization of 'separation between public and
+    restricted feature subspaces' (project brief, L_orth) — squared cosine
+    similarity between the public representation z and the adapter's
+    residual contribution delta=A_phi(z), averaged over the batch. Not
+    claimed to be the only or the best operationalization; Phase 2 compares
+    it against the simpler alternatives (no orth term at all, adapter-only,
+    adversarial-only) rather than assuming it helps."""
+    z_n = nn.functional.normalize(z, dim=-1, eps=1e-8)
+    d_n = nn.functional.normalize(delta, dim=-1, eps=1e-8)
+    cos_sim = (z_n * d_n).sum(dim=-1)
+    return (cos_sim ** 2).mean()
+
+
 class MedGateModel(nn.Module):
-    """Public backbone + coarse head + restricted LoRA adapter + fine head."""
+    """Public backbone + coarse head + restricted LoRA adapter + fine head
+    + an always-present adversary head (z -> fine-class logits, meant to be
+    used only behind grad_reverse). Every Phase 2 method (coarse-only,
+    hidden-fine-head, adapter-isolation, adversarial, orthogonal, combined)
+    uses this exact same architecture and differs only in which loss terms
+    are active — an intentional design choice so the ablation isolates the
+    objective, not the model capacity."""
 
     def __init__(
         self,
@@ -82,6 +125,7 @@ class MedGateModel(nn.Module):
         self.coarse_head = LinearHead(feature_dim, num_coarse)
         self.adapter = LoRAAdapter(feature_dim, rank=adapter_rank)
         self.fine_head = LinearHead(feature_dim, num_fine)
+        self.adversary_head = LinearHead(feature_dim, num_fine)
 
     def representation(self, x: torch.Tensor) -> torch.Tensor:
         """f_theta(x) — the public representation. Used directly by probing
@@ -92,6 +136,16 @@ class MedGateModel(nn.Module):
     def forward_public(self, x: torch.Tensor) -> torch.Tensor:
         return self.coarse_head(self.representation(x))
 
-    def forward_fine(self, x: torch.Tensor) -> torch.Tensor:
+    def forward_fine(self, x: torch.Tensor, use_adapter: bool = True) -> torch.Tensor:
         z = self.representation(x)
-        return self.fine_head(z + self.adapter(z))
+        if use_adapter:
+            return self.fine_head(z + self.adapter(z))
+        return self.fine_head(z)  # "hidden fine head": same representation, no adapter isolation
+
+    def adversary_logits(self, x: torch.Tensor, lambd: float = 1.0) -> torch.Tensor:
+        z = self.representation(x)
+        return self.adversary_head(grad_reverse(z, lambd))
+
+    def orth_term(self, x: torch.Tensor) -> torch.Tensor:
+        z = self.representation(x)
+        return orthogonality_loss(z, self.adapter(z))

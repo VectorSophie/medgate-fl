@@ -1,0 +1,84 @@
+{
+  "method": "coarse_only",
+  "seed": 3,
+  "git_commit": "2e97dc4b030c8099c876e950dcbed3f427d6c63b",
+  "config": {
+    "data": {
+      "source": "synthetic",
+      "num_centers": 6,
+      "samples_per_center": 32,
+      "image_size": 32,
+      "data_seed": 0
+    },
+    "model": {
+      "feature_dim": 64,
+      "adapter_rank": 4
+    },
+    "train": {
+      "rounds": 3,
+      "epochs_per_round": 1,
+      "batch_size": 8,
+      "lr": 0.01
+    },
+    "seeds": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "methods": [
+      "coarse_only",
+      "hidden_fine_head",
+      "adapter_isolation",
+      "adversarial",
+      "orthogonal",
+      "combined"
+    ],
+    "output_dir": "experiments/phase2_synthetic"
+  },
+  "dataset_manifest_hash": "874a6cfad139fea2",
+  "train_wall_clock_seconds": 1.516,
+  "utility": {
+    "coarse_macro_f1": 0.23129251700680273,
+    "coarse_balanced_accuracy": 0.3333333333333333,
+    "fine_macro_f1": 0.030821917808219176,
+    "fine_balanced_accuracy": 0.125
+  },
+  "u_public": 0.02880184331797235,
+  "probes": {
+    "linear_probe": {
+      "macro_f1": 0.02880184331797235,
+      "balanced_accuracy": 0.125,
+      "n_train_examples": 192,
+      "fit_seconds": 0.0151
+    },
+    "nonlinear_probe": {
+      "macro_f1": 0.02880184331797235,
+      "balanced_accuracy": 0.125,
+      "n_train_examples": 192,
+      "fit_seconds": 0.1542
+    },
+    "knn_probe": {
+      "macro_f1": 0.08120886088321362,
+      "balanced_accuracy": 0.09643964228203358,
+      "n_train_examples": 192,
+      "fit_seconds": 0.0019
+    },
+    "fewshot_probe_k5": {
+      "macro_f1": 0.02880184331797235,
+      "balanced_accuracy": 0.125,
+      "n_train_examples": 40,
+      "fit_seconds": 0.0074
+    }
+  },
+  "residual_fine_capability": 0.08120886088321362,
+  "unauthorized_capability_gain": 0.05240701756524127,
+  "capability_recovery_efficiency_by_probe": {
+    "linear_probe": 0.0,
+    "nonlinear_probe": 0.0,
+    "knn_probe": 27.608836042689266,
+    "fewshot_probe_k5": 0.0
+  },
+  "authorized_recovery_ratio": null
+}

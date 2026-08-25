@@ -1,0 +1,26 @@
+# Phase 2 capability-isolation ablation, SYNTHETIC TIER ONLY.
+#
+# Same caveat as configs/phase1_synthetic.yaml: the fixture carries no real
+# signal, so this validates that training/probing/metric-computation code
+# paths work and that no method shows impossible above-chance probe
+# recovery (which would mean a leakage bug in the probe/eval code itself).
+# It is NOT evidence about whether adversarial/orthogonality objectives
+# help real capability isolation -- that requires real Fed-ISIC2019 data
+# (BLOCKED-LICENSE, docs/execution_plan.md).
+data:
+  source: synthetic
+  num_centers: 6
+  samples_per_center: 32
+  image_size: 32
+  data_seed: 0
+model:
+  feature_dim: 64
+  adapter_rank: 4
+train:
+  rounds: 3
+  epochs_per_round: 1
+  batch_size: 8
+  lr: 0.01
+seeds: [0, 1, 2, 3, 4]
+methods: [coarse_only, hidden_fine_head, adapter_isolation, adversarial, orthogonal, combined]
+output_dir: experiments/phase2_synthetic

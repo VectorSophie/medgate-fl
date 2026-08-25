@@ -36,22 +36,27 @@ def local_train(
     lr: float,
     trainable_params=None,
     extra_loss_fn=None,
+    batch_loss_fn=None,
 ) -> dict:
     """Train `model` in place on one client's data; return a CPU state_dict
     (deep copy, safe to aggregate after the caller discards `model`).
 
     `trainable_params`: optimize only these params (e.g. adapter + fine
     head only, for the plain-FedLoRA baseline); defaults to the whole model.
-    `extra_loss_fn(model) -> scalar tensor`: added to the joint loss (e.g.
-    FedProx's proximal term)."""
+    `extra_loss_fn(model) -> scalar tensor`: added to the loss, independent
+    of the batch (e.g. FedProx's proximal term).
+    `batch_loss_fn(model, images, y_coarse, y_fine) -> (loss, coarse_loss, fine_loss)`:
+    replaces the default joint_loss — used by Phase 2's capability-isolation
+    objectives (coarse-only, adversarial, orthogonal, combined)."""
     params = list(trainable_params) if trainable_params is not None else list(model.parameters())
+    loss_fn = batch_loss_fn if batch_loss_fn is not None else joint_loss
     loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
     optimizer = torch.optim.Adam(params, lr=lr)
     model.train()
     for _ in range(epochs):
         for images, y_fine, y_coarse in loader:
             optimizer.zero_grad()
-            loss, _, _ = joint_loss(model, images, y_coarse, y_fine)
+            loss, _, _ = loss_fn(model, images, y_coarse, y_fine)
             if extra_loss_fn is not None:
                 loss = loss + extra_loss_fn(model)
             loss.backward()
@@ -82,6 +87,7 @@ def run_round(
     lr: float = 1e-3,
     trainable_params_fn=None,
     extra_loss_fn_factory=None,
+    batch_loss_fn=None,
 ) -> dict:
     """One federated-averaging round: broadcast -> local train on each
     client -> weighted aggregate. Returns the aggregated state_dict; caller
@@ -93,6 +99,8 @@ def run_round(
     `extra_loss_fn_factory(global_model) -> extra_loss_fn(local_model)`:
     for baselines (e.g. FedProx) whose local objective depends on the
     round's starting global weights.
+    `batch_loss_fn`: passed straight through to local_train (Phase 2
+    capability-isolation objectives).
     """
     client_states, client_sizes = [], []
     for ds in client_datasets:
@@ -100,7 +108,7 @@ def run_round(
         params = trainable_params_fn(local_model) if trainable_params_fn else None
         extra_loss_fn = extra_loss_fn_factory(global_model) if extra_loss_fn_factory else None
         client_states.append(
-            local_train(local_model, ds, epochs, batch_size, lr, params, extra_loss_fn)
+            local_train(local_model, ds, epochs, batch_size, lr, params, extra_loss_fn, batch_loss_fn)
         )
         client_sizes.append(len(ds))
     return fedavg_aggregate(client_states, [float(n) for n in client_sizes])

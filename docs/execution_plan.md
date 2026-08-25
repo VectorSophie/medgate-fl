@@ -74,13 +74,45 @@ hardware (`docs/hardware_report.md`), the plan is:
    / a larger backbone are actually feasible in this environment.
 
 ## Phase 2 — capability isolation
-Status: **PENDING** (depends on Phase 1 baselines existing)
+Status: **synthetic tier DONE (pipeline validation only)**; real-data tier
+`BLOCKED-LICENSE`
 
 Coarse-head-only, hidden-fine-head, adapter isolation, adversarial
-suppression, orthogonality loss, combined method — each followed by linear,
-nonlinear, and few-shot probes. Implemented under `medgate/models/` and
-`medgate/attacks/` (probes count as lightweight attacks and share code with
-Phase 3).
+suppression, orthogonality loss, combined method — all six trained on the
+*identical* `MedGateModel` architecture (`medgate/models/backbone.py`),
+differing only in the loss function (`medgate/federated/capability_isolation.py`),
+so the ablation isolates the objective rather than model capacity. Each
+followed by linear/nonlinear/kNN/few-shot probes on the frozen PUBLIC
+representation (`medgate/attacks/probes.py`) plus an output-only probe used
+to operationalize `U_public` (fine-label recoverability from the exposed
+coarse output alone, before any representation access — documented in
+`medgate/attacks/probes.py` and `medgate/capability_metrics.py`, since the
+project brief's formula for `U_public` was not fully specified). Composite
+metrics ARR/UCG/RFC/CRE implemented in `medgate/capability_metrics.py`,
+always reported alongside the raw probe numbers, never in place of them.
+
+- [x] `scripts/run_phase2_synthetic.py` + `configs/phase2_synthetic.yaml`:
+      6 methods x 5 seeds = 30 runs, ~2m13s wall-clock, raw JSON under
+      `experiments/phase2_synthetic/`, table in
+      `paper/tables/phase2_capability_isolation_synthetic.{csv,md}` via
+      `scripts/make_phase2_table.py`.
+- [x] `tests/test_phase2_capability_isolation.py`: gradient-reversal sign
+      is checked directly (not just "doesn't crash"), orthogonality loss
+      checked against known orthogonal/parallel vectors, all six
+      objectives checked for finite forward/backward, and the adversary
+      head is checked to receive gradient under exactly the two methods
+      that should use it.
+- **Reading the numbers**: same caveat as Phase 1 — synthetic labels carry
+  no signal, so every method's authorized fine macro-F1 sits at the
+  8-class chance/collapse floor (~0.03), and RFC/UCG bounce in a small
+  range (~0.03-0.14) that reflects test-set-size noise (only ~38 samples/
+  fine-class in the pooled test set) rather than a real isolation effect.
+  ARR is `n/a` for most methods because its denominator
+  (`U_plain_adapter - U_public`) is ~0 when nothing is learnable — this is
+  the metric correctly refusing to report a number it cannot support,
+  not a bug. **None of these numbers support or refute any claim about
+  whether adversarial/orthogonality objectives actually help capability
+  isolation** — that question needs real, structured Fed-ISIC2019 data.
 
 ## Phase 3 — security
 Status: **PENDING**

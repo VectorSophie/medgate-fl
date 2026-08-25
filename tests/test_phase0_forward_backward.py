@@ -29,7 +29,13 @@ def test_forward_backward_pass_produces_finite_gradients():
     assert torch.isfinite(loss)
     loss.backward()
 
-    grads = [p.grad for p in model.parameters() if p.requires_grad]
+    # joint_loss is the Phase 0/1 baseline objective: it only exercises
+    # backbone/coarse_head/adapter/fine_head. model.adversary_head exists
+    # for Phase 2's adversarial/combined objectives (medgate/federated/
+    # capability_isolation.py) and is correctly untouched here — it is not
+    # part of this check.
+    touched_modules = [model.backbone, model.coarse_head, model.adapter, model.fine_head]
+    grads = [p.grad for m in touched_modules for p in m.parameters() if p.requires_grad]
     assert grads, "model has no trainable parameters"
     for g in grads:
         assert g is not None, "a parameter received no gradient"
