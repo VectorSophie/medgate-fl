@@ -1,0 +1,81 @@
+{
+  "scenario": "institution",
+  "seed": 1,
+  "gold_retained_utility": 0.027777777777777776,
+  "methods": {
+    "full_retrain": {
+      "retained_fine_macro_f1": 0.027777777777777776,
+      "gap_to_gold_standard": 0.0,
+      "forgetting_auc": 0.4619140625,
+      "mean_removed_data_loss": 2.0963263511657715,
+      "mean_retained_test_loss": 2.0884454250335693
+    },
+    "checkpoint_rollback": {
+      "retained_fine_macro_f1": 0.027777777777777776,
+      "gap_to_gold_standard": 0.0,
+      "forgetting_auc": 0.3953125,
+      "mean_removed_data_loss": 2.1059625148773193,
+      "mean_retained_test_loss": 2.083927869796753
+    },
+    "adapter_deletion_and_retrain": {
+      "retained_fine_macro_f1": 0.027777777777777776,
+      "gap_to_gold_standard": 0.0,
+      "forgetting_auc": 0.458984375,
+      "mean_removed_data_loss": 2.1253950595855713,
+      "mean_retained_test_loss": 2.1023144721984863
+    },
+    "gradient_ascent_unlearning": {
+      "retained_fine_macro_f1": 0.027777777777777776,
+      "gap_to_gold_standard": 0.0,
+      "forgetting_auc": 0.409765625,
+      "mean_removed_data_loss": 2.1318066120147705,
+      "mean_retained_test_loss": 2.0974831581115723
+    },
+    "key_revocation_only": {
+      "retained_fine_macro_f1": 0.027777777777777776,
+      "gap_to_gold_standard": 0.0,
+      "forgetting_auc": 0.455859375,
+      "mean_removed_data_loss": 2.091503143310547,
+      "mean_retained_test_loss": 2.0827980041503906
+    }
+  },
+  "config": {
+    "data": {
+      "source": "synthetic",
+      "num_centers": 6,
+      "samples_per_center": 32,
+      "image_size": 32,
+      "data_seed": 0
+    },
+    "model": {
+      "feature_dim": 64,
+      "adapter_rank": 4
+    },
+    "train": {
+      "rounds": 3,
+      "epochs_per_round": 1,
+      "batch_size": 8,
+      "lr": 0.01
+    },
+    "removal": {
+      "institution_index": 0,
+      "fine_class_index": 0
+    },
+    "unlearning": {
+      "adapter_deletion_epochs": 3,
+      "ascent_steps": 5,
+      "descent_steps": 10,
+      "lr": 0.01,
+      "batch_size": 8
+    },
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "output_dir": "experiments/phase5_synthetic"
+  },
+  "git_commit": "5e8ce663f12fbe450ac41efa971f9806c59e19d3",
+  "dataset_manifest_hash": "874a6cfad139fea2",
+  "wall_clock_seconds": 1.63
+}

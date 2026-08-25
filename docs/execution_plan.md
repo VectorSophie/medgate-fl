@@ -221,16 +221,65 @@ file), and secure aggregation + DP-SGD combined.
   finding. Real epsilon-vs-utility tradeoffs need real data.
 
 ## Phase 5 — revocation and unlearning
-Status: **PENDING**
+Status: **synthetic tier DONE for institution/class levels (pipeline
+validation only)**; patient/patient-group levels **not run** (no real
+manifest); real-data tier `BLOCKED-LICENSE`
 
-Patient-, class-, and institution-level removal. Full retraining is the
-gold standard. Reproducing a literature method (candidates:
-`wu2022-fed-unlearning-kd`, `halimi-fed-unlearning-erase-client`,
-`zhang2023-fedrecovery`, `deng2024-right-to-be-forgotten-medical`) is gated
-on that citation being moved from UNVERIFIED to VERIFIED first, and on
-Phase 1's real-data tier being unblocked (retraining needs real data to be
-meaningful). `chen2026-lethe-unlearning` (Lethe) is already VERIFIED and is
-the direct benchmark to compare methodology against.
+Implemented: full retraining (gold standard), checkpoint rollback (naive
+maximal — reinit to round 0), adapter deletion + retrain (delete/retrain
+only the restricted component, backbone frozen), gradient-ascent
+unlearning (generic simple technique — explicitly NOT a reproduction of
+`wu2022-fed-unlearning-kd`/`halimi-fed-unlearning-erase-client`/
+`zhang2023-fedrecovery`/`deng2024-right-to-be-forgotten-medical`, all
+still UNVERIFIED per `docs/literature_matrix.csv`), and key-revocation-only
+(returns the model unmodified — the literal test of the project brief's
+non-claim that revoking a key does not remove learned influence). Also
+built the crypto/authorization layer this phase needed anyway:
+`medgate/crypto/adapter_encryption.py` (AES-256-GCM, RSA never used to
+encrypt tensors directly, matches the project brief's cryptographic
+conservatism) and `medgate/crypto/authorization.py` (minimal centralized
+IAM + append-only audit log — also the Phase 8 baseline a permissioned
+ledger would be compared against).
+
+- [x] `scripts/run_phase5_synthetic.py` + `configs/phase5_synthetic.yaml`:
+      3 seeds x 2 scenarios (institution-level, class-level) x 5 methods,
+      ~13.6s wall-clock, raw JSON under `experiments/phase5_synthetic/`,
+      table in `paper/tables/phase5_unlearning_synthetic.{csv,md}` via
+      `scripts/make_phase5_table.py`.
+- **Patient-level and patient-group-level removal were NOT run** — the
+  synthetic fixture has no patient/lesion manifest to remove by (only real
+  Fed-ISIC2019 will have one, once unblocked). Not silently skipped:
+  recorded here and in the config's own comments.
+- [x] `tests/test_crypto_layer.py` (6 tests): AES-GCM roundtrip, wrong-key
+      and tampered-metadata rejection (via `InvalidTag`), and — directly
+      testing the pre-registered "expired/revoked credential acceptance
+      rate of zero" criterion — 20/20 authorize attempts on a revoked
+      credential are denied.
+- [x] `tests/test_phase5_unlearning.py` (5 tests): checks real mechanism
+      properties (e.g. adapter deletion leaves the backbone bit-identical
+      while changing the adapter; `key_revocation_only` returns the exact
+      same object, not a copy).
+- **A real metric confound found and documented, not hidden**: the
+  `forgetting_auc` metric (membership-inference AUC between removed data
+  and retained test data) is clean for the institution scenario (all
+  institutions share the same label distribution) but **confounded for
+  the class scenario** — removed data is entirely one class and retained
+  test data is the other seven, so any class-level loss asymmetry that
+  exists even in an untrained model biases this AUC regardless of real
+  memorization. Visible in the numbers: `checkpoint_rollback` (which is
+  never trained on the post-removal data at all) still shows
+  `forgetting_auc` ~0.99 in the class scenario purely from this
+  confound, alongside `key_revocation_only`'s ~0.82 which IS a genuine
+  finding (the unmodified model still fits the class it was trained on).
+  Documented in `paper/tables/phase5_unlearning_synthetic.md` directly so
+  it travels with the table, not just this file.
+- **Reading the rest of the numbers**: on the institution scenario (the
+  clean one), `key_revocation_only`'s forgetting_auc (~0.51) sits right
+  next to `full_retrain`'s (~0.48) and every other method's — expected on
+  synthetic noise where there is nothing to memorize in the first place;
+  this tier cannot show revocation-vs-unlearning separation, only that the
+  measurement pipeline produces sane, bounded numbers. Real separation
+  needs real data with real learnable structure.
 
 ## Phase 6 — external validation and fusion
 Status: **PENDING**, gated on all Phase-6 dataset rows in

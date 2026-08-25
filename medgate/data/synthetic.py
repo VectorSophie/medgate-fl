@@ -61,6 +61,30 @@ def make_synthetic_centers(
     ]
 
 
+def subset_by_indices(dataset: SyntheticFedISIC, indices) -> torch.utils.data.Dataset:
+    """A plain TensorDataset over the given rows of one center's fixture —
+    used by Phase 5 (medgate/unlearning) to build 'data with the target
+    subset removed' scenarios without a real patient/lesion manifest
+    (docs/execution_plan.md notes this as a known limitation of the
+    synthetic tier: no real patient IDs exist to remove by)."""
+    idx = torch.as_tensor(list(indices), dtype=torch.long)
+    return torch.utils.data.TensorDataset(dataset.images[idx], dataset.fine_labels[idx], dataset.coarse_labels[idx])
+
+
+def remove_fine_class(dataset: SyntheticFedISIC, fine_class_idx: int) -> torch.utils.data.Dataset:
+    """Class-level removal: every example of one fine class, dropped."""
+    keep = (dataset.fine_labels != fine_class_idx).nonzero(as_tuple=True)[0]
+    return subset_by_indices(dataset, keep)
+
+
+def select_fine_class(dataset: SyntheticFedISIC, fine_class_idx: int) -> torch.utils.data.Dataset:
+    """The complement of remove_fine_class — just the removed examples,
+    needed as the 'removed_data' pool for gradient_ascent_unlearning and
+    for measuring residual membership signal after unlearning."""
+    keep = (dataset.fine_labels == fine_class_idx).nonzero(as_tuple=True)[0]
+    return subset_by_indices(dataset, keep)
+
+
 def make_synthetic_train_test_centers(
     samples_per_center: int = 64, image_size: int = 32, seed: int = 0
 ) -> tuple[list[SyntheticFedISIC], list[SyntheticFedISIC]]:

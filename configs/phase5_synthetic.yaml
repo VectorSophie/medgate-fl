@@ -1,0 +1,38 @@
+# Phase 5 revocation and unlearning, SYNTHETIC TIER ONLY. Same caveat as
+# earlier phases: no real signal, so this validates the mechanism code
+# paths (full retrain / rollback / adapter deletion / gradient-ascent
+# unlearning / key-revocation-only) and produces a real, interpretable
+# ordering of "how much does each method actually change the model,"
+# which is a property of the mechanisms themselves, not of the data.
+# It is NOT evidence about real forgetting quality on real patient data.
+#
+# No real patient/lesion manifest exists yet (BLOCKED-LICENSE), so
+# patient-level and patient-group-level removal are NOT run here — only
+# institution-level and class-level, which the synthetic fixture's
+# 6-center/8-class structure actually supports. This is recorded as a
+# limitation, not silently skipped.
+data:
+  source: synthetic
+  num_centers: 6
+  samples_per_center: 32
+  image_size: 32
+  data_seed: 0
+model:
+  feature_dim: 64
+  adapter_rank: 4
+train:
+  rounds: 3
+  epochs_per_round: 1
+  batch_size: 8
+  lr: 0.01
+removal:
+  institution_index: 0
+  fine_class_index: 0     # MEL, see medgate/data/synthetic.py FINE_CLASSES
+unlearning:
+  adapter_deletion_epochs: 3
+  ascent_steps: 5
+  descent_steps: 10
+  lr: 0.01
+  batch_size: 8
+seeds: [0, 1, 2]
+output_dir: experiments/phase5_synthetic
