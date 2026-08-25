@@ -1,0 +1,35 @@
+# Phase 3 security attacks, SYNTHETIC TIER ONLY. Same caveat as Phase 1/2:
+# no real signal in the fixture, so this validates the attack code paths
+# and that no attack shows implausible success against pure noise (which
+# would indicate a methodology bug), not real attack effectiveness against
+# a real capability-isolated model. Real numbers need real Fed-ISIC2019
+# data (BLOCKED-LICENSE, docs/execution_plan.md).
+data:
+  source: synthetic
+  num_centers: 6
+  samples_per_center: 32
+  image_size: 32
+  data_seed: 0
+  auxiliary_samples_per_center: 16   # attacker's "public auxiliary medical data" pool (A2/A3/collusion)
+model:
+  feature_dim: 64
+  adapter_rank: 4
+train:
+  rounds: 3
+  epochs_per_round: 1
+  batch_size: 8
+  lr: 0.01
+seeds: [0, 1, 2]     # 3 seeds for this development pass (statistical protocol: 3 for dev, 5 reserved for final real-data runs)
+dlg:
+  steps: 200
+  lr: 0.05
+adapter_reconstruction:
+  budgets: [8, 16, 32]   # auxiliary-example counts
+  epochs: 5
+extraction:
+  query_budgets: [16, 32, 64]
+  epochs: 5
+collusion:
+  budget_each: 16
+  epochs: 5
+output_dir: experiments/phase3_synthetic

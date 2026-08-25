@@ -1,0 +1,166 @@
+{
+  "seed": 2,
+  "git_commit": "175e88db6a6682455d842d2e900e956f5f61fb68",
+  "u_authorized_fine_macro_f1": 0.0567572598659717,
+  "gradient_inversion": {
+    "attacker_knowledge": "full model weights + ONE raw single-example gradient + true labels (simplified DLG)",
+    "attacker_access": "white-box, single client's unaggregated gradient (A1, no secure aggregation)",
+    "compute_budget_steps": 200,
+    "mse": 1.934887409210205,
+    "psnr_db": 15.404666662216187,
+    "final_grad_diff": 0.006548036355525255
+  },
+  "membership_inference": {
+    "attacker_knowledge": "white-box loss access only, no shadow models trained (simplified variant)",
+    "attacker_access": "per-example fine-task loss on a candidate pool",
+    "attack_auc": 0.5501302083333334,
+    "attack_advantage": 0.10026041666666674,
+    "n_members": 32,
+    "n_nonmembers": 192,
+    "mean_member_loss": 2.0882911682128906,
+    "mean_nonmember_loss": 2.109668493270874
+  },
+  "adapter_reconstruction": [
+    {
+      "attacker_knowledge": "public backbone + public coarse head (frozen), FRESH untrained adapter/fine_head",
+      "attacker_access": "8 auxiliary labeled examples, 5 local epochs",
+      "compute_budget": {
+        "auxiliary_examples": 8,
+        "epochs": 5
+      },
+      "u_attack_fine_macro_f1": 0.026744186046511628,
+      "capability_recovery_efficiency": 0.012171803611870499
+    },
+    {
+      "attacker_knowledge": "public backbone + public coarse head (frozen), FRESH untrained adapter/fine_head",
+      "attacker_access": "16 auxiliary labeled examples, 5 local epochs",
+      "compute_budget": {
+        "auxiliary_examples": 16,
+        "epochs": 5
+      },
+      "u_attack_fine_macro_f1": 0.04873737373737374,
+      "capability_recovery_efficiency": 0.017202154521691642
+    },
+    {
+      "attacker_knowledge": "public backbone + public coarse head (frozen), FRESH untrained adapter/fine_head",
+      "attacker_access": "32 auxiliary labeled examples, 5 local epochs",
+      "compute_budget": {
+        "auxiliary_examples": 32,
+        "epochs": 5
+      },
+      "u_attack_fine_macro_f1": 0.031818181818181815,
+      "capability_recovery_efficiency": 0.009099989420539637
+    }
+  ],
+  "extraction": [
+    {
+      "attacker_knowledge": "none of the target's weights; only its output predictions",
+      "attacker_access": "16 black-box queries (fixed query budget), 5 local epochs on the student",
+      "compute_budget": {
+        "query_budget": 16,
+        "epochs": 5
+      },
+      "u_attack_fine_macro_f1": 0.031818181818181815,
+      "capability_recovery_efficiency": 0.011230422122969671
+    },
+    {
+      "attacker_knowledge": "none of the target's weights; only its output predictions",
+      "attacker_access": "32 black-box queries (fixed query budget), 5 local epochs on the student",
+      "compute_budget": {
+        "query_budget": 32,
+        "epochs": 5
+      },
+      "u_attack_fine_macro_f1": 0.031818181818181815,
+      "capability_recovery_efficiency": 0.009099989420539637
+    },
+    {
+      "attacker_knowledge": "none of the target's weights; only its output predictions",
+      "attacker_access": "64 black-box queries (fixed query budget), 5 local epochs on the student",
+      "compute_budget": {
+        "query_budget": 64,
+        "epochs": 5
+      },
+      "u_attack_fine_macro_f1": 0.031818181818181815,
+      "capability_recovery_efficiency": 0.007622240046496045
+    }
+  ],
+  "collusion": {
+    "attacker_knowledge": "two colluding A2 attackers, disjoint auxiliary data, logit-averaged ensemble",
+    "attacker_access": "16+16 auxiliary examples total (same total budget as either solo attack x2)",
+    "compute_budget": {
+      "auxiliary_examples_total": 32,
+      "epochs": 5
+    },
+    "solo_a": {
+      "attacker_knowledge": "public backbone + public coarse head (frozen), FRESH untrained adapter/fine_head",
+      "attacker_access": "16 auxiliary labeled examples, 5 local epochs",
+      "compute_budget": {
+        "auxiliary_examples": 16,
+        "epochs": 5
+      }
+    },
+    "solo_b": {
+      "attacker_knowledge": "public backbone + public coarse head (frozen), FRESH untrained adapter/fine_head",
+      "attacker_access": "16 auxiliary labeled examples, 5 local epochs",
+      "compute_budget": {
+        "auxiliary_examples": 16,
+        "epochs": 5
+      }
+    },
+    "u_colluded_fine_macro_f1": 0.031818181818181815,
+    "u_solo_attacker_fine_macro_f1": 0.026744186046511628,
+    "collusion_gain_over_solo": 0.005073995771670187
+  },
+  "config": {
+    "data": {
+      "source": "synthetic",
+      "num_centers": 6,
+      "samples_per_center": 32,
+      "image_size": 32,
+      "data_seed": 0,
+      "auxiliary_samples_per_center": 16
+    },
+    "model": {
+      "feature_dim": 64,
+      "adapter_rank": 4
+    },
+    "train": {
+      "rounds": 3,
+      "epochs_per_round": 1,
+      "batch_size": 8,
+      "lr": 0.01
+    },
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "dlg": {
+      "steps": 200,
+      "lr": 0.05
+    },
+    "adapter_reconstruction": {
+      "budgets": [
+        8,
+        16,
+        32
+      ],
+      "epochs": 5
+    },
+    "extraction": {
+      "query_budgets": [
+        16,
+        32,
+        64
+      ],
+      "epochs": 5
+    },
+    "collusion": {
+      "budget_each": 16,
+      "epochs": 5
+    },
+    "output_dir": "experiments/phase3_synthetic"
+  },
+  "dataset_manifest_hash": "bf4ade0697cb58af",
+  "wall_clock_seconds": 11.4
+}

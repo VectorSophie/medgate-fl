@@ -1,0 +1,10 @@
+attack,n_seeds,metric,mean,std,note
+"gradient_inversion (DLG, single unaggregated gradient)",3,PSNR_dB,56.20848774909973,71.06878107806294,mse mean=1.3612
+membership_inference (loss-threshold),3,attack_AUC,0.5104709201388888,0.04816892629307494,pre-registered target <= 0.55 (docs/research_scope.md)
+adapter_reconstruction (A2),3,"fine_macro_f1 @ {'auxiliary_examples': 8, 'epochs': 5}",0.026744186046511628,0.0,
+adapter_reconstruction (A2),3,"fine_macro_f1 @ {'auxiliary_examples': 16, 'epochs': 5}",0.03407524861013233,0.012697772833657204,
+adapter_reconstruction (A2),3,"fine_macro_f1 @ {'auxiliary_examples': 32, 'epochs': 5}",0.02843551797040169,0.0029294728246408055,
+black_box_extraction (A3),3,"fine_macro_f1 @ {'query_budget': 16, 'epochs': 5}",0.02806831026551051,0.004165364585118367,
+black_box_extraction (A3),3,"fine_macro_f1 @ {'query_budget': 32, 'epochs': 5}",0.02806831026551051,0.004165364585118367,
+black_box_extraction (A3),3,"fine_macro_f1 @ {'query_budget': 64, 'epochs': 5}",0.02806831026551051,0.004165364585118367,
+"collusion (2 attackers vs solo, same total budget)",3,fine_macro_f1 gain over solo,0.005171299079982671,0.0001685342737417619,

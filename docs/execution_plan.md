@@ -115,14 +115,55 @@ always reported alongside the raw probe numbers, never in place of them.
   isolation** — that question needs real, structured Fed-ISIC2019 data.
 
 ## Phase 3 — security
-Status: **PENDING**
+Status: **synthetic tier PARTIAL (pipeline validation only)**; real-data
+tier `BLOCKED-LICENSE`
 
-Gradient inversion (DLG at minimum; iDLG/Geiping only if their citations
-get verified and CPU cost is acceptable), membership inference, property
-inference, adapter reconstruction, collusion, distillation, fine-tuning
-recovery. Every attack script writes attacker knowledge/access/query
-budget/compute budget/success condition into its result JSON — no attack is
-reported without that record.
+Implemented: gradient inversion (DLG, simplified — Adam not L-BFGS, labels
+fixed not jointly optimized, deviation documented in
+`medgate/attacks/gradient_inversion.py`), loss-threshold membership
+inference (simplified — no shadow models, documented in
+`medgate/attacks/membership_inference.py`), adapter reconstruction (A2,
+`medgate/attacks/reconstruction.py`), black-box hard-label extraction (A3,
+same file), two-attacker collusion (same file). Every attack result JSON
+carries `attacker_knowledge`/`attacker_access`/`compute_budget` fields —
+no attack is reported without that record, per the project brief.
+
+**Not yet implemented**: property inference (source citation
+`melis2019-unintended-leakage` is UNVERIFIED — gated per
+`docs/literature_matrix.md`'s rule that unverified sources aren't used to
+justify a method design until checked), client attribution, sign-flipping/
+label-flipping/backdoor/free-rider/malformed-update/replay integrity
+attacks (these target A4 malicious-client behavior during aggregation,
+not yet built), full-fine-tuning recovery with a fixed compute budget
+distinct from the few-shot probe already in Phase 2, low-rank adapter
+completion, and known-adapter comparison. iDLG/Geiping-style stronger
+gradient inversion are deferred pending their citations being verified.
+
+- [x] `scripts/run_phase3_synthetic.py` + `configs/phase3_synthetic.yaml`:
+      3 seeds (statistical protocol: 3 for this development pass, 5
+      reserved for real-data final runs), ~47s wall-clock total, raw JSON
+      under `experiments/phase3_synthetic/`, table in
+      `paper/tables/phase3_attacks_synthetic.{csv,md}` via
+      `scripts/make_phase3_table.py`.
+- [x] `tests/test_phase3_attacks.py`: 6 tests, each checking a real
+      property of its attack (e.g. the reconstructed adapter is a
+      different object with different weights than the original, not just
+      "code ran"), not merely absence-of-crash.
+- **Reading the numbers**: DLG's PSNR varied enormously across seeds in
+  this run (138 dB, 14.9 dB, 15.4 dB — see
+  `paper/tables/phase3_attacks_synthetic.md`), which is a real,
+  literature-consistent property of gradient-inversion attacks (sensitive
+  to the dummy-image initialization), not a bug — but note the *absolute*
+  numbers are almost certainly inflated by how tiny this model is
+  (`feature_dim=64`, a few thousand parameters total): DLG is known to
+  succeed far more easily against small models than realistic ones, so
+  these PSNR values must not be quoted as representative of a real-scale
+  backbone. Membership-inference AUC (~0.51, std 0.05) sat near the
+  pre-registered target (<=0.55) here, but that is expected on
+  unstructured noise with one training epoch — not evidence the real
+  model would meet the target. Adapter-reconstruction and extraction
+  utility stayed flat across budgets (~0.03), again the synthetic-data
+  floor, not a finding about budget-scaling.
 
 ## Phase 4 — privacy mechanisms
 Status: **PENDING**
