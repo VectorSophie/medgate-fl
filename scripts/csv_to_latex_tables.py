@@ -98,19 +98,45 @@ def phase3():
     write_tabular("phase3_attacks_synthetic.tex", ["Attack", "Seeds", "Metric", "Mean", "Std", "Note"], out, "lcllll", wide=True)
 
 
-def phase3_adapter_recovery():
-    path = TABLES / "phase3_adapter_recovery_synthetic.csv"
+def phase3_adapter_recovery_gain():
+    path = TABLES / "phase3_adapter_recovery_gain.csv"
     if not path.exists():
         return
     rows = list(csv.DictReader(open(path)))
-    out = [[disp(r["scenario"]), r["reveal_fraction"], r["n_seeds"],
+    out = [[disp(r["arm"]), disp(r["method"]), fmt_num(r["reveal_fraction"], 1), r["n_seeds"],
             f"{fmt_num(r['cosine_similarity_mean'])} $\\pm$ {fmt_num(r['cosine_similarity_std'])}",
-            f"{fmt_num(r['normalized_frobenius_error_mean'])} $\\pm$ {fmt_num(r['normalized_frobenius_error_std'])}",
-            f"{fmt_num(r['functional_fine_macro_f1_mean'])} $\\pm$ {fmt_num(r['functional_fine_macro_f1_std'])}"]
+            f"{fmt_num(r['unobserved_entry_normalized_error_mean'])} $\\pm$ {fmt_num(r['unobserved_entry_normalized_error_std'])}",
+            f"{fmt_num(r['gain_over_zero_fill_mean'])} $\\pm$ {fmt_num(r['gain_over_zero_fill_std'])}",
+            f"{fmt_num(r['functional_fine_macro_f1_mean'], 4)} $\\pm$ {fmt_num(r['functional_fine_macro_f1_std'], 4)}"]
            for r in rows]
-    write_tabular("phase3_adapter_recovery_synthetic.tex",
-                  ["Scenario", "Reveal fraction", "Seeds", "Cosine sim.", "Frob. error", "Functional fine-F1"],
-                  out, "lccccc", wide=True)
+    write_tabular("phase3_adapter_recovery_gain.tex",
+                  ["Arm", "Method", "Reveal", "Seeds", "Cosine sim.", "Unobs. error", "Gain over zero-fill", "Functional fine-F1"],
+                  out, "llcccccc", wide=True)
+
+
+def phase3_adapter_recovery_rank():
+    path = TABLES / "phase3_adapter_recovery_rank.csv"
+    if not path.exists():
+        return
+    rows = list(csv.DictReader(open(path)))
+    out = [[r["candidate_rank"], r["true_rank"], r["n_seeds"],
+            f"{fmt_num(r['unobserved_entry_normalized_error_mean'])} $\\pm$ {fmt_num(r['unobserved_entry_normalized_error_std'])}"]
+           for r in rows]
+    write_tabular("phase3_adapter_recovery_rank.tex",
+                  ["Candidate rank", "True rank", "Seeds", "Unobserved-entry error"], out, "cccc")
+
+
+def phase3_adapter_recovery_collusion():
+    path = TABLES / "phase3_adapter_recovery_collusion.csv"
+    if not path.exists():
+        return
+    rows = list(csv.DictReader(open(path)))
+    out = [[disp(r["arm"]), disp(r["scenario"]), r["n_seeds"],
+            f"{fmt_num(r['cosine_similarity_mean'])} $\\pm$ {fmt_num(r['cosine_similarity_std'])}",
+            f"{fmt_num(r['unobserved_entry_normalized_error_mean'])} $\\pm$ {fmt_num(r['unobserved_entry_normalized_error_std'])}"]
+           for r in rows]
+    write_tabular("phase3_adapter_recovery_collusion.tex",
+                  ["Arm", "Scenario", "Seeds", "Cosine sim.", "Unobserved-entry error"], out, "llccc")
 
 
 def phase3_integrity():
@@ -130,12 +156,42 @@ def phase4():
     rows = list(csv.DictReader(open(TABLES / "phase4_privacy_synthetic.csv")))
     out = []
     for r in rows:
-        eps = "n/a" if r["epsilon"] == "" else fmt_num(r["epsilon"], 2)
+        col = "epsilon_full_training_max_per_client_record_level"
+        eps = "n/a" if r[col] == "" else fmt_num(r[col], 2)
         nm = "n/a" if r["noise_multiplier"] == "" else r["noise_multiplier"]
         out.append([disp(r["arm"]), nm, eps,
                     f"{fmt_num(r['fine_macro_f1_mean'])} $\\pm$ {fmt_num(r['fine_macro_f1_std'])}", r["n_seeds"]])
     write_tabular("phase4_privacy_synthetic.tex",
-                  ["Arm", "Noise mult.", "$\\varepsilon$ ($\\delta=10^{-5}$)", "Fine macro-F1", "Seeds"], out, "lcccc")
+                  ["Arm", "Noise mult.", "Full-training $\\varepsilon$ (record-level, $\\delta=10^{-5}$)", "Fine macro-F1", "Seeds"],
+                  out, "lcccc", wide=True)
+
+
+def phase1_hierarchical_sensitivity():
+    path = TABLES / "phase1_hierarchical_sensitivity.csv"
+    if not path.exists():
+        return
+    rows = list(csv.DictReader(open(path)))
+    out = [[esc(r["dimension"]), disp(r["value"]) if r["value"] in ("primary", "alternative") else r["value"], r["n_seeds"],
+            f"{fmt_num(r['baseline_fine_f1_mean'])} $\\pm$ {fmt_num(r['baseline_fine_f1_std'])}",
+            f"{fmt_num(r['combined_fine_f1_mean'])} $\\pm$ {fmt_num(r['combined_fine_f1_std'])}",
+            f"{fmt_num(r['baseline_rfc_mean'])} $\\pm$ {fmt_num(r['baseline_rfc_std'])}",
+            f"{fmt_num(r['combined_rfc_mean'])} $\\pm$ {fmt_num(r['combined_rfc_std'])}"]
+           for r in rows]
+    write_tabular("phase1_hierarchical_sensitivity.tex",
+                  ["Dimension", "Value", "Seeds", "Baseline fine-F1", "Combined fine-F1", "Baseline RFC", "Combined RFC"],
+                  out, "lcccccc", wide=True)
+
+
+def phase4_concealment_sweep():
+    path = TABLES / "phase4_concealment_sweep.csv"
+    if not path.exists():
+        return
+    rows = list(csv.DictReader(open(path)))
+    out = [[fmt_num(r["mask_scale"], 2), disp(r["attacker"]), r["n_seeds"],
+            f"{fmt_num(r['masked_case_attack_auc_mean'])} $\\pm$ {fmt_num(r['masked_case_attack_auc_std'])}"]
+           for r in rows]
+    write_tabular("phase4_concealment_sweep.tex",
+                  ["Mask scale", "Attacker", "Seeds", "Masked-case attack AUC"], out, "cccc")
 
 
 def phase5():
@@ -147,6 +203,22 @@ def phase5():
             f"{fmt_num(r['forgetting_attack_advantage_mean'])} $\\pm$ {fmt_num(r['forgetting_attack_advantage_std'])}"]
            for r in rows]
     write_tabular("phase5_unlearning_synthetic.tex",
+                  ["Scenario", "Method", "Seeds", "Retained fine F1", "Gap to gold", "SymmetricAUC", "Attack advantage"],
+                  out, "llccccc", wide=True)
+
+
+def phase5_hierarchical():
+    path = TABLES / "phase5_hierarchical_unlearning.csv"
+    if not path.exists():
+        return
+    rows = list(csv.DictReader(open(path)))
+    out = [[disp(r["scenario"]), disp(r["method"]), r["n_seeds"],
+            f"{fmt_num(r['retained_fine_macro_f1_mean'])} $\\pm$ {fmt_num(r['retained_fine_macro_f1_std'])}",
+            f"{fmt_num(r['gap_to_gold_standard_mean'], 3)} $\\pm$ {fmt_num(r['gap_to_gold_standard_std'])}",
+            f"{fmt_num(r['forgetting_symmetric_auc_mean'])} $\\pm$ {fmt_num(r['forgetting_symmetric_auc_std'])}",
+            f"{fmt_num(r['forgetting_attack_advantage_mean'])} $\\pm$ {fmt_num(r['forgetting_attack_advantage_std'])}"]
+           for r in rows]
+    write_tabular("phase5_hierarchical_unlearning.tex",
                   ["Scenario", "Method", "Seeds", "Retained fine F1", "Gap to gold", "SymmetricAUC", "Attack advantage"],
                   out, "llccccc", wide=True)
 
@@ -163,6 +235,10 @@ def phase5_confounded_appendix():
 
 
 if __name__ == "__main__":
-    phase1(); phase1_hierarchical(); phase2(); phase3(); phase3_adapter_recovery(); phase3_integrity()
-    phase4(); phase5(); phase5_confounded_appendix()
+    phase1(); phase1_hierarchical(); phase2(); phase3()
+    phase3_adapter_recovery_gain(); phase3_adapter_recovery_rank(); phase3_adapter_recovery_collusion()
+    phase3_integrity()
+    phase1_hierarchical_sensitivity()
+    phase4(); phase4_concealment_sweep()
+    phase5(); phase5_confounded_appendix(); phase5_hierarchical()
     print("wrote LaTeX tables to", TABLES)

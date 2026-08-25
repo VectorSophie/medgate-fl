@@ -112,6 +112,30 @@ def test_hierarchical_config_signal_strength_zero_collapses_toward_chance():
     assert util["coarse_macro_f1"] < 0.6, f"coarse_signal_strength=0 still scored {util['coarse_macro_f1']} -- knob has no effect"
 
 
+def test_alternative_coarse_ontology_is_also_learnable_and_relabels_coarse_classes():
+    """P1 (repair pass 4) coarse-ontology-sensitivity sweep hook: the
+    alternative (benign/malignant/ambiguous, AK isolated) ontology must
+    (a) actually change which coarse class a fine label maps to relative
+    to the primary ontology, and (b) still produce a learnable coarse
+    task -- otherwise the sensitivity sweep would just be silently running
+    the same experiment twice under a different name."""
+    from medgate.data.coarse_ontology import ALTERNATIVE_FINE_TO_COARSE_IDX
+    from medgate.data.synthetic import FINE_TO_COARSE_IDX
+
+    disagreements = sum(1 for f in FINE_TO_COARSE_IDX if FINE_TO_COARSE_IDX[f] != ALTERNATIVE_FINE_TO_COARSE_IDX[f])
+    assert disagreements >= 3, "alternative ontology should meaningfully differ from the primary one, not just relabel indices"
+
+    torch.manual_seed(6)
+    insts = make_hierarchical_institutions(CFG, seed=6, fine_to_coarse_idx=ALTERNATIVE_FINE_TO_COARSE_IDX)
+    train, _val, test = split_by_patient(insts, seed=6)
+    train_pool, test_pool = torch.utils.data.ConcatDataset(train), torch.utils.data.ConcatDataset(test)
+    model = MedGateModel(num_coarse=len(COARSE_CLASSES), num_fine=len(FINE_CLASSES), feature_dim=64, adapter_rank=4)
+    local_train(model, train_pool, epochs=5, batch_size=16, lr=0.01)
+    util = evaluate_both(model, test_pool)
+    chance = 1.0 / len(COARSE_CLASSES)
+    assert util["coarse_macro_f1"] > chance + 0.3, f"alternative-ontology coarse macro-F1 {util['coarse_macro_f1']} not comfortably above chance {chance}"
+
+
 if __name__ == "__main__":
     test_coarse_classifier_learns_coarse_task()
     test_unrestricted_model_learns_fine_task()
@@ -119,4 +143,5 @@ if __name__ == "__main__":
     test_patient_variants_never_cross_train_test_boundary()
     test_null_signal_fixture_remains_at_chance()
     test_hierarchical_config_signal_strength_zero_collapses_toward_chance()
+    test_alternative_coarse_ontology_is_also_learnable_and_relabels_coarse_classes()
     print("OK")

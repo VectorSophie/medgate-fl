@@ -1,0 +1,414 @@
+{
+  "seed": 3,
+  "git_commit": "5b4becc3a66f2ea2f992dab565b5e04b59ae19cc",
+  "config": {
+    "data": {
+      "num_patients_per_institution": 12,
+      "observations_per_patient": 3,
+      "image_size": 32,
+      "class_imbalance_strength": 0.5,
+      "sensitive_property_correlation": 0.6,
+      "data_seed": 0,
+      "train_frac": 0.6,
+      "val_frac": 0.2
+    },
+    "model": {
+      "feature_dim": 32,
+      "adapter_rank": 4
+    },
+    "pretrain": {
+      "epochs": 4,
+      "batch_size": 16,
+      "lr": 0.01
+    },
+    "train": {
+      "rounds": 4,
+      "epochs_per_round": 2,
+      "batch_size": 8,
+      "lr": 0.02
+    },
+    "baselines": [
+      "random_frozen_lora",
+      "coarse_pretrained_fedlora",
+      "imagenet_pretrained_fedlora",
+      "full_finetune"
+    ],
+    "capability_isolation_methods": [
+      "coarse_only",
+      "hidden_fine_head",
+      "adapter_isolation",
+      "adversarial",
+      "orthogonal",
+      "combined"
+    ],
+    "seeds": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "output_dir": "experiments/phase1_hierarchical"
+  },
+  "dataset_manifest_hash": "65f979681270702d",
+  "wall_clock_seconds": 150.56,
+  "results": [
+    {
+      "method": "random_frozen_lora",
+      "kind": "baseline",
+      "param_summary": {
+        "total_params": 22387,
+        "trainable_params": 784,
+        "frozen_params": 21603,
+        "trainable_module_names": [
+          "adapter",
+          "fine_head"
+        ]
+      },
+      "utility": {
+        "coarse_macro_f1": 0.09523809523809523,
+        "coarse_balanced_accuracy": 0.3333333333333333,
+        "fine_macro_f1": 0.16666666666666666,
+        "fine_balanced_accuracy": 0.25
+      },
+      "u_public": 0.08333333333333333,
+      "probe_selection": {
+        "selected_probe": "knn_probe",
+        "selection_val_macro_f1_by_probe": {
+          "linear_probe": 0.08,
+          "nonlinear_probe": 0.3515217391304347,
+          "knn_probe": 0.5935897435897436,
+          "fewshot_probe_k5": 0.047619047619047616,
+          "svm_probe": 0.18,
+          "tree_probe": 0.45
+        },
+        "attack_test_result": {
+          "macro_f1": 0.473469387755102,
+          "balanced_accuracy": 0.5416666666666666,
+          "n_train_examples": 126,
+          "fit_seconds": 0.002
+        }
+      },
+      "residual_fine_capability": 0.473469387755102,
+      "unauthorized_capability_gain": 0.3901360544217687,
+      "authorized_recovery_ratio": 1.6666666666666665
+    },
+    {
+      "method": "coarse_pretrained_fedlora",
+      "kind": "baseline",
+      "param_summary": {
+        "total_params": 22387,
+        "trainable_params": 784,
+        "frozen_params": 21603,
+        "trainable_module_names": [
+          "adapter",
+          "fine_head"
+        ]
+      },
+      "checkpoint_sha256": "323e90b52e47845e69b769797f2e1953d2cb5ac2b8c8f9c3015610eeeda1ad9c",
+      "utility": {
+        "coarse_macro_f1": 0.48888888888888893,
+        "coarse_balanced_accuracy": 0.5555555555555555,
+        "fine_macro_f1": 0.13333333333333333,
+        "fine_balanced_accuracy": 0.16666666666666666
+      },
+      "u_public": 0.23333333333333334,
+      "probe_selection": {
+        "selected_probe": "knn_probe",
+        "selection_val_macro_f1_by_probe": {
+          "linear_probe": 0.3864468864468864,
+          "nonlinear_probe": 0.3224489795918367,
+          "knn_probe": 0.4803184431667403,
+          "fewshot_probe_k5": 0.39999999999999997,
+          "svm_probe": 0.3761904761904762,
+          "tree_probe": 0.46015037593984964
+        },
+        "attack_test_result": {
+          "macro_f1": 0.45555555555555555,
+          "balanced_accuracy": 0.5138888888888888,
+          "n_train_examples": 126,
+          "fit_seconds": 0.0055
+        }
+      },
+      "residual_fine_capability": 0.45555555555555555,
+      "unauthorized_capability_gain": 0.2222222222222222,
+      "authorized_recovery_ratio": 1.0
+    },
+    {
+      "method": "imagenet_pretrained_fedlora",
+      "kind": "baseline",
+      "param_summary": {
+        "total_params": 946355,
+        "trainable_params": 784,
+        "frozen_params": 945571,
+        "trainable_module_names": [
+          "adapter",
+          "fine_head"
+        ]
+      },
+      "checkpoint_sha256": "1d9e3f0a06621aaad4ad8c3b2fa7c147849fa935f9291af2bb22b75e7d35a9cb",
+      "utility": {
+        "coarse_macro_f1": 0.7824463118580766,
+        "coarse_balanced_accuracy": 0.8148148148148149,
+        "fine_macro_f1": 0.27280701754385966,
+        "fine_balanced_accuracy": 0.3611111111111111
+      },
+      "u_public": 0.09795918367346938,
+      "probe_selection": {
+        "selected_probe": "nonlinear_probe",
+        "selection_val_macro_f1_by_probe": {
+          "linear_probe": 0.3974882260596546,
+          "nonlinear_probe": 0.5992063492063492,
+          "knn_probe": 0.4016483516483516,
+          "fewshot_probe_k5": 0.3523809523809524,
+          "svm_probe": 0.44047619047619047,
+          "tree_probe": 0.4401002506265664
+        },
+        "attack_test_result": {
+          "macro_f1": 0.20625,
+          "balanced_accuracy": 0.2638888888888889,
+          "n_train_examples": 126,
+          "fit_seconds": 0.3629
+        }
+      },
+      "residual_fine_capability": 0.20625,
+      "unauthorized_capability_gain": 0.1082908163265306,
+      "authorized_recovery_ratio": 4.942813765182186
+    },
+    {
+      "method": "full_finetune",
+      "kind": "baseline",
+      "param_summary": {
+        "total_params": 22387,
+        "trainable_params": 22387,
+        "frozen_params": 0,
+        "trainable_module_names": [
+          "backbone",
+          "coarse_head",
+          "adapter",
+          "fine_head"
+        ]
+      },
+      "checkpoint_sha256": "323e90b52e47845e69b769797f2e1953d2cb5ac2b8c8f9c3015610eeeda1ad9c",
+      "utility": {
+        "coarse_macro_f1": 1.0,
+        "coarse_balanced_accuracy": 1.0,
+        "fine_macro_f1": 0.16666666666666666,
+        "fine_balanced_accuracy": 0.25
+      },
+      "u_public": 0.08333333333333333,
+      "probe_selection": {
+        "selected_probe": "knn_probe",
+        "selection_val_macro_f1_by_probe": {
+          "linear_probe": 0.3608058608058608,
+          "nonlinear_probe": 0.39285714285714285,
+          "knn_probe": 0.5666666666666667,
+          "fewshot_probe_k5": 0.4476190476190477,
+          "svm_probe": 0.48571428571428565,
+          "tree_probe": 0.4476190476190477
+        },
+        "attack_test_result": {
+          "macro_f1": 0.45952380952380956,
+          "balanced_accuracy": 0.5694444444444444,
+          "n_train_examples": 126,
+          "fit_seconds": 0.0011
+        }
+      },
+      "residual_fine_capability": 0.45952380952380956,
+      "unauthorized_capability_gain": 0.37619047619047624,
+      "authorized_recovery_ratio": 1.6666666666666665
+    },
+    {
+      "method": "coarse_only",
+      "kind": "capability_isolation",
+      "checkpoint_sha256": "323e90b52e47845e69b769797f2e1953d2cb5ac2b8c8f9c3015610eeeda1ad9c",
+      "utility": {
+        "coarse_macro_f1": 0.8666666666666667,
+        "coarse_balanced_accuracy": 0.8888888888888888,
+        "fine_macro_f1": 0.26,
+        "fine_balanced_accuracy": 0.41666666666666663
+      },
+      "u_public": 0.2857142857142857,
+      "probe_selection": {
+        "selected_probe": "tree_probe",
+        "selection_val_macro_f1_by_probe": {
+          "linear_probe": 0.5595238095238095,
+          "nonlinear_probe": 0.33505402160864345,
+          "knn_probe": 0.5555555555555556,
+          "fewshot_probe_k5": 0.5555555555555556,
+          "svm_probe": 0.5314285714285714,
+          "tree_probe": 0.5833333333333334
+        },
+        "attack_test_result": {
+          "macro_f1": 0.7027777777777778,
+          "balanced_accuracy": 0.736111111111111,
+          "n_train_examples": 126,
+          "fit_seconds": 0.2819
+        }
+      },
+      "residual_fine_capability": 0.7027777777777778,
+      "unauthorized_capability_gain": 0.41706349206349214,
+      "authorized_recovery_ratio": 0.16874999999999984
+    },
+    {
+      "method": "hidden_fine_head",
+      "kind": "capability_isolation",
+      "checkpoint_sha256": "323e90b52e47845e69b769797f2e1953d2cb5ac2b8c8f9c3015610eeeda1ad9c",
+      "utility": {
+        "coarse_macro_f1": 1.0,
+        "coarse_balanced_accuracy": 1.0,
+        "fine_macro_f1": 0.16666666666666666,
+        "fine_balanced_accuracy": 0.25
+      },
+      "u_public": 0.20833333333333331,
+      "probe_selection": {
+        "selected_probe": "tree_probe",
+        "selection_val_macro_f1_by_probe": {
+          "linear_probe": 0.30952380952380953,
+          "nonlinear_probe": 0.39285714285714285,
+          "knn_probe": 0.5555555555555556,
+          "fewshot_probe_k5": 0.39999999999999997,
+          "svm_probe": 0.48571428571428565,
+          "tree_probe": 0.5588235294117647
+        },
+        "attack_test_result": {
+          "macro_f1": 0.29761904761904756,
+          "balanced_accuracy": 0.40277777777777773,
+          "n_train_examples": 126,
+          "fit_seconds": 0.2757
+        }
+      },
+      "residual_fine_capability": 0.29761904761904756,
+      "unauthorized_capability_gain": 0.08928571428571425,
+      "authorized_recovery_ratio": 0.5555555555555556
+    },
+    {
+      "method": "adapter_isolation",
+      "kind": "capability_isolation",
+      "checkpoint_sha256": "323e90b52e47845e69b769797f2e1953d2cb5ac2b8c8f9c3015610eeeda1ad9c",
+      "utility": {
+        "coarse_macro_f1": 1.0,
+        "coarse_balanced_accuracy": 1.0,
+        "fine_macro_f1": 0.16666666666666666,
+        "fine_balanced_accuracy": 0.25
+      },
+      "u_public": 0.08333333333333333,
+      "probe_selection": {
+        "selected_probe": "knn_probe",
+        "selection_val_macro_f1_by_probe": {
+          "linear_probe": 0.3608058608058608,
+          "nonlinear_probe": 0.39285714285714285,
+          "knn_probe": 0.5666666666666667,
+          "fewshot_probe_k5": 0.4476190476190477,
+          "svm_probe": 0.48571428571428565,
+          "tree_probe": 0.4476190476190477
+        },
+        "attack_test_result": {
+          "macro_f1": 0.45952380952380956,
+          "balanced_accuracy": 0.5694444444444444,
+          "n_train_examples": 126,
+          "fit_seconds": 0.0012
+        }
+      },
+      "residual_fine_capability": 0.45952380952380956,
+      "unauthorized_capability_gain": 0.37619047619047624,
+      "authorized_recovery_ratio": 1.6666666666666665
+    },
+    {
+      "method": "adversarial",
+      "kind": "capability_isolation",
+      "checkpoint_sha256": "323e90b52e47845e69b769797f2e1953d2cb5ac2b8c8f9c3015610eeeda1ad9c",
+      "utility": {
+        "coarse_macro_f1": 0.47222222222222215,
+        "coarse_balanced_accuracy": 0.5,
+        "fine_macro_f1": 0.15,
+        "fine_balanced_accuracy": 0.25
+      },
+      "u_public": 0.2833333333333333,
+      "probe_selection": {
+        "selected_probe": "tree_probe",
+        "selection_val_macro_f1_by_probe": {
+          "linear_probe": 0.5314285714285714,
+          "nonlinear_probe": 0.3442460317460318,
+          "knn_probe": 0.4857142857142857,
+          "fewshot_probe_k5": 0.5523809523809523,
+          "svm_probe": 0.29047619047619044,
+          "tree_probe": 0.5555555555555556
+        },
+        "attack_test_result": {
+          "macro_f1": 0.6444444444444444,
+          "balanced_accuracy": 0.6805555555555555,
+          "n_train_examples": 126,
+          "fit_seconds": 0.3339
+        }
+      },
+      "residual_fine_capability": 0.6444444444444444,
+      "unauthorized_capability_gain": 0.36111111111111105,
+      "authorized_recovery_ratio": 0.888888888888889
+    },
+    {
+      "method": "orthogonal",
+      "kind": "capability_isolation",
+      "checkpoint_sha256": "323e90b52e47845e69b769797f2e1953d2cb5ac2b8c8f9c3015610eeeda1ad9c",
+      "utility": {
+        "coarse_macro_f1": 1.0,
+        "coarse_balanced_accuracy": 1.0,
+        "fine_macro_f1": 0.3333333333333333,
+        "fine_balanced_accuracy": 0.5
+      },
+      "u_public": 0.2956730769230769,
+      "probe_selection": {
+        "selected_probe": "knn_probe",
+        "selection_val_macro_f1_by_probe": {
+          "linear_probe": 0.3224489795918367,
+          "nonlinear_probe": 0.3761904761904762,
+          "knn_probe": 0.5523809523809523,
+          "fewshot_probe_k5": 0.39999999999999997,
+          "svm_probe": 0.450776397515528,
+          "tree_probe": 0.4476190476190477
+        },
+        "attack_test_result": {
+          "macro_f1": 0.7523809523809524,
+          "balanced_accuracy": 0.7916666666666666,
+          "n_train_examples": 126,
+          "fit_seconds": 0.0015
+        }
+      },
+      "residual_fine_capability": 0.7523809523809524,
+      "unauthorized_capability_gain": 0.45670787545787545,
+      "authorized_recovery_ratio": -0.23198420533070074
+    },
+    {
+      "method": "combined",
+      "kind": "capability_isolation",
+      "checkpoint_sha256": "323e90b52e47845e69b769797f2e1953d2cb5ac2b8c8f9c3015610eeeda1ad9c",
+      "utility": {
+        "coarse_macro_f1": 0.6190476190476191,
+        "coarse_balanced_accuracy": 0.6666666666666666,
+        "fine_macro_f1": 0.38095238095238093,
+        "fine_balanced_accuracy": 0.5
+      },
+      "u_public": 0.2361111111111111,
+      "probe_selection": {
+        "selected_probe": "tree_probe",
+        "selection_val_macro_f1_by_probe": {
+          "linear_probe": 0.40952380952380957,
+          "nonlinear_probe": 0.4873015873015873,
+          "knn_probe": 0.5134502923976608,
+          "fewshot_probe_k5": 0.525,
+          "svm_probe": 0.4036363636363636,
+          "tree_probe": 0.5555555555555556
+        },
+        "attack_test_result": {
+          "macro_f1": 0.36666666666666664,
+          "balanced_accuracy": 0.4305555555555555,
+          "n_train_examples": 126,
+          "fit_seconds": 0.3648
+        }
+      },
+      "residual_fine_capability": 0.36666666666666664,
+      "unauthorized_capability_gain": 0.13055555555555554,
+      "authorized_recovery_ratio": -1.4092664092664091
+    }
+  ]
+}

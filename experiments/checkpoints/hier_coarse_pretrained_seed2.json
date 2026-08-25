@@ -2,12 +2,12 @@
   "kind": "coarse_pretrained",
   "seed": 2,
   "config": {
-    "epochs": 6,
+    "epochs": 4,
     "batch_size": 16,
     "lr": 0.01
   },
-  "git_commit": "987b540badf09101f863bf2e609530eea177764c",
-  "pretrain_coarse_macro_f1": 1.0,
+  "git_commit": "5b4becc3a66f2ea2f992dab565b5e04b59ae19cc",
+  "pretrain_coarse_macro_f1": 0.5555555555555555,
   "checkpoint_name": "hier_coarse_pretrained_seed2",
-  "state_dict_sha256": "aa01a8cc04698f9bf84291bb6b0c4a578fc0845ba71ee1f94e56b2c9519cabb6"
+  "state_dict_sha256": "be9ceaaf3fdbd6a78c01ba1ec6940e18b9dac5a504d5c89a10f6859d554ebe40"
 }

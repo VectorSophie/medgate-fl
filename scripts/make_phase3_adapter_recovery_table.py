@@ -1,6 +1,24 @@
 #!/usr/bin/env python3
-"""Generate paper/tables/phase3_adapter_recovery_synthetic.{csv,md} from
-experiments/phase3_adapter_recovery_synthetic/*.json. Never hand-typed.
+"""Generate paper/tables/phase3_adapter_recovery_*.{csv,md} from
+experiments/phase3_adapter_recovery_synthetic/*.json (repair pass 4 / P0-A
+rewrite -- completely different experiment from the pass-2/3 version, see
+medgate/attacks/adapter_recovery.py's module docstring). Three tables,
+kept separate rather than one giant one because each answers a different
+question and the full grid (2 arms x 5 methods x 5 reveal fractions x 5
+seeds, plus a 5-point rank sweep and collusion, per arm) is too large for
+one readable paper table -- the full grid is in the committed CSV/JSON for
+anyone who wants it (project reproducibility rule: nothing in the paper
+that isn't traceable to committed raw data), only a representative slice
+is rendered:
+  1. phase3_adapter_recovery_gain: completion gain over zero-fill, by
+     method (zero_fill/hard_impute/soft_impute only -- mean/random_fill
+     are summarized in prose, not tabulated) x reveal fraction (0.1, 0.5,
+     0.9 only) x arm.
+  2. phase3_adapter_recovery_rank: the rank-misspecification sweep,
+     hierarchical arm only (both arms behave the same shape; nulling one
+     out keeps the table short -- see the .md's null_signal columns for
+     the other arm if needed).
+  3. phase3_adapter_recovery_collusion: solo vs. pooled, both arms.
 
 Usage: PYTHONPATH=. python scripts/make_phase3_adapter_recovery_table.py
 """
@@ -10,86 +28,147 @@ import statistics
 from pathlib import Path
 
 IN_DIR = Path("experiments/phase3_adapter_recovery_synthetic")
-OUT_CSV = Path("paper/tables/phase3_adapter_recovery_synthetic.csv")
-OUT_MD = Path("paper/tables/phase3_adapter_recovery_synthetic.md")
+TABLES = Path("paper/tables")
+
+REPORTED_METHODS = ("zero_fill", "hard_impute", "soft_impute")
+REPORTED_REVEAL_FRACTIONS = (0.1, 0.5, 0.9)
 
 
 def mean_std(vals):
     return statistics.mean(vals), (statistics.stdev(vals) if len(vals) > 1 else 0.0)
 
 
-def main():
-    runs = [json.loads(p.read_text()) for p in sorted(IN_DIR.glob("seed*.json"))]
-    if not runs:
-        raise SystemExit(f"no run JSON files under {IN_DIR} — run scripts/run_phase3_adapter_recovery_synthetic.py first")
+def load_arm(arm: str) -> list:
+    return [json.loads(p.read_text()) for p in sorted(IN_DIR.glob(f"{arm}_seed*.json"))]
 
+
+def gain_table():
     rows = []
-    for i, budget in enumerate(runs[0]["solo"]):
-        reveal = budget["compute_budget"]["reveal_fraction"]
-        cos = [r["solo"][i]["parameter_space_recovery"]["cosine_similarity"] for r in runs]
-        frob = [r["solo"][i]["parameter_space_recovery"]["normalized_frobenius_error"] for r in runs]
-        func = [r["solo"][i]["functional_recovery_fine_macro_f1"] for r in runs]
-        cm, cs = mean_std(cos)
-        fm, fs = mean_std(frob)
-        um, us = mean_std(func)
-        rows.append({"scenario": "solo", "reveal_fraction": reveal, "n_seeds": len(runs),
-                     "cosine_similarity_mean": cm, "cosine_similarity_std": cs,
-                     "normalized_frobenius_error_mean": fm, "normalized_frobenius_error_std": fs,
-                     "functional_fine_macro_f1_mean": um, "functional_fine_macro_f1_std": us})
-
-    pooled_fracs = [r["collusion"]["compute_budget"]["pooled_reveal_fraction"] for r in runs]
-    solo_cos = [r["collusion"]["solo_parameter_space_recovery"]["cosine_similarity"] for r in runs]
-    coll_cos = [r["collusion"]["colluded_parameter_space_recovery"]["cosine_similarity"] for r in runs]
-    solo_frob = [r["collusion"]["solo_parameter_space_recovery"]["normalized_frobenius_error"] for r in runs]
-    coll_frob = [r["collusion"]["colluded_parameter_space_recovery"]["normalized_frobenius_error"] for r in runs]
-    solo_func = [r["collusion"]["solo_functional_fine_macro_f1"] for r in runs]
-    coll_func = [r["collusion"]["colluded_functional_fine_macro_f1"] for r in runs]
-
-    cm, cs = mean_std(solo_cos)
-    fm, fs = mean_std(solo_frob)
-    um, us = mean_std(solo_func)
-    rows.append({"scenario": "collusion_solo_half", "reveal_fraction": runs[0]["config"]["collusion_reveal_fraction_each"],
-                 "n_seeds": len(runs), "cosine_similarity_mean": cm, "cosine_similarity_std": cs,
-                 "normalized_frobenius_error_mean": fm, "normalized_frobenius_error_std": fs,
-                 "functional_fine_macro_f1_mean": um, "functional_fine_macro_f1_std": us})
-
-    cm, cs = mean_std(coll_cos)
-    fm, fs = mean_std(coll_frob)
-    um, us = mean_std(coll_func)
-    rows.append({"scenario": "collusion_pooled", "reveal_fraction": round(statistics.mean(pooled_fracs), 3),
-                 "n_seeds": len(runs), "cosine_similarity_mean": cm, "cosine_similarity_std": cs,
-                 "normalized_frobenius_error_mean": fm, "normalized_frobenius_error_std": fs,
-                 "functional_fine_macro_f1_mean": um, "functional_fine_macro_f1_std": us})
-
-    OUT_CSV.parent.mkdir(parents=True, exist_ok=True)
-    with open(OUT_CSV, "w", newline="") as f:
+    for arm in ("null_signal", "hierarchical"):
+        runs = load_arm(arm)
+        if not runs:
+            continue
+        for method in REPORTED_METHODS:
+            for reveal in REPORTED_REVEAL_FRACTIONS:
+                cos, unobs_err, gain, func_f1 = [], [], [], []
+                for r in runs:
+                    entry = next(
+                        e for e in r["fill_method_sweep"]
+                        if e["method"] == method and abs(e["compute_budget"]["reveal_fraction"] - reveal) < 1e-9
+                    )
+                    cos.append(entry["parameter_space_recovery"]["cosine_similarity"])
+                    unobs_err.append(entry["parameter_space_recovery"]["unobserved_entry_normalized_error"])
+                    gain.append(entry["completion_gain_over_zero_fill"]["absolute_gain"])
+                    func_f1.append(entry["functional_recovery_fine_macro_f1"])
+                cm, cs = mean_std(cos)
+                um, us = mean_std(unobs_err)
+                gm, gs = mean_std(gain)
+                fm, fs = mean_std(func_f1)
+                rows.append({
+                    "arm": arm, "method": method, "reveal_fraction": reveal, "n_seeds": len(runs),
+                    "cosine_similarity_mean": cm, "cosine_similarity_std": cs,
+                    "unobserved_entry_normalized_error_mean": um, "unobserved_entry_normalized_error_std": us,
+                    "gain_over_zero_fill_mean": gm, "gain_over_zero_fill_std": gs,
+                    "functional_fine_macro_f1_mean": fm, "functional_fine_macro_f1_std": fs,
+                })
+    out_csv = TABLES / "phase3_adapter_recovery_gain.csv"
+    with open(out_csv, "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
         w.writeheader()
         w.writerows(rows)
-
     lines = [
-        "# Phase 3 P1-7 genuine parameter-space adapter recovery — SYNTHETIC TIER",
-        "",
-        "Generated by scripts/make_phase3_adapter_recovery_table.py from "
-        "experiments/phase3_adapter_recovery_synthetic/*.json — do not hand-edit.",
-        "Attacker starts from a PARTIAL, genuinely-leaked copy of the true adapter.up matrix's own entries "
-        "(NOT an AES-GCM break — medgate/attacks/adapter_recovery.py) and completes it via low-rank matrix "
-        "completion; cosine_similarity/normalized_frobenius_error are PARAMETER-space recovery, "
-        "functional_fine_macro_f1 plugs the completed adapter into the model and evaluates the fine task.",
-        "",
-        "| scenario | reveal fraction | seeds | cosine sim | frob. error | functional fine-F1 |",
-        "|---|---|---|---|---|---|",
+        "# Phase 3 P0-A adapter recovery: completion gain over zero-fill",
+        "", "Generated by scripts/make_phase3_adapter_recovery_table.py -- do not hand-edit.",
+        "gain_over_zero_fill = zero_fill's unobserved-entry error MINUS this method's -- positive means the method",
+        "beat the no-completion control; negative means it did WORSE (a real, reported finding at low reveal fractions).",
+        "", "| arm | method | reveal | seeds | cosine sim | unobs. error | gain over zero-fill | functional fine-F1 |",
+        "|---|---|---|---|---|---|---|---|",
     ]
     for row in rows:
         lines.append(
-            f"| {row['scenario']} | {row['reveal_fraction']:.2f} | {row['n_seeds']} "
+            f"| {row['arm']} | {row['method']} | {row['reveal_fraction']:.1f} | {row['n_seeds']} "
             f"| {row['cosine_similarity_mean']:.3f} ± {row['cosine_similarity_std']:.3f} "
-            f"| {row['normalized_frobenius_error_mean']:.3f} ± {row['normalized_frobenius_error_std']:.3f} "
-            f"| {row['functional_fine_macro_f1_mean']:.3f} ± {row['functional_fine_macro_f1_std']:.3f} |"
+            f"| {row['unobserved_entry_normalized_error_mean']:.3f} ± {row['unobserved_entry_normalized_error_std']:.3f} "
+            f"| {row['gain_over_zero_fill_mean']:+.3f} ± {row['gain_over_zero_fill_std']:.3f} "
+            f"| {row['functional_fine_macro_f1_mean']:.4f} ± {row['functional_fine_macro_f1_std']:.4f} |"
         )
-    OUT_MD.parent.mkdir(parents=True, exist_ok=True)
-    OUT_MD.write_text("\n".join(lines) + "\n")
-    print(f"wrote {OUT_CSV} and {OUT_MD} from {len(runs)} seeds, {len(rows)} rows")
+    (TABLES / "phase3_adapter_recovery_gain.md").write_text("\n".join(lines) + "\n")
+    print(f"wrote {out_csv} ({len(rows)} rows)")
+
+
+def rank_table():
+    runs = load_arm("hierarchical")
+    if not runs:
+        return
+    n_points = len(runs[0]["rank_misspecification_sweep"])
+    rows = []
+    for i in range(n_points):
+        cand_ranks = {r["rank_misspecification_sweep"][i]["compute_budget"]["candidate_rank"] for r in runs}
+        true_ranks = {r["rank_misspecification_sweep"][i]["true_rank"] for r in runs}
+        assert len(cand_ranks) == 1 and len(true_ranks) == 1, "rank sweep point must be identical across seeds by construction"
+        cand_rank, true_rank = cand_ranks.pop(), true_ranks.pop()
+        errs = [r["rank_misspecification_sweep"][i]["parameter_space_recovery"]["unobserved_entry_normalized_error"] for r in runs]
+        em, es = mean_std(errs)
+        rows.append({"candidate_rank": cand_rank, "true_rank": true_rank, "n_seeds": len(runs),
+                      "unobserved_entry_normalized_error_mean": em, "unobserved_entry_normalized_error_std": es})
+    out_csv = TABLES / "phase3_adapter_recovery_rank.csv"
+    with open(out_csv, "w", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
+        w.writeheader()
+        w.writerows(rows)
+    lines = [
+        "# Phase 3 P0-A adapter recovery: rank misspecification (hierarchical arm)",
+        "", "Generated by scripts/make_phase3_adapter_recovery_table.py -- do not hand-edit.",
+        "", "| candidate rank | true rank | seeds | unobserved-entry error |", "|---|---|---|---|",
+    ]
+    for row in rows:
+        lines.append(f"| {row['candidate_rank']} | {row['true_rank']} | {row['n_seeds']} "
+                      f"| {row['unobserved_entry_normalized_error_mean']:.3f} ± {row['unobserved_entry_normalized_error_std']:.3f} |")
+    (TABLES / "phase3_adapter_recovery_rank.md").write_text("\n".join(lines) + "\n")
+    print(f"wrote {out_csv} ({len(rows)} rows)")
+
+
+def collusion_table():
+    rows = []
+    for arm in ("null_signal", "hierarchical"):
+        runs = load_arm(arm)
+        if not runs:
+            continue
+        for scenario, cos_key, err_key in (
+            ("solo", "solo_parameter_space_recovery", "solo_parameter_space_recovery"),
+            ("pooled", "colluded_parameter_space_recovery", "colluded_parameter_space_recovery"),
+        ):
+            cos = [r["collusion"][cos_key]["cosine_similarity"] for r in runs]
+            err = [r["collusion"][err_key]["unobserved_entry_normalized_error"] for r in runs]
+            cm, cs = mean_std(cos)
+            em, es = mean_std(err)
+            rows.append({"arm": arm, "scenario": scenario, "n_seeds": len(runs),
+                         "cosine_similarity_mean": cm, "cosine_similarity_std": cs,
+                         "unobserved_entry_normalized_error_mean": em, "unobserved_entry_normalized_error_std": es})
+    out_csv = TABLES / "phase3_adapter_recovery_collusion.csv"
+    with open(out_csv, "w", newline="") as f:
+        w = csv.DictWriter(f, fieldnames=list(rows[0].keys()))
+        w.writeheader()
+        w.writerows(rows)
+    lines = [
+        "# Phase 3 P0-A adapter recovery: collusion (hard_impute)",
+        "", "Generated by scripts/make_phase3_adapter_recovery_table.py -- do not hand-edit.",
+        "", "| arm | scenario | seeds | cosine sim | unobserved-entry error |", "|---|---|---|---|---|",
+    ]
+    for row in rows:
+        lines.append(f"| {row['arm']} | {row['scenario']} | {row['n_seeds']} "
+                      f"| {row['cosine_similarity_mean']:.3f} ± {row['cosine_similarity_std']:.3f} "
+                      f"| {row['unobserved_entry_normalized_error_mean']:.3f} ± {row['unobserved_entry_normalized_error_std']:.3f} |")
+    (TABLES / "phase3_adapter_recovery_collusion.md").write_text("\n".join(lines) + "\n")
+    print(f"wrote {out_csv} ({len(rows)} rows)")
+
+
+def main():
+    if not any(IN_DIR.glob("*_seed*.json")):
+        raise SystemExit(f"no run JSON files under {IN_DIR} — run scripts/run_phase3_adapter_recovery_synthetic.py first")
+    gain_table()
+    rank_table()
+    collusion_table()
 
 
 if __name__ == "__main__":

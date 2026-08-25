@@ -1,6 +1,6 @@
 {
   "seed": 0,
-  "git_commit": "987b540badf09101f863bf2e609530eea177764c",
+  "git_commit": "5b4becc3a66f2ea2f992dab565b5e04b59ae19cc",
   "config": {
     "data": {
       "source": "synthetic",
@@ -36,13 +36,13 @@
     "output_dir": "experiments/phase4_synthetic"
   },
   "dataset_manifest_hash": "874a6cfad139fea2",
-  "wall_clock_seconds": 79.59,
+  "wall_clock_seconds": 73.13,
   "arms": [
     {
       "arm": "no_protection",
       "noise_multiplier": null,
       "seed": 0,
-      "epsilon": null,
+      "epsilon_full_training_max_per_client_record_level": null,
       "utility": {
         "coarse_macro_f1": 0.23129251700680273,
         "coarse_balanced_accuracy": 0.3333333333333333,
@@ -54,7 +54,7 @@
       "arm": "secure_agg",
       "noise_multiplier": null,
       "seed": 0,
-      "epsilon": null,
+      "epsilon_full_training_max_per_client_record_level": null,
       "utility": {
         "coarse_macro_f1": 0.23129251700680273,
         "coarse_balanced_accuracy": 0.3333333333333333,
@@ -66,7 +66,7 @@
       "arm": "dp_sgd",
       "noise_multiplier": 0.5,
       "seed": 0,
-      "epsilon": 14.136170242204665,
+      "epsilon_full_training_max_per_client_record_level": 18.798187510230726,
       "utility": {
         "coarse_macro_f1": 0.23129251700680273,
         "coarse_balanced_accuracy": 0.3333333333333333,
@@ -74,15 +74,18 @@
         "fine_balanced_accuracy": 0.13043478260869565
       },
       "dp_accountant_metadata": {
-        "adjacency": "example-level (record-level), NOT client-level",
-        "accountant": "Opacus RDP accountant (default)",
-        "sampling_mechanism": "shuffled mini-batches, poisson_sampling=False (not Poisson subsampling)",
+        "adjacency": "example-level (record-level), NOT client-level / hospital-level",
+        "opacus_version": "1.6.0",
+        "accountant": "Opacus RDP accountant (opacus.accountants.rdp.RDPAccountant, the PrivacyEngine default)",
+        "sampling_mechanism": "shuffled mini-batches, poisson_sampling=False (NOT Poisson subsampling -- the accountant's numeric epsilon is therefore less tight than the Poisson-sampled analysis DP-SGD literature usually reports)",
+        "approx_sample_rate_per_step": 0.25,
         "delta": 1e-05,
         "max_grad_norm": 1.0,
         "noise_multiplier": 0.5,
         "local_epochs_per_round": 1,
         "federated_rounds": 2,
-        "composition_scope": "within one client's local dp_local_train call only; reported epsilon = max over clients THIS ROUND, NOT cumulative across rounds (see dp_fedavg_round docstring)",
+        "composition_scope": "CUMULATIVE across every federated round this client participated in (P0-C fix, repair pass 4) -- the SAME PrivacyEngine per client is reused round over round via the `engines` dict threaded through dp_fedavg_round/secure_dp_fedavg_round, so this IS a full-training-run epsilon, not a single round's -- see medgate/privacy/dp_sgd.py's module docstring for the mechanism and the bug it fixes",
+        "epsilon_reported_is": "max over clients of each client's OWN cumulative epsilon after the LAST round -- record-level DP for the worst-case (most-composed) client, not an average",
         "params_covered": "backbone, coarse_head, adapter, fine_head (medgate.attacks.gradient_inversion.attack_params)",
         "params_excluded": "adversary_head (architecturally unused by this training path -- receives no gradient at all)"
       }
@@ -91,7 +94,7 @@
       "arm": "secure_agg_plus_dp",
       "noise_multiplier": 0.5,
       "seed": 0,
-      "epsilon": 14.136170242204665,
+      "epsilon_full_training_max_per_client_record_level": 18.798187510230726,
       "utility": {
         "coarse_macro_f1": 0.23129251700680273,
         "coarse_balanced_accuracy": 0.3333333333333333,
@@ -99,15 +102,18 @@
         "fine_balanced_accuracy": 0.13043478260869565
       },
       "dp_accountant_metadata": {
-        "adjacency": "example-level (record-level), NOT client-level",
-        "accountant": "Opacus RDP accountant (default)",
-        "sampling_mechanism": "shuffled mini-batches, poisson_sampling=False (not Poisson subsampling)",
+        "adjacency": "example-level (record-level), NOT client-level / hospital-level",
+        "opacus_version": "1.6.0",
+        "accountant": "Opacus RDP accountant (opacus.accountants.rdp.RDPAccountant, the PrivacyEngine default)",
+        "sampling_mechanism": "shuffled mini-batches, poisson_sampling=False (NOT Poisson subsampling -- the accountant's numeric epsilon is therefore less tight than the Poisson-sampled analysis DP-SGD literature usually reports)",
+        "approx_sample_rate_per_step": 0.25,
         "delta": 1e-05,
         "max_grad_norm": 1.0,
         "noise_multiplier": 0.5,
         "local_epochs_per_round": 1,
         "federated_rounds": 2,
-        "composition_scope": "within one client's local dp_local_train call only; reported epsilon = max over clients THIS ROUND, NOT cumulative across rounds (see dp_fedavg_round docstring)",
+        "composition_scope": "CUMULATIVE across every federated round this client participated in (P0-C fix, repair pass 4) -- the SAME PrivacyEngine per client is reused round over round via the `engines` dict threaded through dp_fedavg_round/secure_dp_fedavg_round, so this IS a full-training-run epsilon, not a single round's -- see medgate/privacy/dp_sgd.py's module docstring for the mechanism and the bug it fixes",
+        "epsilon_reported_is": "max over clients of each client's OWN cumulative epsilon after the LAST round -- record-level DP for the worst-case (most-composed) client, not an average",
         "params_covered": "backbone, coarse_head, adapter, fine_head (medgate.attacks.gradient_inversion.attack_params)",
         "params_excluded": "adversary_head (architecturally unused by this training path -- receives no gradient at all)"
       }
@@ -116,7 +122,7 @@
       "arm": "dp_sgd",
       "noise_multiplier": 1.0,
       "seed": 0,
-      "epsilon": 4.216155971017961,
+      "epsilon_full_training_max_per_client_record_level": 5.467992138469847,
       "utility": {
         "coarse_macro_f1": 0.23129251700680273,
         "coarse_balanced_accuracy": 0.3333333333333333,
@@ -124,15 +130,18 @@
         "fine_balanced_accuracy": 0.12086956521739131
       },
       "dp_accountant_metadata": {
-        "adjacency": "example-level (record-level), NOT client-level",
-        "accountant": "Opacus RDP accountant (default)",
-        "sampling_mechanism": "shuffled mini-batches, poisson_sampling=False (not Poisson subsampling)",
+        "adjacency": "example-level (record-level), NOT client-level / hospital-level",
+        "opacus_version": "1.6.0",
+        "accountant": "Opacus RDP accountant (opacus.accountants.rdp.RDPAccountant, the PrivacyEngine default)",
+        "sampling_mechanism": "shuffled mini-batches, poisson_sampling=False (NOT Poisson subsampling -- the accountant's numeric epsilon is therefore less tight than the Poisson-sampled analysis DP-SGD literature usually reports)",
+        "approx_sample_rate_per_step": 0.25,
         "delta": 1e-05,
         "max_grad_norm": 1.0,
         "noise_multiplier": 1.0,
         "local_epochs_per_round": 1,
         "federated_rounds": 2,
-        "composition_scope": "within one client's local dp_local_train call only; reported epsilon = max over clients THIS ROUND, NOT cumulative across rounds (see dp_fedavg_round docstring)",
+        "composition_scope": "CUMULATIVE across every federated round this client participated in (P0-C fix, repair pass 4) -- the SAME PrivacyEngine per client is reused round over round via the `engines` dict threaded through dp_fedavg_round/secure_dp_fedavg_round, so this IS a full-training-run epsilon, not a single round's -- see medgate/privacy/dp_sgd.py's module docstring for the mechanism and the bug it fixes",
+        "epsilon_reported_is": "max over clients of each client's OWN cumulative epsilon after the LAST round -- record-level DP for the worst-case (most-composed) client, not an average",
         "params_covered": "backbone, coarse_head, adapter, fine_head (medgate.attacks.gradient_inversion.attack_params)",
         "params_excluded": "adversary_head (architecturally unused by this training path -- receives no gradient at all)"
       }
@@ -141,7 +150,7 @@
       "arm": "secure_agg_plus_dp",
       "noise_multiplier": 1.0,
       "seed": 0,
-      "epsilon": 4.216155971017961,
+      "epsilon_full_training_max_per_client_record_level": 5.467992138469847,
       "utility": {
         "coarse_macro_f1": 0.23129251700680273,
         "coarse_balanced_accuracy": 0.3333333333333333,
@@ -149,15 +158,18 @@
         "fine_balanced_accuracy": 0.12086956521739131
       },
       "dp_accountant_metadata": {
-        "adjacency": "example-level (record-level), NOT client-level",
-        "accountant": "Opacus RDP accountant (default)",
-        "sampling_mechanism": "shuffled mini-batches, poisson_sampling=False (not Poisson subsampling)",
+        "adjacency": "example-level (record-level), NOT client-level / hospital-level",
+        "opacus_version": "1.6.0",
+        "accountant": "Opacus RDP accountant (opacus.accountants.rdp.RDPAccountant, the PrivacyEngine default)",
+        "sampling_mechanism": "shuffled mini-batches, poisson_sampling=False (NOT Poisson subsampling -- the accountant's numeric epsilon is therefore less tight than the Poisson-sampled analysis DP-SGD literature usually reports)",
+        "approx_sample_rate_per_step": 0.25,
         "delta": 1e-05,
         "max_grad_norm": 1.0,
         "noise_multiplier": 1.0,
         "local_epochs_per_round": 1,
         "federated_rounds": 2,
-        "composition_scope": "within one client's local dp_local_train call only; reported epsilon = max over clients THIS ROUND, NOT cumulative across rounds (see dp_fedavg_round docstring)",
+        "composition_scope": "CUMULATIVE across every federated round this client participated in (P0-C fix, repair pass 4) -- the SAME PrivacyEngine per client is reused round over round via the `engines` dict threaded through dp_fedavg_round/secure_dp_fedavg_round, so this IS a full-training-run epsilon, not a single round's -- see medgate/privacy/dp_sgd.py's module docstring for the mechanism and the bug it fixes",
+        "epsilon_reported_is": "max over clients of each client's OWN cumulative epsilon after the LAST round -- record-level DP for the worst-case (most-composed) client, not an average",
         "params_covered": "backbone, coarse_head, adapter, fine_head (medgate.attacks.gradient_inversion.attack_params)",
         "params_excluded": "adversary_head (architecturally unused by this training path -- receives no gradient at all)"
       }
@@ -166,7 +178,7 @@
       "arm": "dp_sgd",
       "noise_multiplier": 2.0,
       "seed": 0,
-      "epsilon": 1.3751631369366855,
+      "epsilon_full_training_max_per_client_record_level": 1.8386723943196597,
       "utility": {
         "coarse_macro_f1": 0.23806146572104017,
         "coarse_balanced_accuracy": 0.3206699346405229,
@@ -174,15 +186,18 @@
         "fine_balanced_accuracy": 0.13260869565217392
       },
       "dp_accountant_metadata": {
-        "adjacency": "example-level (record-level), NOT client-level",
-        "accountant": "Opacus RDP accountant (default)",
-        "sampling_mechanism": "shuffled mini-batches, poisson_sampling=False (not Poisson subsampling)",
+        "adjacency": "example-level (record-level), NOT client-level / hospital-level",
+        "opacus_version": "1.6.0",
+        "accountant": "Opacus RDP accountant (opacus.accountants.rdp.RDPAccountant, the PrivacyEngine default)",
+        "sampling_mechanism": "shuffled mini-batches, poisson_sampling=False (NOT Poisson subsampling -- the accountant's numeric epsilon is therefore less tight than the Poisson-sampled analysis DP-SGD literature usually reports)",
+        "approx_sample_rate_per_step": 0.25,
         "delta": 1e-05,
         "max_grad_norm": 1.0,
         "noise_multiplier": 2.0,
         "local_epochs_per_round": 1,
         "federated_rounds": 2,
-        "composition_scope": "within one client's local dp_local_train call only; reported epsilon = max over clients THIS ROUND, NOT cumulative across rounds (see dp_fedavg_round docstring)",
+        "composition_scope": "CUMULATIVE across every federated round this client participated in (P0-C fix, repair pass 4) -- the SAME PrivacyEngine per client is reused round over round via the `engines` dict threaded through dp_fedavg_round/secure_dp_fedavg_round, so this IS a full-training-run epsilon, not a single round's -- see medgate/privacy/dp_sgd.py's module docstring for the mechanism and the bug it fixes",
+        "epsilon_reported_is": "max over clients of each client's OWN cumulative epsilon after the LAST round -- record-level DP for the worst-case (most-composed) client, not an average",
         "params_covered": "backbone, coarse_head, adapter, fine_head (medgate.attacks.gradient_inversion.attack_params)",
         "params_excluded": "adversary_head (architecturally unused by this training path -- receives no gradient at all)"
       }
@@ -191,7 +206,7 @@
       "arm": "secure_agg_plus_dp",
       "noise_multiplier": 2.0,
       "seed": 0,
-      "epsilon": 1.3751631369366855,
+      "epsilon_full_training_max_per_client_record_level": 1.8386723943196597,
       "utility": {
         "coarse_macro_f1": 0.23806146572104017,
         "coarse_balanced_accuracy": 0.3206699346405229,
@@ -199,21 +214,26 @@
         "fine_balanced_accuracy": 0.13260869565217392
       },
       "dp_accountant_metadata": {
-        "adjacency": "example-level (record-level), NOT client-level",
-        "accountant": "Opacus RDP accountant (default)",
-        "sampling_mechanism": "shuffled mini-batches, poisson_sampling=False (not Poisson subsampling)",
+        "adjacency": "example-level (record-level), NOT client-level / hospital-level",
+        "opacus_version": "1.6.0",
+        "accountant": "Opacus RDP accountant (opacus.accountants.rdp.RDPAccountant, the PrivacyEngine default)",
+        "sampling_mechanism": "shuffled mini-batches, poisson_sampling=False (NOT Poisson subsampling -- the accountant's numeric epsilon is therefore less tight than the Poisson-sampled analysis DP-SGD literature usually reports)",
+        "approx_sample_rate_per_step": 0.25,
         "delta": 1e-05,
         "max_grad_norm": 1.0,
         "noise_multiplier": 2.0,
         "local_epochs_per_round": 1,
         "federated_rounds": 2,
-        "composition_scope": "within one client's local dp_local_train call only; reported epsilon = max over clients THIS ROUND, NOT cumulative across rounds (see dp_fedavg_round docstring)",
+        "composition_scope": "CUMULATIVE across every federated round this client participated in (P0-C fix, repair pass 4) -- the SAME PrivacyEngine per client is reused round over round via the `engines` dict threaded through dp_fedavg_round/secure_dp_fedavg_round, so this IS a full-training-run epsilon, not a single round's -- see medgate/privacy/dp_sgd.py's module docstring for the mechanism and the bug it fixes",
+        "epsilon_reported_is": "max over clients of each client's OWN cumulative epsilon after the LAST round -- record-level DP for the worst-case (most-composed) client, not an average",
         "params_covered": "backbone, coarse_head, adapter, fine_head (medgate.attacks.gradient_inversion.attack_params)",
         "params_excluded": "adversary_head (architecturally unused by this training path -- receives no gradient at all)"
       }
     }
   ],
-  "secure_agg_empirical_concealment_sanity_check": {
+  "simulated_pairwise_masking_empirical_concealment_sanity_check": {
+    "attacker": "logistic",
+    "mask_scale": 1.0,
     "masked_case_attack_auc": 1.0,
     "masked_case_attack_auc_95ci": [
       0.9999999999999999,
@@ -222,6 +242,6 @@
     "unmasked_control_attack_auc": 1.0,
     "n_samples_per_distribution": 100,
     "mean_shift": 2.0,
-    "not_a_security_proof": "see empirical_concealment_sanity_check docstring"
+    "not_a_security_proof": "heuristic only -- see empirical_concealment_sanity_check docstring"
   }
 }

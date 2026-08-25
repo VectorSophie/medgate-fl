@@ -38,9 +38,14 @@ DISPLAY_NAMES = {
     "trimmed_mean": "Trimmed mean",
     "validated_fedavg": "Validated FedAvg",
     "no_protection": "No protection",
-    "secure_agg": "Secure aggregation",
+    # P0-B (repair pass 4): never "secure aggregation" unqualified -- this
+    # project's masking is a single-process, Gaussian-mask simulation with
+    # no information-theoretic concealment guarantee at its default scale
+    # (see medgate/privacy/secure_aggregation.py's module docstring and
+    # paper/tables/phase4_concealment_sweep.tex).
+    "secure_agg": "Simulated pairwise additive masking",
     "dp_sgd": "DP-SGD",
-    "secure_agg_plus_dp": "Secure agg. + DP-SGD",
+    "secure_agg_plus_dp": "Simulated masking + DP-SGD",
     "institution": "Institution-level",
     "class": "Class-level",
     "full_retrain": "Full retrain (gold standard)",
@@ -49,8 +54,22 @@ DISPLAY_NAMES = {
     "gradient_ascent_unlearning": "Gradient-ascent unlearning",
     "key_revocation_only": "Key revocation only",
     "solo": "Single attacker",
+    "pooled": "Colluders (pooled)",
     "collusion_solo_half": "Colluder (pre-pooling)",
     "collusion_pooled": "Colluders (pooled)",
+    "null_signal": "Null-signal fixture",
+    "hierarchical": "Hierarchical fixture",
+    "zero_fill": "Zero-fill (no completion)",
+    "mean_fill": "Mean-fill",
+    "random_fill": "Random-fill",
+    "hard_impute": "Hard-impute (oracle/candidate rank)",
+    "soft_impute": "Soft-impute",
+    "logistic": "Logistic regression",
+    "mlp": "MLP (nonlinear)",
+    "primary": "Primary ontology",
+    "alternative": "Alternative ontology",
+    "patient": "Patient-level",
+    "patient_group": "Patient-group-level",
 }
 
 

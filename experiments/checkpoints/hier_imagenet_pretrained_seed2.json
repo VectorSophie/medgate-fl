@@ -2,12 +2,12 @@
   "kind": "imagenet_pretrained",
   "seed": 2,
   "config": {
-    "epochs": 6,
+    "epochs": 4,
     "batch_size": 16,
     "lr": 0.01
   },
-  "git_commit": "987b540badf09101f863bf2e609530eea177764c",
-  "pretrain_coarse_macro_f1": 0.7052302918397703,
+  "git_commit": "5b4becc3a66f2ea2f992dab565b5e04b59ae19cc",
+  "pretrain_coarse_macro_f1": 0.5972222222222222,
   "checkpoint_name": "hier_imagenet_pretrained_seed2",
-  "state_dict_sha256": "671c2a47b22f948b75b57a76d3d1b7467a1a87f42daf9edabdec504964e13eba"
+  "state_dict_sha256": "ca298f7f45f7bc0cb8c20b60f60bf588a218ec13b9679a9c90b88e516ebcc6d5"
 }

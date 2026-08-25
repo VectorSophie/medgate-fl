@@ -15,12 +15,15 @@ fi
 echo "== regenerating tables and figures from experiments/*.json =="
 PYTHONPATH=. python scripts/make_phase1_table.py
 PYTHONPATH=. python scripts/make_phase1_hierarchical_table.py
+PYTHONPATH=. python scripts/make_phase1_hierarchical_sensitivity_table.py
 PYTHONPATH=. python scripts/make_phase2_table.py
 PYTHONPATH=. python scripts/make_phase3_table.py
 PYTHONPATH=. python scripts/make_phase3_adapter_recovery_table.py
 PYTHONPATH=. python scripts/make_phase3_integrity_table.py
 PYTHONPATH=. python scripts/make_phase4_table.py
+PYTHONPATH=. python scripts/make_phase4_concealment_table.py
 PYTHONPATH=. python scripts/make_phase5_table.py
+PYTHONPATH=. python scripts/make_phase5_hierarchical_table.py
 PYTHONPATH=. python scripts/csv_to_latex_tables.py
 PYTHONPATH=. python scripts/make_figures.py
 

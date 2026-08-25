@@ -1,0 +1,90 @@
+{
+  "scenario": "patient_group",
+  "seed": 0,
+  "n_removed_patients": 3,
+  "removed_patient_ids": [
+    0,
+    1,
+    2
+  ],
+  "n_removed_examples": 9,
+  "gold_retained_utility": 0.08,
+  "methods": {
+    "full_retrain": {
+      "retained_fine_macro_f1": 0.08,
+      "gap_to_gold_standard": 0.0,
+      "forgetting_symmetric_auc": 0.5555555555555556,
+      "forgetting_attack_advantage": 0.11111111111111116,
+      "forgetting_raw_auc_diagnostic_only": 0.4444444444444444
+    },
+    "checkpoint_rollback": {
+      "retained_fine_macro_f1": 0.027472527472527476,
+      "gap_to_gold_standard": -0.05252747252747253,
+      "forgetting_symmetric_auc": 0.551440329218107,
+      "forgetting_attack_advantage": 0.10288065843621408,
+      "forgetting_raw_auc_diagnostic_only": 0.44855967078189296
+    },
+    "adapter_deletion_and_retrain": {
+      "retained_fine_macro_f1": 0.15238095238095237,
+      "gap_to_gold_standard": 0.07238095238095237,
+      "forgetting_symmetric_auc": 0.5102880658436214,
+      "forgetting_attack_advantage": 0.020576131687242816,
+      "forgetting_raw_auc_diagnostic_only": 0.4897119341563786
+    },
+    "gradient_ascent_unlearning": {
+      "retained_fine_macro_f1": 0.015037593984962405,
+      "gap_to_gold_standard": -0.0649624060150376,
+      "forgetting_symmetric_auc": 0.7592592592592593,
+      "forgetting_attack_advantage": 0.5185185185185185,
+      "forgetting_raw_auc_diagnostic_only": 0.24074074074074076
+    },
+    "key_revocation_only": {
+      "retained_fine_macro_f1": 0.08,
+      "gap_to_gold_standard": 0.0,
+      "forgetting_symmetric_auc": 0.5123456790123457,
+      "forgetting_attack_advantage": 0.024691358024691468,
+      "forgetting_raw_auc_diagnostic_only": 0.5123456790123457
+    }
+  },
+  "config": {
+    "data": {
+      "num_patients_per_institution": 12,
+      "observations_per_patient": 3,
+      "image_size": 32,
+      "class_imbalance_strength": 0.5,
+      "sensitive_property_correlation": 0.6,
+      "train_frac": 0.6,
+      "val_frac": 0.2
+    },
+    "model": {
+      "feature_dim": 32,
+      "adapter_rank": 4
+    },
+    "train": {
+      "rounds": 4,
+      "epochs_per_round": 2,
+      "batch_size": 8,
+      "lr": 0.02
+    },
+    "unlearning": {
+      "adapter_deletion_epochs": 3,
+      "ascent_steps": 5,
+      "descent_steps": 5,
+      "batch_size": 8,
+      "lr": 0.02
+    },
+    "removal": {
+      "institution_index": 0,
+      "patient_group_size": 3
+    },
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "output_dir": "experiments/phase5_hierarchical_unlearning"
+  },
+  "git_commit": "5b4becc3a66f2ea2f992dab565b5e04b59ae19cc",
+  "dataset_manifest_hash": "22279b03ba8c6260",
+  "wall_clock_seconds": 40.02
+}

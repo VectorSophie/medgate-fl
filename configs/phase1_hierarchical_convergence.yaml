@@ -1,0 +1,28 @@
+# P1 requirement #4 (repair pass 4): convergence curves + a larger-budget
+# full-fine-tune oracle. Single seed (this is a diagnostic curve, not a
+# seeds-averaged comparison) at ~4x the main sweep's round budget
+# (configs/phase1_hierarchical.yaml: 4 rounds x 2 epochs) so the
+# "upper bound" label on full_finetune is checked against something closer
+# to convergence, not just asserted.
+data:
+  num_patients_per_institution: 12
+  observations_per_patient: 3
+  image_size: 32
+  class_imbalance_strength: 0.5
+  sensitive_property_correlation: 0.6
+  train_frac: 0.6
+  val_frac: 0.2
+model:
+  feature_dim: 32
+  adapter_rank: 4
+pretrain:
+  epochs: 4
+  batch_size: 16
+  lr: 0.01
+train:
+  rounds: 16
+  epochs_per_round: 2
+  batch_size: 8
+  lr: 0.02
+seed: 0
+output_dir: experiments/phase1_hierarchical_convergence

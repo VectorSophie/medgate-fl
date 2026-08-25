@@ -139,13 +139,19 @@ def _fine_overlay(xx: torch.Tensor, yy: torch.Tensor, fine_idx: torch.Tensor, fr
 
 def _render(
     fine_labels: torch.Tensor, site_ids: torch.Tensor, patient_ids: torch.Tensor,
-    cfg: HierarchicalConfig, seed: int,
+    cfg: HierarchicalConfig, seed: int, fine_to_coarse_idx: dict | None = None,
 ) -> torch.Tensor:
     """Returns (N,3,H,W) float images. Every step below is analytic and
     keyed only by (fine_labels, site_ids, patient_ids, cfg, seed) -- no
-    hidden state, no dependence on sample order."""
+    hidden state, no dependence on sample order. `fine_to_coarse_idx`:
+    which coarse ontology determines the large-scale pattern (P1
+    coarse-ontology-sensitivity sweep, repair pass 4) -- defaults to the
+    primary ontology (medgate.data.synthetic.FINE_TO_COARSE_IDX) if not
+    given; pass medgate.data.coarse_ontology.ALTERNATIVE_FINE_TO_COARSE_IDX
+    for the alternative."""
+    fine_to_coarse_idx = fine_to_coarse_idx or FINE_TO_COARSE_IDX
     n, hw = len(fine_labels), cfg.image_size
-    coarse_idx = torch.tensor([FINE_TO_COARSE_IDX[FINE_CLASSES[f]] for f in fine_labels.tolist()])
+    coarse_idx = torch.tensor([fine_to_coarse_idx[FINE_CLASSES[f]] for f in fine_labels.tolist()])
 
     lin = torch.linspace(-1, 1, hw)
     base_yy, base_xx = torch.meshgrid(lin, lin, indexing="ij")
@@ -210,7 +216,10 @@ class HierarchicalSyntheticDataset(torch.utils.data.Dataset):
         return self.images[idx], self.fine_labels[idx], self.coarse_labels[idx]
 
 
-def _make_one_institution(site: int, cfg: HierarchicalConfig, seed: int, patient_id_offset: int) -> HierarchicalSyntheticDataset:
+def _make_one_institution(
+    site: int, cfg: HierarchicalConfig, seed: int, patient_id_offset: int, fine_to_coarse_idx: dict | None = None,
+) -> HierarchicalSyntheticDataset:
+    fine_to_coarse_idx = fine_to_coarse_idx or FINE_TO_COARSE_IDX
     g = torch.Generator().manual_seed(seed + site)
     n_patients = cfg.num_patients_per_institution
     k = cfg.observations_per_patient
@@ -226,8 +235,8 @@ def _make_one_institution(site: int, cfg: HierarchicalConfig, seed: int, patient
     sensitive_prob = min(max(sensitive_prob, 0.0), 1.0)
     sensitive_labels = (torch.rand(n_patients * k, generator=g) < sensitive_prob).long()
 
-    coarse_labels = torch.tensor([FINE_TO_COARSE_IDX[FINE_CLASSES[f]] for f in fine_labels.tolist()])
-    images = _render(fine_labels, site_ids, patient_ids, cfg, seed)
+    coarse_labels = torch.tensor([fine_to_coarse_idx[FINE_CLASSES[f]] for f in fine_labels.tolist()])
+    images = _render(fine_labels, site_ids, patient_ids, cfg, seed, fine_to_coarse_idx)
 
     if cfg.backdoor_prevalence > 0:
         n_poison = int(len(images) * cfg.backdoor_prevalence)
@@ -241,14 +250,18 @@ def _make_one_institution(site: int, cfg: HierarchicalConfig, seed: int, patient
     return HierarchicalSyntheticDataset(images, fine_labels, coarse_labels, patient_ids, site_ids, sensitive_labels)
 
 
-def make_hierarchical_institutions(cfg: HierarchicalConfig = None, seed: int = 0) -> list[HierarchicalSyntheticDataset]:
+def make_hierarchical_institutions(
+    cfg: HierarchicalConfig = None, seed: int = 0, fine_to_coarse_idx: dict | None = None,
+) -> list[HierarchicalSyntheticDataset]:
     """One HierarchicalSyntheticDataset per institution (NUM_SITES=6, to
-    match Fed-ISIC2019's verified center count, docs/research_scope.md §5)."""
+    match Fed-ISIC2019's verified center count, docs/research_scope.md §5).
+    `fine_to_coarse_idx`: see _render's docstring -- the coarse-ontology
+    sensitivity-sweep hook (P1, repair pass 4)."""
     cfg = cfg or HierarchicalConfig()
     datasets = []
     offset = 0
     for site in range(NUM_SITES):
-        ds = _make_one_institution(site, cfg, seed, patient_id_offset=offset)
+        ds = _make_one_institution(site, cfg, seed, patient_id_offset=offset, fine_to_coarse_idx=fine_to_coarse_idx)
         datasets.append(ds)
         offset += cfg.num_patients_per_institution
     return datasets

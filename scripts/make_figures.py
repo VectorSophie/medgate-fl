@@ -165,7 +165,7 @@ def fig_phase1_hierarchical():
     ax.bar([i - w / 2 for i in x], fine, width=w, yerr=fine_std, color=BLUE, label="AuthorizedFineUtility", capsize=2)
     ax.bar([i + w / 2 for i in x], rfc, width=w, color=ORANGE, label="BestProbeRFC")
     ax.set_xticks(list(x)); ax.set_xticklabels([disp(m) for m in methods], rotation=30, ha="right", fontsize=7)
-    ax.set_ylabel("fine macro-F1 (mean ± std, 2 seeds)")
+    ax.set_ylabel("fine macro-F1 (mean ± std, 5 seeds)")
     ax.set_title("Phase 1+2 fair baselines — HIERARCHICAL FIXTURE (real learnable signal, still synthetic)", fontsize=7.5)
     ax.legend(frameon=False, fontsize=8)
     fig.tight_layout()
@@ -174,18 +174,19 @@ def fig_phase1_hierarchical():
 
 
 def fig_phase4_privacy_pareto():
+    EPS_COL = "epsilon_full_training_max_per_client_record_level"
     rows = read_csv("paper/tables/phase4_privacy_synthetic.csv")
-    dp_rows = [r for r in rows if r["arm"] in ("dp_sgd", "secure_agg_plus_dp") and r["epsilon"] != ""]
+    dp_rows = [r for r in rows if r["arm"] in ("dp_sgd", "secure_agg_plus_dp") and r[EPS_COL] != ""]
     fig, ax = plt.subplots(figsize=(5.4, 3.2))
     for arm, color, marker in [("dp_sgd", BLUE, "o"), ("secure_agg_plus_dp", ORANGE, "s")]:
-        arm_rows = sorted([r for r in dp_rows if r["arm"] == arm], key=lambda r: float(r["epsilon"]))
-        eps = [float(r["epsilon"]) for r in arm_rows]
+        arm_rows = sorted([r for r in dp_rows if r["arm"] == arm], key=lambda r: float(r[EPS_COL]))
+        eps = [float(r[EPS_COL]) for r in arm_rows]
         f1 = [float(r["fine_macro_f1_mean"]) for r in arm_rows]
         ax.plot(eps, f1, marker=marker, color=color, label=disp(arm), linewidth=1.5, markersize=5)
     no_prot = [r for r in rows if r["arm"] == "no_protection"][0]
     ax.axhline(float(no_prot["fine_macro_f1_mean"]), color=MUTED, linestyle="--", linewidth=1,
                label=f"{disp('no_protection')} (no DP noise)")
-    ax.set_xlabel(r"privacy budget $\varepsilon$ (delta=1e-5, lower = more private)")
+    ax.set_xlabel(r"full-training privacy budget $\varepsilon$ (record-level, $\delta=10^{-5}$, lower = more private)")
     ax.set_ylabel("fine macro-F1 (mean, 3 seeds)")
     ax.set_title("Phase 4 privacy-utility Pareto — SYNTHETIC TIER (pipeline validation only)", fontsize=8)
     ax.legend(frameon=False, fontsize=7.5)

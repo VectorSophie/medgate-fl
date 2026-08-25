@@ -1,0 +1,34 @@
+# P1 requirement #6 (repair pass 4): sensitivity sweeps, hierarchical
+# fixture. Same base data/model/train budget as configs/phase1_hierarchical.yaml;
+# each sweep varies ONE dimension at a time, 2 seeds/point (see
+# scripts/run_phase1_hierarchical_sensitivity.py's module docstring for why
+# 2, not the main sweep's 5).
+data:
+  num_patients_per_institution: 12
+  observations_per_patient: 3
+  image_size: 32
+  class_imbalance_strength: 0.5
+  sensitive_property_correlation: 0.6
+  site_shift_strength: 1.0
+  fine_signal_strength: 0.6
+  train_frac: 0.6
+  val_frac: 0.2
+model:
+  feature_dim: 32
+  adapter_rank: 4
+pretrain:
+  epochs: 4
+  batch_size: 16
+  lr: 0.01
+train:
+  rounds: 4
+  epochs_per_round: 2
+  batch_size: 8
+  lr: 0.02
+seeds: [0, 1]
+sweeps:
+  site_shift_strength: [0.0, 1.0, 2.0]
+  fine_signal_strength: [0.2, 0.6, 1.0]
+  class_imbalance_strength: [0.0, 0.5, 1.0]
+  coarse_ontology: [primary, alternative]
+output_dir: experiments/phase1_hierarchical_sensitivity

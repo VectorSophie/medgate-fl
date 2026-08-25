@@ -6,7 +6,19 @@ SmallBackbone checkpoint and an ImageNet-pretrained MobileNet checkpoint
 the FedLoRA family (random_frozen_lora as a negative control,
 coarse_pretrained_fedlora, imagenet_pretrained_fedlora, full_finetune) and
 all six Phase-2 capability-isolation methods from the SAME coarse
-checkpoint, each evaluated with the full probe suite (RFC/UCG/ARR).
+checkpoint, each evaluated with the full probe suite.
+
+REPAIR PASS 4 / P1 changes from the earlier draft of this script:
+  - 5 seeds, not 2 (P1 requirement #1).
+  - The attack ("RFC") number is no longer the max over every probe
+    evaluated on the SAME test split used to report it -- that is a
+    multiple-comparisons/selection-bias problem (P1 requirement #3). Now:
+    probes are SELECTED on an attack-VALIDATION split (this fixture's own
+    val split, previously computed and discarded) and the winning probe
+    type is evaluated ONCE on a held-out, patient-disjoint attack-TEST
+    split (medgate.attacks.probes.selected_probe_attack) -- utility
+    (fine/coarse macro-F1) is still reported on its own separate
+    utility-test split, untouched by any attack-side selection.
 
 Usage: PYTHONPATH=. python scripts/run_phase1_hierarchical.py [config.yaml]
 """
@@ -18,8 +30,8 @@ from pathlib import Path
 import torch
 import yaml
 
-from medgate.attacks.probes import output_only_probe, run_all_probes
-from medgate.capability_metrics import authorized_recovery_ratio, residual_fine_capability, unauthorized_capability_gain
+from medgate.attacks.probes import output_only_probe, selected_probe_attack
+from medgate.capability_metrics import authorized_recovery_ratio, unauthorized_capability_gain
 from medgate.data.hierarchical_synthetic import HierarchicalConfig, make_hierarchical_institutions, split_by_patient
 from medgate.data.synthetic import COARSE_CLASSES, FINE_CLASSES
 from medgate.federated.baselines import (
@@ -45,20 +57,34 @@ def build_fixture(cfg, seed):
         sensitive_property_correlation=d["sensitive_property_correlation"],
     )
     insts = make_hierarchical_institutions(hcfg, seed=seed)
-    train, _val, test = split_by_patient(insts, train_frac=d["train_frac"], val_frac=d["val_frac"], seed=seed)
-    return train, test, torch.utils.data.ConcatDataset(train), torch.utils.data.ConcatDataset(test)
+    train, val, test = split_by_patient(insts, train_frac=d["train_frac"], val_frac=d["val_frac"], seed=seed)
+    # The 'test' split (test_frac = 1 - train_frac - val_frac) is further
+    # halved BY PATIENT into a utility-test pool (fine/coarse macro-F1 --
+    # no selection happens for utility, so no leakage risk) and an
+    # attack-test pool (the untouched split selected_probe_attack scores
+    # its winning probe on exactly once). train_frac=0.5/val_frac=0.0
+    # reuses split_by_patient itself rather than a second splitting
+    # routine -- val_frac=0.0 here means an empty (unused) second output.
+    utility_test, _unused, attack_test = split_by_patient(test, train_frac=0.5, val_frac=0.0, seed=seed + 900_000)
+    return (
+        train, val, utility_test, attack_test,
+        torch.utils.data.ConcatDataset(train),
+        torch.utils.data.ConcatDataset(val),
+        torch.utils.data.ConcatDataset(utility_test),
+        torch.utils.data.ConcatDataset(attack_test),
+    )
 
 
-def eval_and_leak(model, train_pool, test_pool, seed) -> dict:
-    utility = evaluate_both(model, test_pool)
-    u_public = output_only_probe(model, train_pool, test_pool, seed=seed)["macro_f1"]
-    probes = run_all_probes(model, train_pool, test_pool, seed=seed)
-    rfc = residual_fine_capability(probes)
+def eval_and_leak(model, train_pool, val_pool, utility_test_pool, attack_test_pool, seed) -> dict:
+    utility = evaluate_both(model, utility_test_pool)
+    u_public = output_only_probe(model, train_pool, attack_test_pool, seed=seed)["macro_f1"]
+    attack = selected_probe_attack(model, train_pool, val_pool, attack_test_pool, seed=seed, include_slow=True)
+    rfc = attack["attack_test_result"]["macro_f1"]
     return {
         "utility": utility,
         "u_public": u_public,
-        "probes": probes,
-        "residual_fine_capability": rfc,
+        "probe_selection": attack,  # P1: full selection-vs-test-eval record, not just the winning number
+        "residual_fine_capability": rfc,  # = the validation-selected probe's SINGLE held-out attack-test score
         "unauthorized_capability_gain": unauthorized_capability_gain(rfc, u_public),
     }
 
@@ -74,41 +100,44 @@ def main():
 
     for seed in cfg["seeds"]:
         seed_start = time.time()
-        train, test, train_pool, test_pool = build_fixture(cfg, seed)
+        train, val, utility_test, attack_test, train_pool, val_pool, utility_test_pool, attack_test_pool = build_fixture(cfg, seed)
 
         coarse_ckpt = build_coarse_pretrained_checkpoint(train_pool, model_kwargs, pt["epochs"], pt["batch_size"], pt["lr"], seed)
         coarse_state = coarse_ckpt.state_dict()
         coarse_meta = save_checkpoint(coarse_ckpt, f"hier_coarse_pretrained_seed{seed}", {
             "kind": "coarse_pretrained", "seed": seed, "config": pt, "git_commit": commit,
-            "pretrain_coarse_macro_f1": evaluate_both(coarse_ckpt, test_pool)["coarse_macro_f1"],
+            "pretrain_coarse_macro_f1": evaluate_both(coarse_ckpt, utility_test_pool)["coarse_macro_f1"],
         })
 
         imagenet_ckpt = build_imagenet_pretrained_checkpoint(train_pool, model_kwargs, pt["epochs"], pt["batch_size"], pt["lr"], seed)
         imagenet_state = imagenet_ckpt.state_dict()
         imagenet_meta = save_checkpoint(imagenet_ckpt, f"hier_imagenet_pretrained_seed{seed}", {
             "kind": "imagenet_pretrained", "seed": seed, "config": pt, "git_commit": commit,
-            "pretrain_coarse_macro_f1": evaluate_both(imagenet_ckpt, test_pool)["coarse_macro_f1"],
+            "pretrain_coarse_macro_f1": evaluate_both(imagenet_ckpt, utility_test_pool)["coarse_macro_f1"],
         })
+
+        def leak(model):
+            return eval_and_leak(model, train_pool, val_pool, utility_test_pool, attack_test_pool, seed)
 
         results = []
 
         model, summary = train_random_frozen_lora(train, model_kwargs, t["rounds"], t["epochs_per_round"], t["batch_size"], t["lr"], seed)
-        results.append({"method": "random_frozen_lora", "kind": "baseline", "param_summary": summary, **eval_and_leak(model, train_pool, test_pool, seed)})
+        results.append({"method": "random_frozen_lora", "kind": "baseline", "param_summary": summary, **leak(model)})
 
         model, summary = train_pretrained_fedlora(train, coarse_state, model_kwargs, t["rounds"], t["epochs_per_round"], t["batch_size"], t["lr"], seed)
         results.append({"method": "coarse_pretrained_fedlora", "kind": "baseline", "param_summary": summary,
-                         "checkpoint_sha256": coarse_meta["state_dict_sha256"], **eval_and_leak(model, train_pool, test_pool, seed)})
+                         "checkpoint_sha256": coarse_meta["state_dict_sha256"], **leak(model)})
 
         model, summary = train_pretrained_fedlora(
             train, imagenet_state, model_kwargs, t["rounds"], t["epochs_per_round"], t["batch_size"], t["lr"], seed,
             backbone=PretrainedMobileNetBackbone(feature_dim=model_kwargs["feature_dim"], freeze=True),
         )
         results.append({"method": "imagenet_pretrained_fedlora", "kind": "baseline", "param_summary": summary,
-                         "checkpoint_sha256": imagenet_meta["state_dict_sha256"], **eval_and_leak(model, train_pool, test_pool, seed)})
+                         "checkpoint_sha256": imagenet_meta["state_dict_sha256"], **leak(model)})
 
         model, summary = train_full_finetune(train, coarse_state, model_kwargs, t["rounds"], t["epochs_per_round"], t["batch_size"], t["lr"], seed)
         results.append({"method": "full_finetune", "kind": "baseline", "param_summary": summary,
-                         "checkpoint_sha256": coarse_meta["state_dict_sha256"], **eval_and_leak(model, train_pool, test_pool, seed)})
+                         "checkpoint_sha256": coarse_meta["state_dict_sha256"], **leak(model)})
 
         for method_name in cfg["capability_isolation_methods"]:
             model = train_capability_isolation(
@@ -116,7 +145,7 @@ def main():
                 init_state_dict=coarse_state,
             )
             results.append({"method": method_name, "kind": "capability_isolation",
-                             "checkpoint_sha256": coarse_meta["state_dict_sha256"], **eval_and_leak(model, train_pool, test_pool, seed)})
+                             "checkpoint_sha256": coarse_meta["state_dict_sha256"], **leak(model)})
 
         # ARR needs the plain-adapter reference: use coarse_pretrained_fedlora's fine utility as U_plain_adapter
         plain_adapter_fine_f1 = next(r["utility"]["fine_macro_f1"] for r in results if r["method"] == "coarse_pretrained_fedlora")
@@ -134,7 +163,8 @@ def main():
         print(f"seed={seed} ({out['wall_clock_seconds']:.1f}s) -> {out_path}")
         for r in results:
             print(f"    {r['method']:28s} coarse_f1={r['utility']['coarse_macro_f1']:.3f} fine_f1={r['utility']['fine_macro_f1']:.3f} "
-                  f"u_public={r['u_public']:.3f} rfc={r['residual_fine_capability']:.3f} arr={r['authorized_recovery_ratio']}")
+                  f"u_public={r['u_public']:.3f} rfc={r['residual_fine_capability']:.3f} "
+                  f"(selected={r['probe_selection']['selected_probe']}) arr={r['authorized_recovery_ratio']}")
 
 
 if __name__ == "__main__":

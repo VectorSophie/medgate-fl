@@ -1,0 +1,1251 @@
+{
+  "arm": "null_signal",
+  "seed": 0,
+  "git_commit": "5b4becc3a66f2ea2f992dab565b5e04b59ae19cc",
+  "u_authorized_fine_macro_f1": 0.02358490566037736,
+  "fill_method_sweep": [
+    {
+      "method": "zero_fill",
+      "attacker_knowledge": "10% of the true adapter's effective delta_w=up@down matrix's entries (plaintext leak, NOT an AES-GCM break), candidate_rank=4 (true_rank=4, oracle)",
+      "attacker_access": "no auxiliary data, no queries -- pure parameter-space completion",
+      "compute_budget": {
+        "reveal_fraction": 0.1,
+        "completion_iterations": 100,
+        "candidate_rank": 4
+      },
+      "true_rank": 4,
+      "parameter_space_recovery": {
+        "cosine_similarity": 0.31160619854927063,
+        "normalized_frobenius_error": 0.9502113461494446,
+        "observed_entry_rmse": 0.0,
+        "unobserved_entry_rmse": 0.005540903657674789,
+        "unobserved_entry_normalized_error": 1.0,
+        "true_top_singular_values": [
+          0.33076754212379456,
+          0.1098695695400238,
+          0.0566970594227314,
+          0.030249888077378273
+        ],
+        "recovered_top_singular_values": [
+          0.0477864108979702,
+          0.036017388105392456,
+          0.03379910811781883,
+          0.02951733209192753
+        ]
+      },
+      "completion_gain_over_zero_fill": {
+        "zero_fill_unobserved_normalized_error": 1.0,
+        "method_unobserved_normalized_error": 1.0,
+        "absolute_gain": 0.0,
+        "relative_gain": 0.0
+      },
+      "functional_recovery_fine_macro_f1": 0.02358490566037736
+    },
+    {
+      "method": "zero_fill",
+      "attacker_knowledge": "30% of the true adapter's effective delta_w=up@down matrix's entries (plaintext leak, NOT an AES-GCM break), candidate_rank=4 (true_rank=4, oracle)",
+      "attacker_access": "no auxiliary data, no queries -- pure parameter-space completion",
+      "compute_budget": {
+        "reveal_fraction": 0.3,
+        "completion_iterations": 100,
+        "candidate_rank": 4
+      },
+      "true_rank": 4,
+      "parameter_space_recovery": {
+        "cosine_similarity": 0.5414979457855225,
+        "normalized_frobenius_error": 0.8407020568847656,
+        "observed_entry_rmse": 0.0,
+        "unobserved_entry_rmse": 0.005578276701271534,
+        "unobserved_entry_normalized_error": 1.0,
+        "true_top_singular_values": [
+          0.33076754212379456,
+          0.1098695695400238,
+          0.0566970594227314,
+          0.030249888077378273
+        ],
+        "recovered_top_singular_values": [
+          0.10669197887182236,
+          0.05342986062169075,
+          0.04750886559486389,
+          0.043692395091056824
+        ]
+      },
+      "completion_gain_over_zero_fill": {
+        "zero_fill_unobserved_normalized_error": 1.0,
+        "method_unobserved_normalized_error": 1.0,
+        "absolute_gain": 0.0,
+        "relative_gain": 0.0
+      },
+      "functional_recovery_fine_macro_f1": 0.023923444976076555
+    },
+    {
+      "method": "zero_fill",
+      "attacker_knowledge": "50% of the true adapter's effective delta_w=up@down matrix's entries (plaintext leak, NOT an AES-GCM break), candidate_rank=4 (true_rank=4, oracle)",
+      "attacker_access": "no auxiliary data, no queries -- pure parameter-space completion",
+      "compute_budget": {
+        "reveal_fraction": 0.5,
+        "completion_iterations": 100,
+        "candidate_rank": 4
+      },
+      "true_rank": 4,
+      "parameter_space_recovery": {
+        "cosine_similarity": 0.7020114064216614,
+        "normalized_frobenius_error": 0.7121656537055969,
+        "observed_entry_rmse": 0.0,
+        "unobserved_entry_rmse": 0.005621402058750391,
+        "unobserved_entry_normalized_error": 1.0,
+        "true_top_singular_values": [
+          0.33076754212379456,
+          0.1098695695400238,
+          0.0566970594227314,
+          0.030249888077378273
+        ],
+        "recovered_top_singular_values": [
+          0.16785874962806702,
+          0.06400907784700394,
+          0.05422913283109665,
+          0.05298498272895813
+        ]
+      },
+      "completion_gain_over_zero_fill": {
+        "zero_fill_unobserved_normalized_error": 1.0,
+        "method_unobserved_normalized_error": 1.0,
+        "absolute_gain": 0.0,
+        "relative_gain": 0.0
+      },
+      "functional_recovery_fine_macro_f1": 0.02358490566037736
+    },
+    {
+      "method": "zero_fill",
+      "attacker_knowledge": "70% of the true adapter's effective delta_w=up@down matrix's entries (plaintext leak, NOT an AES-GCM break), candidate_rank=4 (true_rank=4, oracle)",
+      "attacker_access": "no auxiliary data, no queries -- pure parameter-space completion",
+      "compute_budget": {
+        "reveal_fraction": 0.7,
+        "completion_iterations": 100,
+        "candidate_rank": 4
+      },
+      "true_rank": 4,
+      "parameter_space_recovery": {
+        "cosine_similarity": 0.8258606195449829,
+        "normalized_frobenius_error": 0.5638742446899414,
+        "observed_entry_rmse": 0.0,
+        "unobserved_entry_rmse": 0.005688968580216169,
+        "unobserved_entry_normalized_error": 1.0,
+        "true_top_singular_values": [
+          0.33076754212379456,
+          0.1098695695400238,
+          0.0566970594227314,
+          0.030249888077378273
+        ],
+        "recovered_top_singular_values": [
+          0.22804474830627441,
+          0.08021622896194458,
+          0.05657166615128517,
+          0.05375116318464279
+        ]
+      },
+      "completion_gain_over_zero_fill": {
+        "zero_fill_unobserved_normalized_error": 1.0,
+        "method_unobserved_normalized_error": 1.0,
+        "absolute_gain": 0.0,
+        "relative_gain": 0.0
+      },
+      "functional_recovery_fine_macro_f1": 0.02358490566037736
+    },
+    {
+      "method": "zero_fill",
+      "attacker_knowledge": "90% of the true adapter's effective delta_w=up@down matrix's entries (plaintext leak, NOT an AES-GCM break), candidate_rank=4 (true_rank=4, oracle)",
+      "attacker_access": "no auxiliary data, no queries -- pure parameter-space completion",
+      "compute_budget": {
+        "reveal_fraction": 0.9,
+        "completion_iterations": 100,
+        "candidate_rank": 4
+      },
+      "true_rank": 4,
+      "parameter_space_recovery": {
+        "cosine_similarity": 0.9422688484191895,
+        "normalized_frobenius_error": 0.3348572254180908,
+        "observed_entry_rmse": 0.0,
+        "unobserved_entry_rmse": 0.005664169788360596,
+        "unobserved_entry_normalized_error": 1.0,
+        "true_top_singular_values": [
+          0.33076754212379456,
+          0.1098695695400238,
+          0.0566970594227314,
+          0.030249888077378273
+        ],
+        "recovered_top_singular_values": [
+          0.29453620314598083,
+          0.09876192361116409,
+          0.05551166087388992,
+          0.04090474545955658
+        ]
+      },
+      "completion_gain_over_zero_fill": {
+        "zero_fill_unobserved_normalized_error": 1.0,
+        "method_unobserved_normalized_error": 1.0,
+        "absolute_gain": 0.0,
+        "relative_gain": 0.0
+      },
+      "functional_recovery_fine_macro_f1": 0.02358490566037736
+    },
+    {
+      "method": "mean_fill",
+      "attacker_knowledge": "10% of the true adapter's effective delta_w=up@down matrix's entries (plaintext leak, NOT an AES-GCM break), candidate_rank=4 (true_rank=4, oracle)",
+      "attacker_access": "no auxiliary data, no queries -- pure parameter-space completion",
+      "compute_budget": {
+        "reveal_fraction": 0.1,
+        "completion_iterations": 100,
+        "candidate_rank": 4
+      },
+      "true_rank": 4,
+      "parameter_space_recovery": {
+        "cosine_similarity": 0.30126550793647766,
+        "normalized_frobenius_error": 0.9537224173545837,
+        "observed_entry_rmse": 0.0,
+        "unobserved_entry_rmse": 0.005561377387493849,
+        "unobserved_entry_normalized_error": 1.003695011138916,
+        "true_top_singular_values": [
+          0.33076754212379456,
+          0.1098695695400238,
+          0.0566970594227314,
+          0.030249888077378273
+        ],
+        "recovered_top_singular_values": [
+          0.04784722626209259,
+          0.037527695298194885,
+          0.03361176326870918,
+          0.029472220689058304
+        ]
+      },
+      "completion_gain_over_zero_fill": {
+        "zero_fill_unobserved_normalized_error": 1.0,
+        "method_unobserved_normalized_error": 1.003695011138916,
+        "absolute_gain": -0.0036950111389160156,
+        "relative_gain": -0.0036950111389160156
+      },
+      "functional_recovery_fine_macro_f1": 0.02358490566037736
+    },
+    {
+      "method": "mean_fill",
+      "attacker_knowledge": "30% of the true adapter's effective delta_w=up@down matrix's entries (plaintext leak, NOT an AES-GCM break), candidate_rank=4 (true_rank=4, oracle)",
+      "attacker_access": "no auxiliary data, no queries -- pure parameter-space completion",
+      "compute_budget": {
+        "reveal_fraction": 0.3,
+        "completion_iterations": 100,
+        "candidate_rank": 4
+      },
+      "true_rank": 4,
+      "parameter_space_recovery": {
+        "cosine_similarity": 0.5406482815742493,
+        "normalized_frobenius_error": 0.8412496447563171,
+        "observed_entry_rmse": 0.0,
+        "unobserved_entry_rmse": 0.005581909790635109,
+        "unobserved_entry_normalized_error": 1.000651240348816,
+        "true_top_singular_values": [
+          0.33076754212379456,
+          0.1098695695400238,
+          0.0566970594227314,
+          0.030249888077378273
+        ],
+        "recovered_top_singular_values": [
+          0.10660814493894577,
+          0.05334671959280968,
+          0.047521572560071945,
+          0.04374893009662628
+        ]
+      },
+      "completion_gain_over_zero_fill": {
+        "zero_fill_unobserved_normalized_error": 1.0,
+        "method_unobserved_normalized_error": 1.000651240348816,
+        "absolute_gain": -0.000651240348815918,
+        "relative_gain": -0.000651240348815918
+      },
+      "functional_recovery_fine_macro_f1": 0.023809523809523808
+    },
+    {
+      "method": "mean_fill",
+      "attacker_knowledge": "50% of the true adapter's effective delta_w=up@down matrix's entries (plaintext leak, NOT an AES-GCM break), candidate_rank=4 (true_rank=4, oracle)",
+      "attacker_access": "no auxiliary data, no queries -- pure parameter-space completion",
+      "compute_budget": {
+        "reveal_fraction": 0.5,
+        "completion_iterations": 100,
+        "candidate_rank": 4
+      },
+      "true_rank": 4,
+      "parameter_space_recovery": {
+        "cosine_similarity": 0.7011717557907104,
+        "normalized_frobenius_error": 0.7129931449890137,
+        "observed_entry_rmse": 0.0,
+        "unobserved_entry_rmse": 0.005627932958304882,
+        "unobserved_entry_normalized_error": 1.001161813735962,
+        "true_top_singular_values": [
+          0.33076754212379456,
+          0.1098695695400238,
+          0.0566970594227314,
+          0.030249888077378273
+        ],
+        "recovered_top_singular_values": [
+          0.16771109402179718,
+          0.0640144944190979,
+          0.054306887090206146,
+          0.05316232517361641
+        ]
+      },
+      "completion_gain_over_zero_fill": {
+        "zero_fill_unobserved_normalized_error": 1.0,
+        "method_unobserved_normalized_error": 1.001161813735962,
+        "absolute_gain": -0.001161813735961914,
+        "relative_gain": -0.001161813735961914
+      },
+      "functional_recovery_fine_macro_f1": 0.02358490566037736
+    },
+    {
+      "method": "mean_fill",
+      "attacker_knowledge": "70% of the true adapter's effective delta_w=up@down matrix's entries (plaintext leak, NOT an AES-GCM break), candidate_rank=4 (true_rank=4, oracle)",
+      "attacker_access": "no auxiliary data, no queries -- pure parameter-space completion",
+      "compute_budget": {
+        "reveal_fraction": 0.7,
+        "completion_iterations": 100,
+        "candidate_rank": 4
+      },
+      "true_rank": 4,
+      "parameter_space_recovery": {
+        "cosine_similarity": 0.8258427977561951,
+        "normalized_frobenius_error": 0.5639002919197083,
+        "observed_entry_rmse": 0.0,
+        "unobserved_entry_rmse": 0.005689230747520924,
+        "unobserved_entry_normalized_error": 1.0000461339950562,
+        "true_top_singular_values": [
+          0.33076754212379456,
+          0.1098695695400238,
+          0.0566970594227314,
+          0.030249888077378273
+        ],
+        "recovered_top_singular_values": [
+          0.22803977131843567,
+          0.08021043986082077,
+          0.05657423660159111,
+          0.05375402793288231
+        ]
+      },
+      "completion_gain_over_zero_fill": {
+        "zero_fill_unobserved_normalized_error": 1.0,
+        "method_unobserved_normalized_error": 1.0000461339950562,
+        "absolute_gain": -4.6133995056152344e-05,
+        "relative_gain": -4.6133995056152344e-05
+      },
+      "functional_recovery_fine_macro_f1": 0.02358490566037736
+    },
+    {
+      "method": "mean_fill",
+      "attacker_knowledge": "90% of the true adapter's effective delta_w=up@down matrix's entries (plaintext leak, NOT an AES-GCM break), candidate_rank=4 (true_rank=4, oracle)",
+      "attacker_access": "no auxiliary data, no queries -- pure parameter-space completion",
+      "compute_budget": {
+        "reveal_fraction": 0.9,
+        "completion_iterations": 100,
+        "candidate_rank": 4
+      },
+      "true_rank": 4,
+      "parameter_space_recovery": {
+        "cosine_similarity": 0.9422634243965149,
+        "normalized_frobenius_error": 0.33487242460250854,
+        "observed_entry_rmse": 0.0,
+        "unobserved_entry_rmse": 0.00566442683339119,
+        "unobserved_entry_normalized_error": 1.0000452995300293,
+        "true_top_singular_values": [
+          0.33076754212379456,
+          0.1098695695400238,
+          0.0566970594227314,
+          0.030249888077378273
+        ],
+        "recovered_top_singular_values": [
+          0.29453667998313904,
+          0.09875380992889404,
+          0.05551591143012047,
+          0.04089413583278656
+        ]
+      },
+      "completion_gain_over_zero_fill": {
+        "zero_fill_unobserved_normalized_error": 1.0,
+        "method_unobserved_normalized_error": 1.0000452995300293,
+        "absolute_gain": -4.5299530029296875e-05,
+        "relative_gain": -4.5299530029296875e-05
+      },
+      "functional_recovery_fine_macro_f1": 0.02358490566037736
+    },
+    {
+      "method": "random_fill",
+      "attacker_knowledge": "10% of the true adapter's effective delta_w=up@down matrix's entries (plaintext leak, NOT an AES-GCM break), candidate_rank=4 (true_rank=4, oracle)",
+      "attacker_access": "no auxiliary data, no queries -- pure parameter-space completion",
+      "compute_budget": {
+        "reveal_fraction": 0.1,
+        "completion_iterations": 100,
+        "candidate_rank": 4
+      },
+      "true_rank": 4,
+      "parameter_space_recovery": {
+        "cosine_similarity": 0.09202741086483002,
+        "normalized_frobenius_error": 1.3338557481765747,
+        "observed_entry_rmse": 0.0,
+        "unobserved_entry_rmse": 0.007778023835271597,
+        "unobserved_entry_normalized_error": 1.4037463665008545,
+        "true_top_singular_values": [
+          0.33076754212379456,
+          0.1098695695400238,
+          0.0566970594227314,
+          0.030249888077378273
+        ],
+        "recovered_top_singular_values": [
+          0.08461306989192963,
+          0.08099062740802765,
+          0.07805047184228897,
+          0.07526195794343948
+        ]
+      },
+      "completion_gain_over_zero_fill": {
+        "zero_fill_unobserved_normalized_error": 1.0,
+        "method_unobserved_normalized_error": 1.4037463665008545,
+        "absolute_gain": -0.4037463665008545,
+        "relative_gain": -0.4037463665008545
+      },
+      "functional_recovery_fine_macro_f1": 0.02358490566037736
+    },
+    {
+      "method": "random_fill",
+      "attacker_knowledge": "30% of the true adapter's effective delta_w=up@down matrix's entries (plaintext leak, NOT an AES-GCM break), candidate_rank=4 (true_rank=4, oracle)",
+      "attacker_access": "no auxiliary data, no queries -- pure parameter-space completion",
+      "compute_budget": {
+        "reveal_fraction": 0.3,
+        "completion_iterations": 100,
+        "candidate_rank": 4
+      },
+      "true_rank": 4,
+      "parameter_space_recovery": {
+        "cosine_similarity": 0.3227043151855469,
+        "normalized_frobenius_error": 1.143402338027954,
+        "observed_entry_rmse": 0.0,
+        "unobserved_entry_rmse": 0.007586771622300148,
+        "unobserved_entry_normalized_error": 1.3600566387176514,
+        "true_top_singular_values": [
+          0.33076754212379456,
+          0.1098695695400238,
+          0.0566970594227314,
+          0.030249888077378273
+        ],
+        "recovered_top_singular_values": [
+          0.12309414148330688,
+          0.0809556096792221,
+          0.07711919397115707,
+          0.07470084726810455
+        ]
+      },
+      "completion_gain_over_zero_fill": {
+        "zero_fill_unobserved_normalized_error": 1.0,
+        "method_unobserved_normalized_error": 1.3600566387176514,
+        "absolute_gain": -0.36005663871765137,
+        "relative_gain": -0.36005663871765137
+      },
+      "functional_recovery_fine_macro_f1": 0.02358490566037736
+    },
+    {
+      "method": "random_fill",
+      "attacker_knowledge": "50% of the true adapter's effective delta_w=up@down matrix's entries (plaintext leak, NOT an AES-GCM break), candidate_rank=4 (true_rank=4, oracle)",
+      "attacker_access": "no auxiliary data, no queries -- pure parameter-space completion",
+      "compute_budget": {
+        "reveal_fraction": 0.5,
+        "completion_iterations": 100,
+        "candidate_rank": 4
+      },
+      "true_rank": 4,
+      "parameter_space_recovery": {
+        "cosine_similarity": 0.5118362903594971,
+        "normalized_frobenius_error": 0.975691020488739,
+        "observed_entry_rmse": 0.0,
+        "unobserved_entry_rmse": 0.007701510563492775,
+        "unobserved_entry_normalized_error": 1.3700337409973145,
+        "true_top_singular_values": [
+          0.33076754212379456,
+          0.1098695695400238,
+          0.0566970594227314,
+          0.030249888077378273
+        ],
+        "recovered_top_singular_values": [
+          0.17342603206634521,
+          0.07927940785884857,
+          0.07480701059103012,
+          0.07050623744726181
+        ]
+      },
+      "completion_gain_over_zero_fill": {
+        "zero_fill_unobserved_normalized_error": 1.0,
+        "method_unobserved_normalized_error": 1.3700337409973145,
+        "absolute_gain": -0.37003374099731445,
+        "relative_gain": -0.37003374099731445
+      },
+      "functional_recovery_fine_macro_f1": 0.02358490566037736
+    },
+    {
+      "method": "random_fill",
+      "attacker_knowledge": "70% of the true adapter's effective delta_w=up@down matrix's entries (plaintext leak, NOT an AES-GCM break), candidate_rank=4 (true_rank=4, oracle)",
+      "attacker_access": "no auxiliary data, no queries -- pure parameter-space completion",
+      "compute_budget": {
+        "reveal_fraction": 0.7,
+        "completion_iterations": 100,
+        "candidate_rank": 4
+      },
+      "true_rank": 4,
+      "parameter_space_recovery": {
+        "cosine_similarity": 0.6942521333694458,
+        "normalized_frobenius_error": 0.7747619152069092,
+        "observed_entry_rmse": 0.0,
+        "unobserved_entry_rmse": 0.007816629484295845,
+        "unobserved_entry_normalized_error": 1.373997688293457,
+        "true_top_singular_values": [
+          0.33076754212379456,
+          0.1098695695400238,
+          0.0566970594227314,
+          0.030249888077378273
+        ],
+        "recovered_top_singular_values": [
+          0.23056568205356598,
+          0.08255797624588013,
+          0.06848926842212677,
+          0.06498146802186966
+        ]
+      },
+      "completion_gain_over_zero_fill": {
+        "zero_fill_unobserved_normalized_error": 1.0,
+        "method_unobserved_normalized_error": 1.373997688293457,
+        "absolute_gain": -0.37399768829345703,
+        "relative_gain": -0.37399768829345703
+      },
+      "functional_recovery_fine_macro_f1": 0.02358490566037736
+    },
+    {
+      "method": "random_fill",
+      "attacker_knowledge": "90% of the true adapter's effective delta_w=up@down matrix's entries (plaintext leak, NOT an AES-GCM break), candidate_rank=4 (true_rank=4, oracle)",
+      "attacker_access": "no auxiliary data, no queries -- pure parameter-space completion",
+      "compute_budget": {
+        "reveal_fraction": 0.9,
+        "completion_iterations": 100,
+        "candidate_rank": 4
+      },
+      "true_rank": 4,
+      "parameter_space_recovery": {
+        "cosine_similarity": 0.8875426650047302,
+        "normalized_frobenius_error": 0.47332990169525146,
+        "observed_entry_rmse": 0.0,
+        "unobserved_entry_rmse": 0.008006460033357143,
+        "unobserved_entry_normalized_error": 1.413527488708496,
+        "true_top_singular_values": [
+          0.33076754212379456,
+          0.1098695695400238,
+          0.0566970594227314,
+          0.030249888077378273
+        ],
+        "recovered_top_singular_values": [
+          0.2944011688232422,
+          0.09946292638778687,
+          0.060306500643491745,
+          0.054460786283016205
+        ]
+      },
+      "completion_gain_over_zero_fill": {
+        "zero_fill_unobserved_normalized_error": 1.0,
+        "method_unobserved_normalized_error": 1.413527488708496,
+        "absolute_gain": -0.4135274887084961,
+        "relative_gain": -0.4135274887084961
+      },
+      "functional_recovery_fine_macro_f1": 0.02358490566037736
+    },
+    {
+      "method": "hard_impute",
+      "attacker_knowledge": "10% of the true adapter's effective delta_w=up@down matrix's entries (plaintext leak, NOT an AES-GCM break), candidate_rank=4 (true_rank=4, oracle)",
+      "attacker_access": "no auxiliary data, no queries -- pure parameter-space completion",
+      "compute_budget": {
+        "reveal_fraction": 0.1,
+        "completion_iterations": 100,
+        "candidate_rank": 4
+      },
+      "true_rank": 4,
+      "parameter_space_recovery": {
+        "cosine_similarity": 0.5364457368850708,
+        "normalized_frobenius_error": 0.8558943271636963,
+        "observed_entry_rmse": 0.0,
+        "unobserved_entry_rmse": 0.004990919027477503,
+        "unobserved_entry_normalized_error": 0.9007409811019897,
+        "true_top_singular_values": [
+          0.33076754212379456,
+          0.1098695695400238,
+          0.0566970594227314,
+          0.030249888077378273
+        ],
+        "recovered_top_singular_values": [
+          0.16466987133026123,
+          0.10750021785497665,
+          0.09920544922351837,
+          0.09665302187204361
+        ]
+      },
+      "completion_gain_over_zero_fill": {
+        "zero_fill_unobserved_normalized_error": 1.0,
+        "method_unobserved_normalized_error": 0.9007409811019897,
+        "absolute_gain": 0.09925901889801025,
+        "relative_gain": 0.09925901889801025
+      },
+      "functional_recovery_fine_macro_f1": 0.02358490566037736
+    },
+    {
+      "method": "hard_impute",
+      "attacker_knowledge": "30% of the true adapter's effective delta_w=up@down matrix's entries (plaintext leak, NOT an AES-GCM break), candidate_rank=4 (true_rank=4, oracle)",
+      "attacker_access": "no auxiliary data, no queries -- pure parameter-space completion",
+      "compute_budget": {
+        "reveal_fraction": 0.3,
+        "completion_iterations": 100,
+        "candidate_rank": 4
+      },
+      "true_rank": 4,
+      "parameter_space_recovery": {
+        "cosine_similarity": 0.971688985824585,
+        "normalized_frobenius_error": 0.23626859486103058,
+        "observed_entry_rmse": 0.0,
+        "unobserved_entry_rmse": 0.0015677037881687284,
+        "unobserved_entry_normalized_error": 0.28103727102279663,
+        "true_top_singular_values": [
+          0.33076754212379456,
+          0.1098695695400238,
+          0.0566970594227314,
+          0.030249888077378273
+        ],
+        "recovered_top_singular_values": [
+          0.31473639607429504,
+          0.11392200738191605,
+          0.06790360808372498,
+          0.04625609517097473
+        ]
+      },
+      "completion_gain_over_zero_fill": {
+        "zero_fill_unobserved_normalized_error": 1.0,
+        "method_unobserved_normalized_error": 0.28103727102279663,
+        "absolute_gain": 0.7189627289772034,
+        "relative_gain": 0.7189627289772034
+      },
+      "functional_recovery_fine_macro_f1": 0.02358490566037736
+    },
+    {
+      "method": "hard_impute",
+      "attacker_knowledge": "50% of the true adapter's effective delta_w=up@down matrix's entries (plaintext leak, NOT an AES-GCM break), candidate_rank=4 (true_rank=4, oracle)",
+      "attacker_access": "no auxiliary data, no queries -- pure parameter-space completion",
+      "compute_budget": {
+        "reveal_fraction": 0.5,
+        "completion_iterations": 100,
+        "candidate_rank": 4
+      },
+      "true_rank": 4,
+      "parameter_space_recovery": {
+        "cosine_similarity": 1.0,
+        "normalized_frobenius_error": 2.2870884208714415e-07,
+        "observed_entry_rmse": 0.0,
+        "unobserved_entry_rmse": 1.805288030176655e-09,
+        "unobserved_entry_normalized_error": 3.211455350538017e-07,
+        "true_top_singular_values": [
+          0.33076754212379456,
+          0.1098695695400238,
+          0.0566970594227314,
+          0.030249888077378273
+        ],
+        "recovered_top_singular_values": [
+          0.33076754212379456,
+          0.1098695695400238,
+          0.0566970519721508,
+          0.030249886214733124
+        ]
+      },
+      "completion_gain_over_zero_fill": {
+        "zero_fill_unobserved_normalized_error": 1.0,
+        "method_unobserved_normalized_error": 3.211455350538017e-07,
+        "absolute_gain": 0.999999678854465,
+        "relative_gain": 0.999999678854465
+      },
+      "functional_recovery_fine_macro_f1": 0.02358490566037736
+    },
+    {
+      "method": "hard_impute",
+      "attacker_knowledge": "70% of the true adapter's effective delta_w=up@down matrix's entries (plaintext leak, NOT an AES-GCM break), candidate_rank=4 (true_rank=4, oracle)",
+      "attacker_access": "no auxiliary data, no queries -- pure parameter-space completion",
+      "compute_budget": {
+        "reveal_fraction": 0.7,
+        "completion_iterations": 100,
+        "candidate_rank": 4
+      },
+      "true_rank": 4,
+      "parameter_space_recovery": {
+        "cosine_similarity": 0.9999998807907104,
+        "normalized_frobenius_error": 6.273686636859566e-08,
+        "observed_entry_rmse": 0.0,
+        "unobserved_entry_rmse": 6.329567980856154e-10,
+        "unobserved_entry_normalized_error": 1.1126037691155943e-07,
+        "true_top_singular_values": [
+          0.33076754212379456,
+          0.1098695695400238,
+          0.0566970594227314,
+          0.030249888077378273
+        ],
+        "recovered_top_singular_values": [
+          0.33076754212379456,
+          0.1098695695400238,
+          0.0566970594227314,
+          0.030249888077378273
+        ]
+      },
+      "completion_gain_over_zero_fill": {
+        "zero_fill_unobserved_normalized_error": 1.0,
+        "method_unobserved_normalized_error": 1.1126037691155943e-07,
+        "absolute_gain": 0.9999998887396231,
+        "relative_gain": 0.9999998887396231
+      },
+      "functional_recovery_fine_macro_f1": 0.02358490566037736
+    },
+    {
+      "method": "hard_impute",
+      "attacker_knowledge": "90% of the true adapter's effective delta_w=up@down matrix's entries (plaintext leak, NOT an AES-GCM break), candidate_rank=4 (true_rank=4, oracle)",
+      "attacker_access": "no auxiliary data, no queries -- pure parameter-space completion",
+      "compute_budget": {
+        "reveal_fraction": 0.9,
+        "completion_iterations": 100,
+        "candidate_rank": 4
+      },
+      "true_rank": 4,
+      "parameter_space_recovery": {
+        "cosine_similarity": 0.9999998807907104,
+        "normalized_frobenius_error": 3.113305879764994e-08,
+        "observed_entry_rmse": 0.0,
+        "unobserved_entry_rmse": 5.266211910992524e-10,
+        "unobserved_entry_normalized_error": 9.297412617570444e-08,
+        "true_top_singular_values": [
+          0.33076754212379456,
+          0.1098695695400238,
+          0.0566970594227314,
+          0.030249888077378273
+        ],
+        "recovered_top_singular_values": [
+          0.33076754212379456,
+          0.1098695695400238,
+          0.0566970594227314,
+          0.030249888077378273
+        ]
+      },
+      "completion_gain_over_zero_fill": {
+        "zero_fill_unobserved_normalized_error": 1.0,
+        "method_unobserved_normalized_error": 9.297412617570444e-08,
+        "absolute_gain": 0.9999999070258738,
+        "relative_gain": 0.9999999070258738
+      },
+      "functional_recovery_fine_macro_f1": 0.02358490566037736
+    },
+    {
+      "method": "soft_impute",
+      "attacker_knowledge": "10% of the true adapter's effective delta_w=up@down matrix's entries (plaintext leak, NOT an AES-GCM break), candidate_rank=4 (true_rank=4, oracle)",
+      "attacker_access": "no auxiliary data, no queries -- pure parameter-space completion",
+      "compute_budget": {
+        "reveal_fraction": 0.1,
+        "completion_iterations": 100,
+        "candidate_rank": 4
+      },
+      "true_rank": 4,
+      "parameter_space_recovery": {
+        "cosine_similarity": 0.31160619854927063,
+        "normalized_frobenius_error": 0.9502113461494446,
+        "observed_entry_rmse": 0.0,
+        "unobserved_entry_rmse": 0.005540903657674789,
+        "unobserved_entry_normalized_error": 1.0,
+        "true_top_singular_values": [
+          0.33076754212379456,
+          0.1098695695400238,
+          0.0566970594227314,
+          0.030249888077378273
+        ],
+        "recovered_top_singular_values": [
+          0.0477864108979702,
+          0.036017388105392456,
+          0.03379910811781883,
+          0.02951733209192753
+        ]
+      },
+      "completion_gain_over_zero_fill": {
+        "zero_fill_unobserved_normalized_error": 1.0,
+        "method_unobserved_normalized_error": 1.0,
+        "absolute_gain": 0.0,
+        "relative_gain": 0.0
+      },
+      "functional_recovery_fine_macro_f1": 0.02358490566037736
+    },
+    {
+      "method": "soft_impute",
+      "attacker_knowledge": "30% of the true adapter's effective delta_w=up@down matrix's entries (plaintext leak, NOT an AES-GCM break), candidate_rank=4 (true_rank=4, oracle)",
+      "attacker_access": "no auxiliary data, no queries -- pure parameter-space completion",
+      "compute_budget": {
+        "reveal_fraction": 0.3,
+        "completion_iterations": 100,
+        "candidate_rank": 4
+      },
+      "true_rank": 4,
+      "parameter_space_recovery": {
+        "cosine_similarity": 0.8703702092170715,
+        "normalized_frobenius_error": 0.5413792729377747,
+        "observed_entry_rmse": 0.0,
+        "unobserved_entry_rmse": 0.0035921926610171795,
+        "unobserved_entry_normalized_error": 0.6439609527587891,
+        "true_top_singular_values": [
+          0.33076754212379456,
+          0.1098695695400238,
+          0.0566970594227314,
+          0.030249888077378273
+        ],
+        "recovered_top_singular_values": [
+          0.2039574235677719,
+          0.037582285702228546,
+          0.030080776661634445,
+          0.026623331010341644
+        ]
+      },
+      "completion_gain_over_zero_fill": {
+        "zero_fill_unobserved_normalized_error": 1.0,
+        "method_unobserved_normalized_error": 0.6439609527587891,
+        "absolute_gain": 0.35603904724121094,
+        "relative_gain": 0.35603904724121094
+      },
+      "functional_recovery_fine_macro_f1": 0.02358490566037736
+    },
+    {
+      "method": "soft_impute",
+      "attacker_knowledge": "50% of the true adapter's effective delta_w=up@down matrix's entries (plaintext leak, NOT an AES-GCM break), candidate_rank=4 (true_rank=4, oracle)",
+      "attacker_access": "no auxiliary data, no queries -- pure parameter-space completion",
+      "compute_budget": {
+        "reveal_fraction": 0.5,
+        "completion_iterations": 100,
+        "candidate_rank": 4
+      },
+      "true_rank": 4,
+      "parameter_space_recovery": {
+        "cosine_similarity": 0.9522547125816345,
+        "normalized_frobenius_error": 0.32847726345062256,
+        "observed_entry_rmse": 0.0,
+        "unobserved_entry_rmse": 0.002592799486592412,
+        "unobserved_entry_normalized_error": 0.4612371623516083,
+        "true_top_singular_values": [
+          0.33076754212379456,
+          0.1098695695400238,
+          0.0566970594227314,
+          0.030249888077378273
+        ],
+        "recovered_top_singular_values": [
+          0.27564552426338196,
+          0.06324146687984467,
+          0.031626541167497635,
+          0.022722087800502777
+        ]
+      },
+      "completion_gain_over_zero_fill": {
+        "zero_fill_unobserved_normalized_error": 1.0,
+        "method_unobserved_normalized_error": 0.4612371623516083,
+        "absolute_gain": 0.5387628376483917,
+        "relative_gain": 0.5387628376483917
+      },
+      "functional_recovery_fine_macro_f1": 0.02358490566037736
+    },
+    {
+      "method": "soft_impute",
+      "attacker_knowledge": "70% of the true adapter's effective delta_w=up@down matrix's entries (plaintext leak, NOT an AES-GCM break), candidate_rank=4 (true_rank=4, oracle)",
+      "attacker_access": "no auxiliary data, no queries -- pure parameter-space completion",
+      "compute_budget": {
+        "reveal_fraction": 0.7,
+        "completion_iterations": 100,
+        "candidate_rank": 4
+      },
+      "true_rank": 4,
+      "parameter_space_recovery": {
+        "cosine_similarity": 0.9816586375236511,
+        "normalized_frobenius_error": 0.20034641027450562,
+        "observed_entry_rmse": 0.0,
+        "unobserved_entry_rmse": 0.0020213096868246794,
+        "unobserved_entry_normalized_error": 0.3553033173084259,
+        "true_top_singular_values": [
+          0.33076754212379456,
+          0.1098695695400238,
+          0.0566970594227314,
+          0.030249888077378273
+        ],
+        "recovered_top_singular_values": [
+          0.3056720197200775,
+          0.08804300427436829,
+          0.0407995730638504,
+          0.02439718320965767
+        ]
+      },
+      "completion_gain_over_zero_fill": {
+        "zero_fill_unobserved_normalized_error": 1.0,
+        "method_unobserved_normalized_error": 0.3553033173084259,
+        "absolute_gain": 0.6446966826915741,
+        "relative_gain": 0.6446966826915741
+      },
+      "functional_recovery_fine_macro_f1": 0.02358490566037736
+    },
+    {
+      "method": "soft_impute",
+      "attacker_knowledge": "90% of the true adapter's effective delta_w=up@down matrix's entries (plaintext leak, NOT an AES-GCM break), candidate_rank=4 (true_rank=4, oracle)",
+      "attacker_access": "no auxiliary data, no queries -- pure parameter-space completion",
+      "compute_budget": {
+        "reveal_fraction": 0.9,
+        "completion_iterations": 100,
+        "candidate_rank": 4
+      },
+      "true_rank": 4,
+      "parameter_space_recovery": {
+        "cosine_similarity": 0.9952454566955566,
+        "normalized_frobenius_error": 0.09887140244245529,
+        "observed_entry_rmse": 0.0,
+        "unobserved_entry_rmse": 0.001672427519224584,
+        "unobserved_entry_normalized_error": 0.2952643632888794,
+        "true_top_singular_values": [
+          0.33076754212379456,
+          0.1098695695400238,
+          0.0566970594227314,
+          0.030249888077378273
+        ],
+        "recovered_top_singular_values": [
+          0.3243117928504944,
+          0.10350606590509415,
+          0.05130820348858833,
+          0.027332225814461708
+        ]
+      },
+      "completion_gain_over_zero_fill": {
+        "zero_fill_unobserved_normalized_error": 1.0,
+        "method_unobserved_normalized_error": 0.2952643632888794,
+        "absolute_gain": 0.7047356367111206,
+        "relative_gain": 0.7047356367111206
+      },
+      "functional_recovery_fine_macro_f1": 0.02358490566037736
+    }
+  ],
+  "rank_misspecification_sweep": [
+    {
+      "method": "hard_impute",
+      "attacker_knowledge": "50% of the true adapter's effective delta_w=up@down matrix's entries (plaintext leak, NOT an AES-GCM break), candidate_rank=1 (true_rank=4, misspecified)",
+      "attacker_access": "no auxiliary data, no queries -- pure parameter-space completion",
+      "compute_budget": {
+        "reveal_fraction": 0.5,
+        "completion_iterations": 100,
+        "candidate_rank": 1
+      },
+      "true_rank": 4,
+      "parameter_space_recovery": {
+        "cosine_similarity": 0.9648338556289673,
+        "normalized_frobenius_error": 0.2628624141216278,
+        "observed_entry_rmse": 0.0,
+        "unobserved_entry_rmse": 0.0020748756360262632,
+        "unobserved_entry_normalized_error": 0.3691028952598572,
+        "true_top_singular_values": [
+          0.33076754212379456,
+          0.1098695695400238,
+          0.0566970594227314,
+          0.030249888077378273
+        ],
+        "recovered_top_singular_values": [
+          0.3296199440956116,
+          0.05689861252903938,
+          0.029657922685146332,
+          0.022343890741467476
+        ]
+      },
+      "completion_gain_over_zero_fill": {
+        "zero_fill_unobserved_normalized_error": 1.0,
+        "method_unobserved_normalized_error": 0.3691028952598572,
+        "absolute_gain": 0.6308971047401428,
+        "relative_gain": 0.6308971047401428
+      },
+      "functional_recovery_fine_macro_f1": 0.02358490566037736
+    },
+    {
+      "method": "hard_impute",
+      "attacker_knowledge": "50% of the true adapter's effective delta_w=up@down matrix's entries (plaintext leak, NOT an AES-GCM break), candidate_rank=3 (true_rank=4, misspecified)",
+      "attacker_access": "no auxiliary data, no queries -- pure parameter-space completion",
+      "compute_budget": {
+        "reveal_fraction": 0.5,
+        "completion_iterations": 100,
+        "candidate_rank": 3
+      },
+      "true_rank": 4,
+      "parameter_space_recovery": {
+        "cosine_similarity": 0.9977664351463318,
+        "normalized_frobenius_error": 0.06681839376688004,
+        "observed_entry_rmse": 0.0,
+        "unobserved_entry_rmse": 0.0005274236318655312,
+        "unobserved_entry_normalized_error": 0.09382422268390656,
+        "true_top_singular_values": [
+          0.33076754212379456,
+          0.1098695695400238,
+          0.0566970594227314,
+          0.030249888077378273
+        ],
+        "recovered_top_singular_values": [
+          0.33084118366241455,
+          0.11080494523048401,
+          0.057047516107559204,
+          0.015435115434229374
+        ]
+      },
+      "completion_gain_over_zero_fill": {
+        "zero_fill_unobserved_normalized_error": 1.0,
+        "method_unobserved_normalized_error": 0.09382422268390656,
+        "absolute_gain": 0.9061757773160934,
+        "relative_gain": 0.9061757773160934
+      },
+      "functional_recovery_fine_macro_f1": 0.02358490566037736
+    },
+    {
+      "method": "hard_impute",
+      "attacker_knowledge": "50% of the true adapter's effective delta_w=up@down matrix's entries (plaintext leak, NOT an AES-GCM break), candidate_rank=4 (true_rank=4, oracle)",
+      "attacker_access": "no auxiliary data, no queries -- pure parameter-space completion",
+      "compute_budget": {
+        "reveal_fraction": 0.5,
+        "completion_iterations": 100,
+        "candidate_rank": 4
+      },
+      "true_rank": 4,
+      "parameter_space_recovery": {
+        "cosine_similarity": 1.0,
+        "normalized_frobenius_error": 2.2870884208714415e-07,
+        "observed_entry_rmse": 0.0,
+        "unobserved_entry_rmse": 1.805288030176655e-09,
+        "unobserved_entry_normalized_error": 3.211455350538017e-07,
+        "true_top_singular_values": [
+          0.33076754212379456,
+          0.1098695695400238,
+          0.0566970594227314,
+          0.030249888077378273
+        ],
+        "recovered_top_singular_values": [
+          0.33076754212379456,
+          0.1098695695400238,
+          0.0566970519721508,
+          0.030249886214733124
+        ]
+      },
+      "completion_gain_over_zero_fill": {
+        "zero_fill_unobserved_normalized_error": 1.0,
+        "method_unobserved_normalized_error": 3.211455350538017e-07,
+        "absolute_gain": 0.999999678854465,
+        "relative_gain": 0.999999678854465
+      },
+      "functional_recovery_fine_macro_f1": 0.02358490566037736
+    },
+    {
+      "method": "hard_impute",
+      "attacker_knowledge": "50% of the true adapter's effective delta_w=up@down matrix's entries (plaintext leak, NOT an AES-GCM break), candidate_rank=6 (true_rank=4, misspecified)",
+      "attacker_access": "no auxiliary data, no queries -- pure parameter-space completion",
+      "compute_budget": {
+        "reveal_fraction": 0.5,
+        "completion_iterations": 100,
+        "candidate_rank": 6
+      },
+      "true_rank": 4,
+      "parameter_space_recovery": {
+        "cosine_similarity": 0.9852266907691956,
+        "normalized_frobenius_error": 0.17139054834842682,
+        "observed_entry_rmse": 0.0,
+        "unobserved_entry_rmse": 0.0013528524432331324,
+        "unobserved_entry_normalized_error": 0.24066105484962463,
+        "true_top_singular_values": [
+          0.33076754212379456,
+          0.1098695695400238,
+          0.0566970594227314,
+          0.030249888077378273
+        ],
+        "recovered_top_singular_values": [
+          0.31871360540390015,
+          0.10899333655834198,
+          0.059087783098220825,
+          0.03879662975668907
+        ]
+      },
+      "completion_gain_over_zero_fill": {
+        "zero_fill_unobserved_normalized_error": 1.0,
+        "method_unobserved_normalized_error": 0.24066105484962463,
+        "absolute_gain": 0.7593389451503754,
+        "relative_gain": 0.7593389451503754
+      },
+      "functional_recovery_fine_macro_f1": 0.02358490566037736
+    },
+    {
+      "method": "hard_impute",
+      "attacker_knowledge": "50% of the true adapter's effective delta_w=up@down matrix's entries (plaintext leak, NOT an AES-GCM break), candidate_rank=10 (true_rank=4, misspecified)",
+      "attacker_access": "no auxiliary data, no queries -- pure parameter-space completion",
+      "compute_budget": {
+        "reveal_fraction": 0.5,
+        "completion_iterations": 100,
+        "candidate_rank": 10
+      },
+      "true_rank": 4,
+      "parameter_space_recovery": {
+        "cosine_similarity": 0.9332453608512878,
+        "normalized_frobenius_error": 0.3593868017196655,
+        "observed_entry_rmse": 0.0,
+        "unobserved_entry_rmse": 0.0028367803897708654,
+        "unobserved_entry_normalized_error": 0.5046393871307373,
+        "true_top_singular_values": [
+          0.33076754212379456,
+          0.1098695695400238,
+          0.0566970594227314,
+          0.030249888077378273
+        ],
+        "recovered_top_singular_values": [
+          0.285611629486084,
+          0.10844679176807404,
+          0.06140834465622902,
+          0.04791314899921417
+        ]
+      },
+      "completion_gain_over_zero_fill": {
+        "zero_fill_unobserved_normalized_error": 1.0,
+        "method_unobserved_normalized_error": 0.5046393871307373,
+        "absolute_gain": 0.4953606128692627,
+        "relative_gain": 0.4953606128692627
+      },
+      "functional_recovery_fine_macro_f1": 0.02358490566037736
+    }
+  ],
+  "collusion": {
+    "method": "hard_impute",
+    "attacker_knowledge": "two colluding attackers, each leaked 30% of delta_w (pooled union: ~51%)",
+    "attacker_access": "no auxiliary data, no queries -- pure parameter-space completion",
+    "compute_budget": {
+      "reveal_fraction_each": 0.3,
+      "pooled_reveal_fraction": 0.51123046875
+    },
+    "solo_parameter_space_recovery": {
+      "cosine_similarity": 0.971688985824585,
+      "normalized_frobenius_error": 0.23626859486103058,
+      "observed_entry_rmse": 0.0,
+      "unobserved_entry_rmse": 0.0015677037881687284,
+      "unobserved_entry_normalized_error": 0.28103727102279663,
+      "true_top_singular_values": [
+        0.33076754212379456,
+        0.1098695695400238,
+        0.0566970594227314,
+        0.030249888077378273
+      ],
+      "recovered_top_singular_values": [
+        0.31473639607429504,
+        0.11392200738191605,
+        0.06790360808372498,
+        0.04625609517097473
+      ]
+    },
+    "colluded_parameter_space_recovery": {
+      "cosine_similarity": 1.0,
+      "normalized_frobenius_error": 3.0120165774860652e-06,
+      "observed_entry_rmse": 0.0,
+      "unobserved_entry_rmse": 2.3858008901811445e-08,
+      "unobserved_entry_normalized_error": 4.3339405237929896e-06,
+      "true_top_singular_values": [
+        0.33076754212379456,
+        0.1098695695400238,
+        0.0566970594227314,
+        0.030249888077378273
+      ],
+      "recovered_top_singular_values": [
+        0.3307674825191498,
+        0.10986951738595963,
+        0.056697096675634384,
+        0.03024987131357193
+      ]
+    },
+    "solo_functional_fine_macro_f1": 0.02358490566037736,
+    "colluded_functional_fine_macro_f1": 0.02358490566037736
+  },
+  "wall_clock_seconds": 31.18,
+  "config": {
+    "null_signal": {
+      "data": {
+        "num_centers": 6,
+        "samples_per_center": 32,
+        "image_size": 32,
+        "data_seed": 0
+      },
+      "model": {
+        "feature_dim": 64,
+        "adapter_rank": 4
+      },
+      "train": {
+        "rounds": 3,
+        "epochs_per_round": 1,
+        "batch_size": 8,
+        "lr": 0.01
+      }
+    },
+    "hierarchical": {
+      "data": {
+        "num_patients_per_institution": 12,
+        "observations_per_patient": 3,
+        "image_size": 32,
+        "class_imbalance_strength": 0.5,
+        "sensitive_property_correlation": 0.6,
+        "data_seed": 0,
+        "train_frac": 0.6,
+        "val_frac": 0.2
+      },
+      "model": {
+        "feature_dim": 32,
+        "adapter_rank": 4
+      },
+      "pretrain": {
+        "epochs": 4,
+        "batch_size": 16,
+        "lr": 0.01
+      },
+      "train": {
+        "rounds": 4,
+        "epochs_per_round": 2,
+        "batch_size": 8,
+        "lr": 0.02
+      }
+    },
+    "seeds": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "reveal_fractions": [
+      0.1,
+      0.3,
+      0.5,
+      0.7,
+      0.9
+    ],
+    "fill_methods": [
+      "zero_fill",
+      "mean_fill",
+      "random_fill",
+      "hard_impute",
+      "soft_impute"
+    ],
+    "soft_impute_lam": 0.05,
+    "rank_misspecification_reveal_fraction": 0.5,
+    "rank_misspecification_deltas": [
+      -3,
+      -1,
+      0,
+      2,
+      6
+    ],
+    "collusion_reveal_fraction_each": 0.3,
+    "completion_iterations": 100,
+    "output_dir": "experiments/phase3_adapter_recovery_synthetic"
+  },
+  "dataset_manifest_hash": "8355044fe0d8fd45"
+}

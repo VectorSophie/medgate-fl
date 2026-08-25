@@ -147,6 +147,60 @@ def run_all_probes(model, train_dataset, test_dataset, batch_size: int = 32, see
     return run_all_probes_on_features(Z_train, y_train, Z_test, y_test, seed, include_slow)
 
 
+def probe_by_name(name: str, Z_train, y_train, Z_test, y_test, seed: int = 0) -> dict:
+    """Dispatch to one probe by its run_all_probes_on_features key, with a
+    single uniform call signature (some underlying probes, e.g. knn_probe,
+    do not themselves take a seed) — used by selected_probe_attack below
+    to refit exactly the probe TYPE selected on the validation split."""
+    if name == "linear_probe":
+        return linear_probe(Z_train, y_train, Z_test, y_test, seed=seed)
+    if name == "nonlinear_probe":
+        return nonlinear_probe(Z_train, y_train, Z_test, y_test, seed=seed)
+    if name == "knn_probe":
+        return knn_probe(Z_train, y_train, Z_test, y_test)
+    if name == "fewshot_probe_k5":
+        return fewshot_probe(Z_train, y_train, Z_test, y_test, k_per_class=5, seed=seed)
+    if name == "svm_probe":
+        return svm_probe(Z_train, y_train, Z_test, y_test, seed=seed)
+    if name == "tree_probe":
+        return tree_probe(Z_train, y_train, Z_test, y_test, seed=seed)
+    raise ValueError(f"unknown probe name {name!r}")
+
+
+def selected_probe_attack(
+    model, train_dataset, val_dataset, test_dataset, batch_size: int = 32, seed: int = 0, include_slow: bool = True,
+) -> dict:
+    """P1 (repair pass 4) fix for a probe-selection data-leakage issue:
+    earlier drafts reported 'BestProbeRFC' as the MAX across every probe
+    family, evaluated on the SAME held-out split used for the final
+    number. Selecting the best of several probes and reporting its score
+    on the very data used to select it is itself a form of
+    multiple-comparisons inflation — the reported "best" number is biased
+    upward by however many probes were tried, not a fair estimate of what
+    a single, fixed attacker would achieve.
+
+    Fixed here: every probe is fit on `train_dataset` and SCORED on
+    `val_dataset` (an attack-VALIDATION split, patient-disjoint from both
+    train and test) to pick a winner by validation macro-F1; the winning
+    probe TYPE is then refit on `train_dataset` and evaluated EXACTLY ONCE
+    on `test_dataset` (the untouched attack-TEST split) — that single
+    held-out number, not the validation-time max, is what should be
+    reported as the attack's result."""
+    Z_train, y_train = extract_representations(model, train_dataset, batch_size)
+    Z_val, y_val = extract_representations(model, val_dataset, batch_size)
+    Z_test, y_test = extract_representations(model, test_dataset, batch_size)
+
+    val_scores = run_all_probes_on_features(Z_train, y_train, Z_val, y_val, seed, include_slow)
+    selected = max(val_scores, key=lambda name: val_scores[name]["macro_f1"])
+    test_result = probe_by_name(selected, Z_train, y_train, Z_test, y_test, seed=seed)
+
+    return {
+        "selected_probe": selected,
+        "selection_val_macro_f1_by_probe": {name: r["macro_f1"] for name, r in val_scores.items()},
+        "attack_test_result": test_result,
+    }
+
+
 @torch.no_grad()
 def extract_adapter_residual(model, dataset, batch_size: int = 32):
     """A_phi(f_theta(x)) alone (medgate.models.backbone.MedGateModel.adapter_residual)

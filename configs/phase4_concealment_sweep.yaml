@@ -1,0 +1,13 @@
+# P0-B requirement: mask-scale sweep + nonlinear attacker, as a committed
+# experiment result (repair pass 4). Same shape/mean_shift as
+# scripts/run_phase4_synthetic.py's embedded single-point check
+# (shape=(64,), mean_shift=2.0) so the mask_scale=1.0 row here is directly
+# comparable to that script's own number.
+shape: [64]
+mean_shift: 2.0
+n_samples: 100
+n_bootstrap: 200
+mask_scales: [0.1, 0.5, 1.0, 2.0, 5.0, 10.0, 20.0, 50.0]
+attackers: [logistic, mlp]
+seeds: [0, 1, 2]
+output_dir: experiments/phase4_concealment_sweep

@@ -1,0 +1,26 @@
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llcccccc}
+\toprule
+Arm & Method & Reveal & Seeds & Cosine sim. & Unobs. error & Gain over zero-fill & Functional fine-F1 \\
+\midrule
+Null-signal fixture & Zero-fill (no completion) & 0.1 & 5 & 0.325 $\pm$ 0.013 & 1.000 $\pm$ 0.000 & 0.000 $\pm$ 0.000 & 0.0277 $\pm$ 0.0032 \\
+Null-signal fixture & Zero-fill (no completion) & 0.5 & 5 & 0.717 $\pm$ 0.017 & 1.000 $\pm$ 0.000 & 0.000 $\pm$ 0.000 & 0.0277 $\pm$ 0.0032 \\
+Null-signal fixture & Zero-fill (no completion) & 0.9 & 5 & 0.947 $\pm$ 0.004 & 1.000 $\pm$ 0.000 & 0.000 $\pm$ 0.000 & 0.0276 $\pm$ 0.0030 \\
+Null-signal fixture & Hard-impute (oracle/candidate rank) & 0.1 & 5 & 0.599 $\pm$ 0.064 & 0.852 $\pm$ 0.056 & 0.148 $\pm$ 0.056 & 0.0277 $\pm$ 0.0032 \\
+Null-signal fixture & Hard-impute (oracle/candidate rank) & 0.5 & 5 & 1.000 $\pm$ 0.000 & 0.000 $\pm$ 0.000 & 1.000 $\pm$ 0.000 & 0.0327 $\pm$ 0.0136 \\
+Null-signal fixture & Hard-impute (oracle/candidate rank) & 0.9 & 5 & 1.000 $\pm$ 0.000 & 0.000 $\pm$ 0.000 & 1.000 $\pm$ 0.000 & 0.0327 $\pm$ 0.0136 \\
+Null-signal fixture & Soft-impute & 0.1 & 5 & 0.325 $\pm$ 0.013 & 1.000 $\pm$ 0.000 & 0.000 $\pm$ 0.000 & 0.0277 $\pm$ 0.0032 \\
+Null-signal fixture & Soft-impute & 0.5 & 5 & 0.920 $\pm$ 0.026 & 0.584 $\pm$ 0.090 & 0.416 $\pm$ 0.090 & 0.0277 $\pm$ 0.0032 \\
+Null-signal fixture & Soft-impute & 0.9 & 5 & 0.993 $\pm$ 0.002 & 0.374 $\pm$ 0.062 & 0.626 $\pm$ 0.062 & 0.0302 $\pm$ 0.0081 \\
+Hierarchical fixture & Zero-fill (no completion) & 0.1 & 5 & 0.304 $\pm$ 0.024 & 1.000 $\pm$ 0.000 & 0.000 $\pm$ 0.000 & 0.1845 $\pm$ 0.0759 \\
+Hierarchical fixture & Zero-fill (no completion) & 0.5 & 5 & 0.701 $\pm$ 0.027 & 1.000 $\pm$ 0.000 & 0.000 $\pm$ 0.000 & 0.2205 $\pm$ 0.0679 \\
+Hierarchical fixture & Zero-fill (no completion) & 0.9 & 5 & 0.950 $\pm$ 0.005 & 1.000 $\pm$ 0.000 & 0.000 $\pm$ 0.000 & 0.2230 $\pm$ 0.0626 \\
+Hierarchical fixture & Hard-impute (oracle/candidate rank) & 0.1 & 5 & 0.313 $\pm$ 0.039 & 1.025 $\pm$ 0.022 & -0.025 $\pm$ 0.022 & 0.2010 $\pm$ 0.0750 \\
+Hierarchical fixture & Hard-impute (oracle/candidate rank) & 0.5 & 5 & 0.985 $\pm$ 0.020 & 0.170 $\pm$ 0.195 & 0.830 $\pm$ 0.195 & 0.2137 $\pm$ 0.0662 \\
+Hierarchical fixture & Hard-impute (oracle/candidate rank) & 0.9 & 5 & 1.000 $\pm$ 0.000 & 0.000 $\pm$ 0.000 & 1.000 $\pm$ 0.000 & 0.2090 $\pm$ 0.0756 \\
+Hierarchical fixture & Soft-impute & 0.1 & 5 & 0.379 $\pm$ 0.079 & 0.972 $\pm$ 0.029 & 0.028 $\pm$ 0.029 & 0.1927 $\pm$ 0.0805 \\
+Hierarchical fixture & Soft-impute & 0.5 & 5 & 0.945 $\pm$ 0.023 & 0.479 $\pm$ 0.103 & 0.521 $\pm$ 0.103 & 0.2270 $\pm$ 0.0641 \\
+Hierarchical fixture & Soft-impute & 0.9 & 5 & 0.996 $\pm$ 0.001 & 0.272 $\pm$ 0.056 & 0.728 $\pm$ 0.056 & 0.2090 $\pm$ 0.0756 \\
+\bottomrule
+\end{tabular}
+}

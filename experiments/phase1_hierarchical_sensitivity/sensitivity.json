@@ -1,0 +1,501 @@
+{
+  "git_commit": "5b4becc3a66f2ea2f992dab565b5e04b59ae19cc",
+  "config": {
+    "data": {
+      "num_patients_per_institution": 12,
+      "observations_per_patient": 3,
+      "image_size": 32,
+      "class_imbalance_strength": 0.5,
+      "sensitive_property_correlation": 0.6,
+      "site_shift_strength": 1.0,
+      "fine_signal_strength": 0.6,
+      "train_frac": 0.6,
+      "val_frac": 0.2
+    },
+    "model": {
+      "feature_dim": 32,
+      "adapter_rank": 4
+    },
+    "pretrain": {
+      "epochs": 4,
+      "batch_size": 16,
+      "lr": 0.01
+    },
+    "train": {
+      "rounds": 4,
+      "epochs_per_round": 2,
+      "batch_size": 8,
+      "lr": 0.02
+    },
+    "seeds": [
+      0,
+      1
+    ],
+    "sweeps": {
+      "site_shift_strength": [
+        0.0,
+        1.0,
+        2.0
+      ],
+      "fine_signal_strength": [
+        0.2,
+        0.6,
+        1.0
+      ],
+      "class_imbalance_strength": [
+        0.0,
+        0.5,
+        1.0
+      ],
+      "coarse_ontology": [
+        "primary",
+        "alternative"
+      ]
+    },
+    "output_dir": "experiments/phase1_hierarchical_sensitivity"
+  },
+  "dataset_manifest_hash": "8929b53f3e916081",
+  "wall_clock_seconds": 480.99,
+  "rows": [
+    {
+      "dimension": "site_shift_strength",
+      "value": 0.0,
+      "seed": 0,
+      "coarse_pretrained_fedlora": {
+        "fine_macro_f1": 0.3333333333333333,
+        "coarse_macro_f1": 0.6,
+        "u_public": 0.29437229437229434,
+        "selected_probe": "linear_probe",
+        "rfc": 0.29437229437229434
+      },
+      "combined": {
+        "fine_macro_f1": 0.2,
+        "coarse_macro_f1": 0.6,
+        "u_public": 0.19913419913419914,
+        "selected_probe": "svm_probe",
+        "rfc": 0.21645021645021645
+      },
+      "git_commit": "5b4becc3a66f2ea2f992dab565b5e04b59ae19cc"
+    },
+    {
+      "dimension": "site_shift_strength",
+      "value": 0.0,
+      "seed": 1,
+      "coarse_pretrained_fedlora": {
+        "fine_macro_f1": 0.4,
+        "coarse_macro_f1": 0.6190476190476191,
+        "u_public": 0.18214285714285713,
+        "selected_probe": "knn_probe",
+        "rfc": 0.27976190476190477
+      },
+      "combined": {
+        "fine_macro_f1": 0.17142857142857143,
+        "coarse_macro_f1": 0.6190476190476191,
+        "u_public": 0.1375,
+        "selected_probe": "linear_probe",
+        "rfc": 0.3
+      },
+      "git_commit": "5b4becc3a66f2ea2f992dab565b5e04b59ae19cc"
+    },
+    {
+      "dimension": "site_shift_strength",
+      "value": 1.0,
+      "seed": 0,
+      "coarse_pretrained_fedlora": {
+        "fine_macro_f1": 0.2,
+        "coarse_macro_f1": 1.0,
+        "u_public": 0.22789115646258504,
+        "selected_probe": "nonlinear_probe",
+        "rfc": 0.15931697612732096
+      },
+      "combined": {
+        "fine_macro_f1": 0.15,
+        "coarse_macro_f1": 0.5538847117794486,
+        "u_public": 0.1952380952380952,
+        "selected_probe": "svm_probe",
+        "rfc": 0.21645021645021645
+      },
+      "git_commit": "5b4becc3a66f2ea2f992dab565b5e04b59ae19cc"
+    },
+    {
+      "dimension": "site_shift_strength",
+      "value": 1.0,
+      "seed": 1,
+      "coarse_pretrained_fedlora": {
+        "fine_macro_f1": 0.6666666666666666,
+        "coarse_macro_f1": 0.8412698412698413,
+        "u_public": 0.2,
+        "selected_probe": "svm_probe",
+        "rfc": 0.14285714285714285
+      },
+      "combined": {
+        "fine_macro_f1": 0.37142857142857144,
+        "coarse_macro_f1": 0.6,
+        "u_public": 0.46485260770975056,
+        "selected_probe": "linear_probe",
+        "rfc": 0.6571428571428571
+      },
+      "git_commit": "5b4becc3a66f2ea2f992dab565b5e04b59ae19cc"
+    },
+    {
+      "dimension": "site_shift_strength",
+      "value": 2.0,
+      "seed": 0,
+      "coarse_pretrained_fedlora": {
+        "fine_macro_f1": 0.6666666666666666,
+        "coarse_macro_f1": 1.0,
+        "u_public": 0.3434343434343434,
+        "selected_probe": "svm_probe",
+        "rfc": 0.1038961038961039
+      },
+      "combined": {
+        "fine_macro_f1": 0.15,
+        "coarse_macro_f1": 0.4830917874396135,
+        "u_public": 0.1142857142857143,
+        "selected_probe": "svm_probe",
+        "rfc": 0.20634920634920637
+      },
+      "git_commit": "5b4becc3a66f2ea2f992dab565b5e04b59ae19cc"
+    },
+    {
+      "dimension": "site_shift_strength",
+      "value": 2.0,
+      "seed": 1,
+      "coarse_pretrained_fedlora": {
+        "fine_macro_f1": 0.36,
+        "coarse_macro_f1": 0.48888888888888893,
+        "u_public": 0.2204081632653061,
+        "selected_probe": "knn_probe",
+        "rfc": 0.36655011655011654
+      },
+      "combined": {
+        "fine_macro_f1": 0.38095238095238093,
+        "coarse_macro_f1": 0.6190476190476191,
+        "u_public": 0.548051948051948,
+        "selected_probe": "nonlinear_probe",
+        "rfc": 0.5515873015873015
+      },
+      "git_commit": "5b4becc3a66f2ea2f992dab565b5e04b59ae19cc"
+    },
+    {
+      "dimension": "fine_signal_strength",
+      "value": 0.2,
+      "seed": 0,
+      "coarse_pretrained_fedlora": {
+        "fine_macro_f1": 0.4,
+        "coarse_macro_f1": 1.0,
+        "u_public": 0.45,
+        "selected_probe": "svm_probe",
+        "rfc": 0.4770714737507906
+      },
+      "combined": {
+        "fine_macro_f1": 0.38095238095238093,
+        "coarse_macro_f1": 0.6190476190476191,
+        "u_public": 0.3074074074074074,
+        "selected_probe": "nonlinear_probe",
+        "rfc": 0.35185185185185186
+      },
+      "git_commit": "5b4becc3a66f2ea2f992dab565b5e04b59ae19cc"
+    },
+    {
+      "dimension": "fine_signal_strength",
+      "value": 0.2,
+      "seed": 1,
+      "coarse_pretrained_fedlora": {
+        "fine_macro_f1": 0.047619047619047616,
+        "coarse_macro_f1": 1.0,
+        "u_public": 0.34285714285714286,
+        "selected_probe": "tree_probe",
+        "rfc": 0.21428571428571427
+      },
+      "combined": {
+        "fine_macro_f1": 0.0,
+        "coarse_macro_f1": 0.47222222222222215,
+        "u_public": 0.6785714285714285,
+        "selected_probe": "svm_probe",
+        "rfc": 0.26851851851851855
+      },
+      "git_commit": "5b4becc3a66f2ea2f992dab565b5e04b59ae19cc"
+    },
+    {
+      "dimension": "fine_signal_strength",
+      "value": 0.6,
+      "seed": 0,
+      "coarse_pretrained_fedlora": {
+        "fine_macro_f1": 0.2,
+        "coarse_macro_f1": 1.0,
+        "u_public": 0.22789115646258504,
+        "selected_probe": "nonlinear_probe",
+        "rfc": 0.15931697612732096
+      },
+      "combined": {
+        "fine_macro_f1": 0.15,
+        "coarse_macro_f1": 0.5538847117794486,
+        "u_public": 0.1952380952380952,
+        "selected_probe": "svm_probe",
+        "rfc": 0.21645021645021645
+      },
+      "git_commit": "5b4becc3a66f2ea2f992dab565b5e04b59ae19cc"
+    },
+    {
+      "dimension": "fine_signal_strength",
+      "value": 0.6,
+      "seed": 1,
+      "coarse_pretrained_fedlora": {
+        "fine_macro_f1": 0.6666666666666666,
+        "coarse_macro_f1": 0.8412698412698413,
+        "u_public": 0.2,
+        "selected_probe": "svm_probe",
+        "rfc": 0.14285714285714285
+      },
+      "combined": {
+        "fine_macro_f1": 0.37142857142857144,
+        "coarse_macro_f1": 0.6,
+        "u_public": 0.46485260770975056,
+        "selected_probe": "linear_probe",
+        "rfc": 0.6571428571428571
+      },
+      "git_commit": "5b4becc3a66f2ea2f992dab565b5e04b59ae19cc"
+    },
+    {
+      "dimension": "fine_signal_strength",
+      "value": 1.0,
+      "seed": 0,
+      "coarse_pretrained_fedlora": {
+        "fine_macro_f1": 0.18,
+        "coarse_macro_f1": 0.4523809523809524,
+        "u_public": 0.44730983302411875,
+        "selected_probe": "tree_probe",
+        "rfc": 0.49659863945578225
+      },
+      "combined": {
+        "fine_macro_f1": 0.375,
+        "coarse_macro_f1": 0.6,
+        "u_public": 0.3238095238095238,
+        "selected_probe": "svm_probe",
+        "rfc": 0.17226890756302524
+      },
+      "git_commit": "5b4becc3a66f2ea2f992dab565b5e04b59ae19cc"
+    },
+    {
+      "dimension": "fine_signal_strength",
+      "value": 1.0,
+      "seed": 1,
+      "coarse_pretrained_fedlora": {
+        "fine_macro_f1": 0.3333333333333333,
+        "coarse_macro_f1": 0.4523809523809524,
+        "u_public": 0.19999999999999998,
+        "selected_probe": "svm_probe",
+        "rfc": 0.13605442176870747
+      },
+      "combined": {
+        "fine_macro_f1": 0.0,
+        "coarse_macro_f1": 0.47222222222222215,
+        "u_public": 0.20502645502645503,
+        "selected_probe": "knn_probe",
+        "rfc": 0.23148148148148148
+      },
+      "git_commit": "5b4becc3a66f2ea2f992dab565b5e04b59ae19cc"
+    },
+    {
+      "dimension": "class_imbalance_strength",
+      "value": 0.0,
+      "seed": 0,
+      "coarse_pretrained_fedlora": {
+        "fine_macro_f1": 0.05555555555555555,
+        "coarse_macro_f1": 1.0,
+        "u_public": 0.31666666666666665,
+        "selected_probe": "fewshot_probe_k5",
+        "rfc": 0.15795454545454546
+      },
+      "combined": {
+        "fine_macro_f1": 0.06666666666666667,
+        "coarse_macro_f1": 1.0,
+        "u_public": 0.3205627705627705,
+        "selected_probe": "knn_probe",
+        "rfc": 0.4086309523809523
+      },
+      "git_commit": "5b4becc3a66f2ea2f992dab565b5e04b59ae19cc"
+    },
+    {
+      "dimension": "class_imbalance_strength",
+      "value": 0.0,
+      "seed": 1,
+      "coarse_pretrained_fedlora": {
+        "fine_macro_f1": 0.0,
+        "coarse_macro_f1": 1.0,
+        "u_public": 0.29940191387559806,
+        "selected_probe": "tree_probe",
+        "rfc": 0.3916666666666666
+      },
+      "combined": {
+        "fine_macro_f1": 0.0,
+        "coarse_macro_f1": 0.45454545454545453,
+        "u_public": 0.23055555555555557,
+        "selected_probe": "knn_probe",
+        "rfc": 0.41547619047619044
+      },
+      "git_commit": "5b4becc3a66f2ea2f992dab565b5e04b59ae19cc"
+    },
+    {
+      "dimension": "class_imbalance_strength",
+      "value": 0.5,
+      "seed": 0,
+      "coarse_pretrained_fedlora": {
+        "fine_macro_f1": 0.2,
+        "coarse_macro_f1": 1.0,
+        "u_public": 0.22789115646258504,
+        "selected_probe": "nonlinear_probe",
+        "rfc": 0.15931697612732096
+      },
+      "combined": {
+        "fine_macro_f1": 0.15,
+        "coarse_macro_f1": 0.5538847117794486,
+        "u_public": 0.1952380952380952,
+        "selected_probe": "svm_probe",
+        "rfc": 0.21645021645021645
+      },
+      "git_commit": "5b4becc3a66f2ea2f992dab565b5e04b59ae19cc"
+    },
+    {
+      "dimension": "class_imbalance_strength",
+      "value": 0.5,
+      "seed": 1,
+      "coarse_pretrained_fedlora": {
+        "fine_macro_f1": 0.6666666666666666,
+        "coarse_macro_f1": 0.8412698412698413,
+        "u_public": 0.2,
+        "selected_probe": "svm_probe",
+        "rfc": 0.14285714285714285
+      },
+      "combined": {
+        "fine_macro_f1": 0.37142857142857144,
+        "coarse_macro_f1": 0.6,
+        "u_public": 0.46485260770975056,
+        "selected_probe": "linear_probe",
+        "rfc": 0.6571428571428571
+      },
+      "git_commit": "5b4becc3a66f2ea2f992dab565b5e04b59ae19cc"
+    },
+    {
+      "dimension": "class_imbalance_strength",
+      "value": 1.0,
+      "seed": 0,
+      "coarse_pretrained_fedlora": {
+        "fine_macro_f1": 0.2857142857142857,
+        "coarse_macro_f1": 0.3333333333333333,
+        "u_public": 0.35878787878787877,
+        "selected_probe": "linear_probe",
+        "rfc": 0.3290322580645161
+      },
+      "combined": {
+        "fine_macro_f1": 0.5,
+        "coarse_macro_f1": 1.0,
+        "u_public": 0.26666666666666666,
+        "selected_probe": "tree_probe",
+        "rfc": 0.4647619047619047
+      },
+      "git_commit": "5b4becc3a66f2ea2f992dab565b5e04b59ae19cc"
+    },
+    {
+      "dimension": "class_imbalance_strength",
+      "value": 1.0,
+      "seed": 1,
+      "coarse_pretrained_fedlora": {
+        "fine_macro_f1": 0.5,
+        "coarse_macro_f1": 0.8285714285714285,
+        "u_public": 0.3666666666666666,
+        "selected_probe": "tree_probe",
+        "rfc": 0.49111111111111105
+      },
+      "combined": {
+        "fine_macro_f1": 0.39166666666666666,
+        "coarse_macro_f1": 0.8285714285714285,
+        "u_public": 0.42000000000000004,
+        "selected_probe": "tree_probe",
+        "rfc": 0.27936507936507937
+      },
+      "git_commit": "5b4becc3a66f2ea2f992dab565b5e04b59ae19cc"
+    },
+    {
+      "dimension": "coarse_ontology",
+      "value": "primary",
+      "seed": 0,
+      "coarse_pretrained_fedlora": {
+        "fine_macro_f1": 0.2,
+        "coarse_macro_f1": 1.0,
+        "u_public": 0.22789115646258504,
+        "selected_probe": "nonlinear_probe",
+        "rfc": 0.15931697612732096
+      },
+      "combined": {
+        "fine_macro_f1": 0.15,
+        "coarse_macro_f1": 0.5538847117794486,
+        "u_public": 0.1952380952380952,
+        "selected_probe": "svm_probe",
+        "rfc": 0.21645021645021645
+      },
+      "git_commit": "5b4becc3a66f2ea2f992dab565b5e04b59ae19cc"
+    },
+    {
+      "dimension": "coarse_ontology",
+      "value": "primary",
+      "seed": 1,
+      "coarse_pretrained_fedlora": {
+        "fine_macro_f1": 0.6666666666666666,
+        "coarse_macro_f1": 0.8412698412698413,
+        "u_public": 0.2,
+        "selected_probe": "svm_probe",
+        "rfc": 0.14285714285714285
+      },
+      "combined": {
+        "fine_macro_f1": 0.37142857142857144,
+        "coarse_macro_f1": 0.6,
+        "u_public": 0.46485260770975056,
+        "selected_probe": "linear_probe",
+        "rfc": 0.6571428571428571
+      },
+      "git_commit": "5b4becc3a66f2ea2f992dab565b5e04b59ae19cc"
+    },
+    {
+      "dimension": "coarse_ontology",
+      "value": "alternative",
+      "seed": 0,
+      "coarse_pretrained_fedlora": {
+        "fine_macro_f1": 0.15,
+        "coarse_macro_f1": 1.0,
+        "u_public": 0.28095238095238095,
+        "selected_probe": "knn_probe",
+        "rfc": 0.3226190476190476
+      },
+      "combined": {
+        "fine_macro_f1": 0.15,
+        "coarse_macro_f1": 1.0,
+        "u_public": 0.24675324675324675,
+        "selected_probe": "linear_probe",
+        "rfc": 0.27121212121212124
+      },
+      "git_commit": "5b4becc3a66f2ea2f992dab565b5e04b59ae19cc"
+    },
+    {
+      "dimension": "coarse_ontology",
+      "value": "alternative",
+      "seed": 1,
+      "coarse_pretrained_fedlora": {
+        "fine_macro_f1": 0.08,
+        "coarse_macro_f1": 1.0,
+        "u_public": 0.23928571428571424,
+        "selected_probe": "knn_probe",
+        "rfc": 0.19212962962962962
+      },
+      "combined": {
+        "fine_macro_f1": 0.15,
+        "coarse_macro_f1": 1.0,
+        "u_public": 0.20952380952380953,
+        "selected_probe": "knn_probe",
+        "rfc": 0.31065759637188206
+      },
+      "git_commit": "5b4becc3a66f2ea2f992dab565b5e04b59ae19cc"
+    }
+  ]
+}

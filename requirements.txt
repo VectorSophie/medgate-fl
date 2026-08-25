@@ -1,8 +1,17 @@
 # Direct dependencies. Install order matters for CPU-only torch:
-#   pip install torch --index-url https://download.pytorch.org/whl/cpu
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
 #   pip install -r requirements.txt
 # Full pinned transitive closure captured after install: requirements.lock.txt
 torch                # CPU wheel installed separately, see above
+torchvision          # ImageNet-pretrained MobileNetV3-Small backbone (P0-1 fair-baseline
+                     # repair, medgate/models/backbone.py PretrainedMobileNetBackbone) --
+                     # CPU wheel installed alongside torch, see above; this line was
+                     # missing from a real install (repair pass 4 clean-install
+                     # verification caught it: torchvision was present only because an
+                     # earlier session pip-installed it ad hoc into .venv without ever
+                     # adding it here, so a fresh `pip install -r requirements.txt` would
+                     # have failed on every imagenet_pretrained_fedlora/full_finetune-with-
+                     # ImageNet-backbone code path).
 numpy
 pandas
 scikit-learn

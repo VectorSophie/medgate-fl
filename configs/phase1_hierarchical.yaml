@@ -39,5 +39,13 @@ train:
   lr: 0.02
 baselines: [random_frozen_lora, coarse_pretrained_fedlora, imagenet_pretrained_fedlora, full_finetune]
 capability_isolation_methods: [coarse_only, hidden_fine_head, adapter_isolation, adversarial, orthogonal, combined]
-seeds: [0, 1]
+# P1 (repair pass 4): 5 seeds, not 2 -- the earlier 2-seed run's own
+# standard deviations were too wide to distinguish methods with any
+# confidence; see paper/main.tex's power/uncertainty-analysis paragraph
+# (P1 requirement #2's "OR justify" branch: patient count is kept at 12 --
+# increasing it further is the more expensive lever, since the probe
+# suite's fit cost scales with pool size more than federated training
+# does, docs/hardware_report.md -- but seed count is cheap to increase and
+# directly reduces the standard error the paper actually reports).
+seeds: [0, 1, 2, 3, 4]
 output_dir: experiments/phase1_hierarchical

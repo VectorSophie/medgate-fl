@@ -1,26 +1,64 @@
-# Phase 3 P1-7 genuine parameter-space adapter-recovery attack, SYNTHETIC
-# TIER ONLY. Same caveat as the rest of Phase 3: the null-signal fixture has
-# no learnable signal, so functional_recovery_fine_macro_f1 numbers here sit
-# at the same synthetic-data floor as every other Phase 3 attack -- this
-# config validates the PARAMETER-SPACE recovery mechanism (which does not
-# depend on the fixture having real signal, since it operates directly on
-# the adapter's own weight matrix) and reports functional recovery alongside
-# it for completeness, not as a claim about real attack effectiveness.
-data:
-  num_centers: 6
-  samples_per_center: 32
-  image_size: 32
-  data_seed: 0
-model:
-  feature_dim: 64
-  adapter_rank: 4
-train:
-  rounds: 3
-  epochs_per_round: 1
-  batch_size: 8
-  lr: 0.01
-seeds: [0, 1, 2]
-reveal_fractions: [0.2, 0.5, 0.9]   # single-attacker parameter-space completion
+# Phase 3 P0-A genuine parameter-space adapter-recovery attack (repair
+# pass 4 rewrite -- the pass 2/3 version of this experiment completed the
+# wrong matrix, see medgate/attacks/adapter_recovery.py's module docstring;
+# every artifact from that version was deleted, not just relabeled).
+#
+# Two arms:
+#   null_signal: trains the "combined" model on the null-signal fixture
+#     (medgate/data/synthetic.py). Parameter-space recovery quality
+#     (cosine sim, unobserved-entry error, completion gain over zero-fill)
+#     is a claim about matrix-completion GEOMETRY, not about the fixture's
+#     diagnostic signal, so this arm is a legitimate, fixture-independent
+#     source of those numbers, same reasoning as the pass 2/3 draft.
+#   hierarchical: trains the "combined" model on the hierarchical fixture
+#     (medgate/data/hierarchical_synthetic.py) so FUNCTIONAL recovery
+#     (fine macro-F1 with the completed adapter plugged in) is measured
+#     against a task that actually has signal to recover -- this is new in
+#     repair pass 4 (P0-A requirement #6); the null_signal arm's functional
+#     numbers stay at that fixture's floor by construction and were never
+#     informative on their own.
+null_signal:
+  data:
+    num_centers: 6
+    samples_per_center: 32
+    image_size: 32
+    data_seed: 0
+  model:
+    feature_dim: 64
+    adapter_rank: 4
+  train:
+    rounds: 3
+    epochs_per_round: 1
+    batch_size: 8
+    lr: 0.01
+hierarchical:
+  data:
+    num_patients_per_institution: 12
+    observations_per_patient: 3
+    image_size: 32
+    class_imbalance_strength: 0.5
+    sensitive_property_correlation: 0.6
+    data_seed: 0
+    train_frac: 0.6
+    val_frac: 0.2
+  model:
+    feature_dim: 32
+    adapter_rank: 4
+  pretrain:
+    epochs: 4
+    batch_size: 16
+    lr: 0.01
+  train:
+    rounds: 4
+    epochs_per_round: 2
+    batch_size: 8
+    lr: 0.02
+seeds: [0, 1, 2, 3, 4]           # P0-A requirement #4: at least 5 seeds
+reveal_fractions: [0.1, 0.3, 0.5, 0.7, 0.9]
+fill_methods: [zero_fill, mean_fill, random_fill, hard_impute, soft_impute]
+soft_impute_lam: 0.05
+rank_misspecification_reveal_fraction: 0.5   # fixed reveal fraction used for the rank sweep below
+rank_misspecification_deltas: [-3, -1, 0, 2, 6]   # candidate_rank = true_rank + delta, clipped to >=1
 collusion_reveal_fraction_each: 0.3
 completion_iterations: 100
 output_dir: experiments/phase3_adapter_recovery_synthetic

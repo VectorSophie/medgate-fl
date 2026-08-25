@@ -1,0 +1,13 @@
+{
+  "kind": "coarse_pretrained",
+  "seed": 4,
+  "config": {
+    "epochs": 4,
+    "batch_size": 16,
+    "lr": 0.01
+  },
+  "git_commit": "5b4becc3a66f2ea2f992dab565b5e04b59ae19cc",
+  "pretrain_coarse_macro_f1": 0.5555555555555555,
+  "checkpoint_name": "hier_coarse_pretrained_seed4",
+  "state_dict_sha256": "dbdd79088b4560bc7ba381ab12608af95f0fca3671fd4c8fcd54f76419707f9c"
+}

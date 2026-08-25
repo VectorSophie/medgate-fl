@@ -111,11 +111,34 @@ def test_adapter_residual_probing_is_disjoint_from_representation_probing():
     assert 0.0 <= result["linear_probe"]["macro_f1"] <= 1.0
 
 
+def test_selected_probe_attack_evaluates_the_validation_winner_once_on_test():
+    """P1 (repair pass 4): the selected probe's reported attack_test_result
+    must come from the TEST split, and the probe picked must be the
+    argmax over the VALIDATION split's scores, not the test split's own
+    (which would silently readmit the selection-bias this function
+    exists to remove)."""
+    from medgate.attacks.probes import selected_probe_attack
+
+    model = MedGateModel(**MODEL_KWARGS)
+    train = SyntheticFedISIC(num_samples=24, image_size=16, seed=1)
+    val = SyntheticFedISIC(num_samples=16, image_size=16, seed=2)
+    test = SyntheticFedISIC(num_samples=16, image_size=16, seed=3)
+
+    result = selected_probe_attack(model, train, val, test, include_slow=True)
+    assert result["selected_probe"] in result["selection_val_macro_f1_by_probe"]
+    best_val_name = max(result["selection_val_macro_f1_by_probe"], key=result["selection_val_macro_f1_by_probe"].get)
+    assert result["selected_probe"] == best_val_name
+    assert 0.0 <= result["attack_test_result"]["macro_f1"] <= 1.0
+    assert "n_train_examples" in result["attack_test_result"]
+
+
 if __name__ == "__main__":
     test_cosine_similarity_stats_matches_known_cases()
     test_cosine_stats_reveal_what_the_squared_loss_alone_hides()
     test_linear_cka_known_cases()
     test_svm_and_tree_probes_run_and_are_bounded()
     test_run_all_probes_on_features_include_slow_toggle()
+    test_adapter_residual_probing_is_disjoint_from_representation_probing()
+    test_selected_probe_attack_evaluates_the_validation_winner_once_on_test()
     test_adapter_residual_probing_is_disjoint_from_representation_probing()
     print("OK")

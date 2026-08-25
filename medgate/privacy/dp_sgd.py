@@ -24,14 +24,41 @@ different, stronger, NOT-implemented guarantee):
     epsilon is never read as the tightest possible bound.
   - Composition: WITHIN one dp_local_train call, Opacus's accountant
     (RDP-based, the Opacus default) composes across every local
-    mini-batch step across `epochs` — that part IS accounted. ACROSS
-    FedAvg rounds and across which clients participate in which rounds,
-    composition is NOT accounted (dp_fedavg_round reports the MAX of each
-    round's independent per-client epsilon, not a cumulative sum/
-    composition across rounds — see that function's own docstring). A
-    client that participates in every round of a multi-round experiment
-    has a TRUE cumulative epsilon higher than any single round's reported
-    number; this project does not compute that cumulative figure.
+    mini-batch step across `epochs` — that part was always accounted.
+
+    REPAIR PASS 4 / P0-C FIX: earlier drafts of this module created a
+    BRAND NEW `PrivacyEngine()` inside every `dp_local_train` call, so
+    `dp_fedavg_round`'s reported epsilon was the max of each round's
+    INDEPENDENT, freshly-reset per-client epsilon — never composed across
+    rounds — and the orchestration script (scripts/run_phase4_synthetic.py)
+    then took the max of those independent per-round numbers as "the"
+    experiment epsilon, silently reporting a single round's budget as if
+    it were the full-training-run budget. A client that participates in
+    every round of a multi-round experiment has a TRUE cumulative epsilon
+    HIGHER than any single round's number, and that is what actually
+    matters for a full-training privacy claim.
+
+    Fixed by threading an optional, CALLER-OWNED `engine` (dp_local_train)
+    / `engines: dict[int, PrivacyEngine]` (dp_fedavg_round) through every
+    round: the caller creates one `PrivacyEngine` per client ONCE, before
+    the round loop, and passes the SAME dict back in on every round: each
+    `PrivacyEngine`'s internal RDP accountant genuinely accumulates
+    composition history across every `make_private()` call it is reused
+    for (verified empirically — see
+    test_dp_epsilon_increases_monotonically_with_more_federated_rounds —
+    epsilon grows sub-additively round over round, exactly the RDP
+    composition signature, not a flat repeat of one round's number). The
+    epsilon reported for a full training run is now
+    `max_i(engines[i].get_epsilon(delta))` AFTER the last round each
+    client participated in — the genuine full-training, per-client-max,
+    record-level epsilon — and scripts/run_phase4_synthetic.py's result
+    field is renamed from the ambiguous `epsilon` to
+    `epsilon_full_training_max_per_client_record_level` to make what it
+    measures unmistakable from the column name alone (P0-C requirement
+    #3). Omitting `engine`/`engines` (the default) reproduces the OLD,
+    single-call-only behavior — still useful for one-off checks
+    (e.g. Phase 3 attacks that only ever call this once) — but is never
+    used for a multi-round Phase 4 arm.
   - delta: caller-supplied (dp_local_train's `delta` parameter, default
     1e-5 throughout this project's configs) — not derived from dataset
     size via any rule of thumb; stated as a fixed choice, not tuned.
@@ -79,19 +106,30 @@ def dp_local_train(
     noise_multiplier: float,
     max_grad_norm: float = 1.0,
     delta: float = 1e-5,
-) -> tuple[dict, float]:
+    engine: "PrivacyEngine | None" = None,
+) -> tuple[dict, float, "PrivacyEngine"]:
     """Train `model` in place under DP-SGD on one client's data. Returns
-    (state_dict, achieved epsilon at the given delta). Only the coarse+
-    fine joint objective is used (matches medgate.federated.fedavg.joint_loss;
-    Opacus's per-sample-gradient machinery is not wired up for the Phase 2
+    (state_dict, epsilon, engine). Only the coarse+fine joint objective is
+    used (matches medgate.federated.fedavg.joint_loss; Opacus's
+    per-sample-gradient machinery is not wired up for the Phase 2
     adversarial/orthogonality loss variants — DP-SGD here is evaluated
-    against the plain adapter-isolation architecture only)."""
+    against the plain adapter-isolation architecture only).
+
+    `engine`: pass an existing PrivacyEngine (from a PRIOR call, e.g. a
+    previous federated round for this same client) to compose this call's
+    training into that engine's accountant history and get back a genuine
+    CUMULATIVE epsilon (P0-C fix — see module docstring); omit (default
+    None) to get a fresh engine and a single-call-only epsilon. The
+    returned `engine` is always the one actually used — reuse it (i.e.
+    thread it back in as `engine=` on the next call) to keep composing."""
     import torch
+
+    if engine is None:
+        engine = PrivacyEngine()
 
     loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
     optimizer = torch.optim.Adam(attack_params(model), lr=lr)
 
-    engine = PrivacyEngine()
     priv_model, priv_optimizer, priv_loader = engine.make_private(
         module=model, optimizer=optimizer, data_loader=loader,
         noise_multiplier=noise_multiplier, max_grad_norm=max_grad_norm, poisson_sampling=False,
@@ -108,7 +146,7 @@ def dp_local_train(
             priv_optimizer.step()
 
     epsilon = engine.get_epsilon(delta=delta)
-    return copy.deepcopy(inner.state_dict()), epsilon
+    return copy.deepcopy(inner.state_dict()), epsilon, engine
 
 
 def dp_fedavg_round(
@@ -120,31 +158,40 @@ def dp_fedavg_round(
     noise_multiplier: float,
     max_grad_norm: float = 1.0,
     delta: float = 1e-5,
-) -> tuple[dict, float]:
+    engines: "dict[int, PrivacyEngine] | None" = None,
+) -> tuple[dict, float, "dict[int, PrivacyEngine]"]:
     """One DP-FedAvg round: each client trains under record-level DP-SGD
     (dp_local_train), server aggregates normally (FedAvg weighted average
     — the aggregation step itself gets no additional protection here; that
     is exactly the 'secure aggregation + DP' arm in
     scripts/run_phase4_synthetic.py, kept separate on purpose).
 
-    Reported epsilon = the MAX across clients this round (each client's
-    epsilon is independent per-client record-level DP; this does NOT
-    account for cross-round composition — that would require tracking each
-    client's cumulative epsilon across all rounds it participated in,
-    which this simplified implementation does not do. Documented here so
-    the reported epsilon is never over-claimed as a full-training-run
-    guarantee.)"""
+    `engines`: optional {client_index: PrivacyEngine}, reused and mutated
+    across repeated calls by a caller running multiple federated rounds —
+    pass the SAME dict back in every round to get genuine cross-round RDP
+    composition per client (P0-C fix, see module docstring); omit for a
+    single independent round. Returns (aggregated_state,
+    max_cumulative_epsilon_this_round, engines) — the caller should track
+    the LAST round's returned epsilon as the full-training epsilon, not
+    accumulate/max across the returned values of multiple calls itself
+    (each returned value already IS that client's cumulative-to-date
+    epsilon, so re-maxing across calls is redundant but harmless)."""
     from medgate.federated.fedavg import fedavg_aggregate
 
+    if engines is None:
+        engines = {}
     client_states, client_sizes, epsilons = [], [], []
-    for ds in client_datasets:
+    for i, ds in enumerate(client_datasets):
         local_model = copy.deepcopy(global_model)
-        state, eps = dp_local_train(local_model, ds, epochs, batch_size, lr, noise_multiplier, max_grad_norm, delta)
+        state, eps, engine = dp_local_train(
+            local_model, ds, epochs, batch_size, lr, noise_multiplier, max_grad_norm, delta, engine=engines.get(i)
+        )
+        engines[i] = engine
         client_states.append(state)
         client_sizes.append(len(ds))
         epsilons.append(eps)
     aggregated = fedavg_aggregate(client_states, [float(n) for n in client_sizes])
-    return aggregated, max(epsilons)
+    return aggregated, max(epsilons), engines
 
 
 def secure_dp_fedavg_round(
@@ -157,23 +204,32 @@ def secure_dp_fedavg_round(
     seed: int,
     max_grad_norm: float = 1.0,
     delta: float = 1e-5,
-) -> tuple[dict, float]:
+    engines: "dict[int, PrivacyEngine] | None" = None,
+) -> tuple[dict, float, "dict[int, PrivacyEngine]"]:
     """Combined arm: each client trains under DP-SGD (dp_local_train) AND
     the resulting updates are pairwise-masked before the server sums them
-    (medgate.privacy.secure_aggregation) — the server never sees a
-    client's plaintext update, DP-noised or not. Requires uniform client
-    weighting, same as secure_fedavg_round."""
+    (medgate.privacy.secure_aggregation -- labeled "simulated pairwise
+    additive masking" in the paper, not "secure aggregation" unqualified,
+    per P0-B) — the server never sees a client's plaintext update,
+    DP-noised or not. Requires uniform client weighting, same as
+    secure_fedavg_round. `engines`: see dp_fedavg_round -- same
+    cross-round composition mechanism, reused here identically."""
     from medgate.privacy.secure_aggregation import mask_client_updates, secure_aggregate_updates
 
+    if engines is None:
+        engines = {}
     global_state = {k: v.clone() for k, v in global_model.state_dict().items()}
     updates, epsilons = [], []
-    for ds in client_datasets:
+    for i, ds in enumerate(client_datasets):
         local_model = copy.deepcopy(global_model)
-        state, eps = dp_local_train(local_model, ds, epochs, batch_size, lr, noise_multiplier, max_grad_norm, delta)
+        state, eps, engine = dp_local_train(
+            local_model, ds, epochs, batch_size, lr, noise_multiplier, max_grad_norm, delta, engine=engines.get(i)
+        )
+        engines[i] = engine
         updates.append({k: state[k] - global_state[k] for k in global_state})
         epsilons.append(eps)
 
     masked = mask_client_updates(updates, seed)
     aggregated_update = secure_aggregate_updates(masked, weights=[1.0] * len(updates))
     new_state = {k: global_state[k] + aggregated_update[k] for k in global_state}
-    return new_state, max(epsilons)
+    return new_state, max(epsilons), engines
