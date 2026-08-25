@@ -202,59 +202,104 @@ the server via pairwise masking; this paper's secure-aggregation module
 process, explicitly not the full dropout-robust protocol. DP-SGD
 \citep{abadi2016deep} bounds what a trained model's parameters can reveal
 about any single training example via gradient clipping and noise; this
-paper applies it per-client via Opacus. \textbf{Gap:} neither mechanism, by
-itself or combined (as we test directly, \S\ref{sec:privacy}), is a
-capability-isolation mechanism -- both protect \emph{how training happened},
-not \emph{what the resulting model exposes to different recipients}, and
-this paper does not claim secure aggregation prevents the membership or
-property inference it separately evaluates in \S\ref{sec:security}.
+paper applies it per-client via Opacus. Client-level DP
+\citep{geyer2017differentially,mcmahan2018learning} and the foundational DP
+definitions \citep{dwork2014algorithmic} inform the framing but are not
+themselves implemented as separate baselines here -- Phase 4
+(\S\ref{sec:privacy}) applies record-level DP-SGD per client, not the
+client-level variant these two papers propose; that distinction is a
+concrete, not-yet-implemented extension (\S\ref{sec:limitations}).
+\textbf{Gap:} neither mechanism, by itself or combined (as we test
+directly, \S\ref{sec:privacy}), is a capability-isolation mechanism -- both
+protect \emph{how training happened}, not \emph{what the resulting model
+exposes to different recipients}, and this paper does not claim secure
+aggregation prevents the membership or property inference it separately
+evaluates in \S\ref{sec:security}.
 
 \paragraph{Inference and extraction attacks.} Deep Leakage from Gradients
-\citep{zhu2019deep} reconstructs a training input from its raw gradient;
-membership inference \citep{shokri2017membership} distinguishes training
-members from non-members via model behavior; model extraction
-\citep{tramer2016stealing} clones a model's functionality from black-box
-query access. All three are implemented in \S\ref{sec:security} against
+\citep{zhu2019deep} and its refinements iDLG \citep{zhao2020idlg} and
+gradient inversion via cosine-similarity matching
+\citep{geiping2020inverting} reconstruct a training input from its raw
+gradient; membership inference \citep{shokri2017membership} and its
+comprehensive white-box extension \citep{nasr2019comprehensive}
+distinguish training members from non-members via model behavior; property
+inference \citep{melis2019exploiting} infers a property of a
+participant's training set (not membership of a specific record) from
+collaborative-learning updates; model inversion
+\citep{fredrikson2015model} and GAN-based active leakage
+\citep{hitaj2017deep} reconstruct class-representative inputs rather than
+specific records; model extraction \citep{tramer2016stealing} and training-
+data extraction from language models \citep{carlini2021extracting} clone or
+recover content from black-box query access. DLG, membership inference,
+and model extraction are implemented in \S\ref{sec:security} against
 MedGate-FL specifically, adapted to ask whether the \emph{public} path
-leaks the \emph{restricted} task -- a different question from the attacks'
-original centralized or generically-federated framing. \UNVERIFIED{iDLG;
-Geiping et al.\ inverting-gradients; Nasr et al.\ comprehensive privacy
-analysis; Melis et al.\ property inference; Fredrikson et al.\ model
-inversion; Hitaj et al.\ GAN-based leakage -- not cited pending
-verification; several of these (Melis et al.\ in particular) would be the
-natural source for a property-inference attack this paper has not yet
-implemented, see \S\ref{sec:limitations}.}
+leaks the \emph{restricted} task -- a different question from these
+attacks' original centralized or generically-federated framing.
+\citet{melis2019exploiting} is the natural source for a property-inference
+attack this paper has not yet implemented (\S\ref{sec:limitations}); iDLG,
+the cosine-similarity gradient-inversion variant, comprehensive white-box
+membership inference, model inversion, and GAN-based leakage are cited as
+background here but likewise not yet implemented as additional attacks.
 
-\paragraph{Federated and medical unlearning.} \citet{chen2026lethe} (Lethe)
-benchmark twelve federated-unlearning methods across eight medical-imaging
-tasks and multiple removal granularities, finding that the
-\emph{difficulty of the forgetting request}, not the unlearning method,
-dominates performance differences, and that client-level removal often has
-minimal utility impact -- making residual membership signal, not utility
-loss, the metric that actually distinguishes methods. This is the closest
-prior benchmark to this paper's Phase 5 (\S\ref{sec:unlearning}), and its
-finding directly motivates measuring forgetting via a membership-inference
-proxy rather than utility drop alone, which is what we do.
-\UNVERIFIED{Wu et al.\ federated unlearning via knowledge distillation;
-Halimi et al.\ efficient client erasure; Zhang et al.\ FedRecovery; Deng
-et al.\ right-to-be-forgotten medical unlearning -- not cited pending
-verification; this paper's \texttt{gradient\_ascent\_unlearning} method
-(\S\ref{sec:unlearning}) is therefore described only as a generic simple
-technique, not attributed to any of these.} \textbf{Gap:} no cited,
-verified prior work evaluates unlearning specifically against a
-capability-isolated architecture, where an ``adapter deletion'' operation
-is available that has no counterpart in a monolithic model.
+\paragraph{Federated and medical unlearning.} Machine unlearning's exact
+gold standard, retraining from scratch, and cheaper approximations were
+formalized by \citet{ginart2019making} (data deletion, formal guarantees)
+and \citet{bourtoule2021machine} (SISA training for efficient exact
+unlearning) outside the federated setting; this paper's
+\texttt{full\_retrain} (\S\ref{sec:unlearning}) is exactly the gold
+standard both papers take as their baseline. In the federated setting,
+\citet{wu2022federated} erase a client's contribution via knowledge
+distillation, \citet{halimi2022federated} via local unlearning followed by
+a few federated recovery rounds, and \citet{zhang2023fedrecovery} via a
+differentially-private FedRecovery mechanism; \citet{deng2024enable} give
+the first federated-unlearning framework specifically for medical imaging
+(intracranial hemorrhage and skin-lesion diagnosis). None of these four
+methods is reproduced here -- this paper's
+\texttt{gradient\_ascent\_unlearning} (\S\ref{sec:unlearning}) is a
+generic, simpler technique (ascend on the removed data's loss, then
+recover on retained data), deliberately not claimed as an implementation of
+any of them, though implementing one of them (Halimi et al.'s
+local-unlearning-then-recovery approach is architecturally the closest fit
+to this paper's federated setup) is a natural next step
+(\S\ref{sec:limitations}). \citet{chen2026lethe} (Lethe) benchmark twelve
+federated-unlearning methods across eight medical-imaging tasks and
+multiple removal granularities, finding that the \emph{difficulty of the
+forgetting request}, not the unlearning method, dominates performance
+differences, and that client-level removal often has minimal utility
+impact -- making residual membership signal, not utility loss, the metric
+that actually distinguishes methods. This is the closest prior benchmark to
+this paper's Phase 5, and its finding directly motivates measuring
+forgetting via a membership-inference proxy rather than utility drop
+alone, which is what we do. \textbf{Gap:} none of the federated-unlearning
+papers above evaluates unlearning against a capability-isolated
+architecture, where an ``adapter deletion'' operation is available that has
+no counterpart in a monolithic model, and none is medical-imaging-specific
+except \citet{deng2024enable}, which does not study capability isolation
+either.
 
 \paragraph{Access control and cryptography, and blockchain-assisted FL.}
-\UNVERIFIED{Every specific source the project brief names in these two
-categories (CP-ABE, ABE, probabilistic encryption, FHE constructions,
-blockchain-FL systematic reviews) remains unverified as of this draft; see
-\texttt{docs/literature\_matrix.md}.} This paper's crypto layer
-(\S\ref{sec:privacy}) is accordingly built from first principles against
-current, maintained libraries (AES-GCM via Python's \texttt{cryptography}
-package) rather than citing a specific ABE or FHE construction it does not
-implement. Blockchain-assisted authorization (project brief Phase 8) is not
-yet implemented; see \S\ref{sec:limitations}.
+Ciphertext-policy \citep{bethencourt2007ciphertext} and key-policy
+\citep{goyal2006attribute} attribute-based encryption let a policy over
+attributes (rather than a single key) gate decryption -- a natural fit for
+``authorized if credentialed as X'' access rules, but not implemented here:
+this paper's crypto layer (\S\ref{sec:privacy}) uses conventional AES-GCM
+with a centralized-IAM key registry, which is simpler and matches the
+project's cryptographic-conservatism rule, at the cost of not supporting
+CP-ABE/KP-ABE's richer policy expressiveness. Fully homomorphic encryption
+\citep{gentry2009fully} and its practical approximate-arithmetic
+descendant CKKS \citep{cheon2017homomorphic} would let computation happen
+directly on encrypted adapters or activations; explicitly out of scope on
+this project's CPU-only hardware (Table~\ref{tab:hardware}), stated as such
+rather than attempted at a scale that couldn't be evaluated honestly.
+\UNVERIFIED{Every blockchain-FL systematic-review source the project brief
+names remains unverified as of this draft; see
+\texttt{docs/literature\_matrix.md}.} \textbf{Gap:} none of the ABE or FHE
+constructions above has been evaluated, in their own papers, against this
+project's specific four-adversary threat model (\S\ref{sec:threat}) or a
+federated capability-isolation architecture; this paper's contribution is
+that evaluation, not a new construction. Blockchain-assisted authorization
+(project brief Phase 8) is not yet implemented; see
+\S\ref{sec:limitations}.
 
 \section{Problem Definition and Threat Model}
 \label{sec:threat}
