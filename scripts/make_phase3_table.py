@@ -32,11 +32,23 @@ def main():
     rows.append({"attack": "simplified_known_label_gradient_inversion (single unaggregated gradient)", "n_seeds": len(runs),
                  "metric": "PSNR_dB", "mean": m, "std": s, "note": f"mse mean={statistics.mean(dlg_mse):.4f}"})
 
-    mi_auc = [r["membership_inference"]["attack_auc"] for r in runs]
-    m, s = mean_std(mi_auc)
+    # P1-x repair: SymmetricAUC/AttackAdvantage are the primary, direction-
+    # invariant metrics (medgate/attacks/membership_inference.py) — the raw
+    # attack_auc that used to be reported alone here is diagnostic-only,
+    # since a below-0.5 AUC is just as much an attack (in the opposite
+    # direction) as an above-0.5 one and the old plain-AUC table row hid
+    # that.
+    mi_sym_auc = [r["membership_inference"]["symmetric_auc"] for r in runs]
+    mi_adv = [r["membership_inference"]["attack_advantage"] for r in runs]
+    mi_raw_auc = [r["membership_inference"]["attack_auc"] for r in runs]
+    m, s = mean_std(mi_sym_auc)
     rows.append({"attack": "membership_inference (loss-threshold)", "n_seeds": len(runs),
-                 "metric": "attack_AUC", "mean": m, "std": s,
-                 "note": f"pre-registered target <= 0.55 (docs/research_scope.md)"})
+                 "metric": "SymmetricAUC", "mean": m, "std": s,
+                 "note": f"raw attack_AUC (diagnostic, direction not symmetrized) mean={statistics.mean(mi_raw_auc):.3f}"})
+    m, s = mean_std(mi_adv)
+    rows.append({"attack": "membership_inference (loss-threshold)", "n_seeds": len(runs),
+                 "metric": "AttackAdvantage", "mean": m, "std": s,
+                 "note": "pre-registered SymmetricAUC target <= 0.55 (docs/research_scope.md)"})
 
     def fmt_budget(b: dict) -> str:
         return ", ".join(f"{k}={v}" for k, v in b.items())

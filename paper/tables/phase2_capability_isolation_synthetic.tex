@@ -1,12 +1,14 @@
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{lcccccc}
 \toprule
-Method & Seeds & Auth. fine F1 & $U_{\text{public}}$ & RFC & UCG & ARR \\
+Method & Seeds & AuthorizedFineUtility & OutputLeak & BestProbeRFC & UCG & ARR \\
 \midrule
-adapter\_isolation & 5 & 0.029 $\pm$ 0.000 & 0.029 $\pm$ 0.000 & 0.081 $\pm$ 0.040 & 0.052 $\pm$ 0.040 & n/a \\
-adversarial & 5 & 0.028 $\pm$ 0.002 & 0.034 $\pm$ 0.012 & 0.111 $\pm$ 0.021 & 0.077 $\pm$ 0.023 & 1.000 $\pm$ 0.000 \\
-coarse\_only & 5 & 0.028 $\pm$ 0.003 & 0.029 $\pm$ 0.000 & 0.100 $\pm$ 0.024 & 0.071 $\pm$ 0.024 & n/a \\
-combined & 5 & 0.033 $\pm$ 0.014 & 0.035 $\pm$ 0.013 & 0.115 $\pm$ 0.024 & 0.081 $\pm$ 0.019 & 1.000 $\pm$ 0.000 \\
-hidden\_fine\_head & 5 & 0.029 $\pm$ 0.000 & 0.029 $\pm$ 0.000 & 0.101 $\pm$ 0.041 & 0.072 $\pm$ 0.041 & n/a \\
-orthogonal & 5 & 0.029 $\pm$ 0.000 & 0.029 $\pm$ 0.000 & 0.080 $\pm$ 0.045 & 0.051 $\pm$ 0.045 & n/a \\
+Adapter isolation & 5 & 0.029 $\pm$ 0.000 & 0.029 $\pm$ 0.000 & 0.085 $\pm$ 0.035 & 0.057 $\pm$ 0.035 & n/a \\
+Adversarial suppression & 5 & 0.028 $\pm$ 0.002 & 0.034 $\pm$ 0.012 & 0.122 $\pm$ 0.023 & 0.087 $\pm$ 0.027 & 1.000 $\pm$ 0.000 \\
+Coarse-only & 5 & 0.028 $\pm$ 0.003 & 0.029 $\pm$ 0.000 & 0.113 $\pm$ 0.027 & 0.084 $\pm$ 0.027 & n/a \\
+Combined (adversarial + orthogonal) & 5 & 0.033 $\pm$ 0.014 & 0.035 $\pm$ 0.013 & 0.127 $\pm$ 0.029 & 0.093 $\pm$ 0.028 & 1.000 $\pm$ 0.000 \\
+Hidden fine head & 5 & 0.029 $\pm$ 0.000 & 0.029 $\pm$ 0.000 & 0.112 $\pm$ 0.044 & 0.083 $\pm$ 0.044 & n/a \\
+Orthogonality penalty & 5 & 0.029 $\pm$ 0.000 & 0.029 $\pm$ 0.000 & 0.092 $\pm$ 0.047 & 0.063 $\pm$ 0.047 & n/a \\
 \bottomrule
 \end{tabular}
+}

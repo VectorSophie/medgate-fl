@@ -1,26 +1,28 @@
-\begin{tabular}{llccccc}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llcccc}
 \toprule
 Attack & Aggregator & Seeds & Fine macro-F1 & Model corrupted rate & Backdoor success rate \\
 \midrule
-backdoor & coordinate\_median & 3 & 0.029 $\pm$ 0.000 & 0.00 & 1.000 \\
-backdoor & fedavg & 3 & 0.029 $\pm$ 0.000 & 0.00 & 1.000 \\
-backdoor & trimmed\_mean & 3 & 0.029 $\pm$ 0.000 & 0.00 & 1.000 \\
-free\_rider & coordinate\_median & 3 & 0.029 $\pm$ 0.000 & 0.00 & n/a \\
-free\_rider & fedavg & 3 & 0.029 $\pm$ 0.000 & 0.00 & n/a \\
-free\_rider & trimmed\_mean & 3 & 0.029 $\pm$ 0.000 & 0.00 & n/a \\
-label\_flip & coordinate\_median & 3 & 0.029 $\pm$ 0.000 & 0.00 & n/a \\
-label\_flip & fedavg & 3 & 0.029 $\pm$ 0.000 & 0.00 & n/a \\
-label\_flip & trimmed\_mean & 3 & 0.029 $\pm$ 0.000 & 0.00 & n/a \\
-malformed & fedavg & 3 & 0.029 $\pm$ 0.000 & 1.00 & n/a \\
-malformed & validated\_fedavg & 3 & 0.029 $\pm$ 0.000 & 0.00 & n/a \\
-model\_replacement & coordinate\_median & 3 & 0.029 $\pm$ 0.000 & 0.00 & n/a \\
-model\_replacement & fedavg & 3 & 0.029 $\pm$ 0.002 & 0.00 & n/a \\
-model\_replacement & trimmed\_mean & 3 & 0.029 $\pm$ 0.000 & 0.00 & n/a \\
-none & coordinate\_median & 3 & 0.029 $\pm$ 0.000 & 0.00 & n/a \\
-none & fedavg & 3 & 0.029 $\pm$ 0.000 & 0.00 & n/a \\
-none & trimmed\_mean & 3 & 0.029 $\pm$ 0.000 & 0.00 & n/a \\
-sign\_flip & coordinate\_median & 3 & 0.029 $\pm$ 0.000 & 0.00 & n/a \\
-sign\_flip & fedavg & 3 & 0.027 $\pm$ 0.003 & 0.00 & n/a \\
-sign\_flip & trimmed\_mean & 3 & 0.029 $\pm$ 0.000 & 0.00 & n/a \\
+Backdoor insertion & Coordinate median & 3 & 0.029 $\pm$ 0.000 & 0.00 & 1.000 \\
+Backdoor insertion & FedAvg & 3 & 0.029 $\pm$ 0.000 & 0.00 & 1.000 \\
+Backdoor insertion & Trimmed mean & 3 & 0.029 $\pm$ 0.000 & 0.00 & 1.000 \\
+Free rider & Coordinate median & 3 & 0.029 $\pm$ 0.000 & 0.00 & n/a \\
+Free rider & FedAvg & 3 & 0.029 $\pm$ 0.000 & 0.00 & n/a \\
+Free rider & Trimmed mean & 3 & 0.029 $\pm$ 0.000 & 0.00 & n/a \\
+Label flipping & Coordinate median & 3 & 0.029 $\pm$ 0.000 & 0.00 & n/a \\
+Label flipping & FedAvg & 3 & 0.029 $\pm$ 0.000 & 0.00 & n/a \\
+Label flipping & Trimmed mean & 3 & 0.029 $\pm$ 0.000 & 0.00 & n/a \\
+Malformed update & FedAvg & 3 & 0.029 $\pm$ 0.000 & 1.00 & n/a \\
+Malformed update & Validated FedAvg & 3 & 0.029 $\pm$ 0.000 & 0.00 & n/a \\
+Model replacement & Coordinate median & 3 & 0.029 $\pm$ 0.000 & 0.00 & n/a \\
+Model replacement & FedAvg & 3 & 0.029 $\pm$ 0.002 & 0.00 & n/a \\
+Model replacement & Trimmed mean & 3 & 0.029 $\pm$ 0.000 & 0.00 & n/a \\
+No attack (honest) & Coordinate median & 3 & 0.029 $\pm$ 0.000 & 0.00 & n/a \\
+No attack (honest) & FedAvg & 3 & 0.029 $\pm$ 0.000 & 0.00 & n/a \\
+No attack (honest) & Trimmed mean & 3 & 0.029 $\pm$ 0.000 & 0.00 & n/a \\
+Sign flipping & Coordinate median & 3 & 0.029 $\pm$ 0.000 & 0.00 & n/a \\
+Sign flipping & FedAvg & 3 & 0.027 $\pm$ 0.003 & 0.00 & n/a \\
+Sign flipping & Trimmed mean & 3 & 0.029 $\pm$ 0.000 & 0.00 & n/a \\
 \bottomrule
 \end{tabular}
+}

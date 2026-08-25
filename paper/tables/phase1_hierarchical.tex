@@ -1,0 +1,18 @@
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llcccccc}
+\toprule
+Method & Kind & Seeds & Coarse F1 & Fine F1 & OutputLeak & BestProbeRFC & ARR \\
+\midrule
+Random-frozen LoRA (negative control) & Baseline & 2 & 0.152 $\pm$ 0.121 & 0.076 $\pm$ 0.006 & 0.076 $\pm$ 0.006 & 0.529 $\pm$ 0.017 & 0.000 $\pm$ 0.000 \\
+Coarse-pretrained FedLoRA & Baseline & 2 & 0.857 $\pm$ 0.009 & 0.204 $\pm$ 0.065 & 0.297 $\pm$ 0.052 & 0.452 $\pm$ 0.103 & 1.000 $\pm$ 0.000 \\
+ImageNet-pretrained FedLoRA & Baseline & 2 & 0.480 $\pm$ 0.133 & 0.186 $\pm$ 0.044 & 0.154 $\pm$ 0.071 & 0.432 $\pm$ 0.033 & 0.610 $\pm$ 0.470 \\
+Full fine-tune (upper bound) & Baseline & 2 & 0.810 $\pm$ 0.269 & 0.204 $\pm$ 0.012 & 0.228 $\pm$ 0.037 & 0.342 $\pm$ 0.091 & 0.425 $\pm$ 0.266 \\
+Coarse-only & Capability isolation & 2 & 0.724 $\pm$ 0.139 & 0.000 $\pm$ 0.000 & 0.282 $\pm$ 0.040 & 0.445 $\pm$ 0.026 & 3.918 $\pm$ 1.761 \\
+Hidden fine head & Capability isolation & 2 & 0.619 $\pm$ 0.000 & 0.167 $\pm$ 0.040 & 0.221 $\pm$ 0.044 & 0.410 $\pm$ 0.213 & 25.850 $\pm$ 36.783 \\
+Adapter isolation & Capability isolation & 2 & 0.810 $\pm$ 0.269 & 0.204 $\pm$ 0.012 & 0.228 $\pm$ 0.037 & 0.342 $\pm$ 0.091 & 0.425 $\pm$ 0.266 \\
+Adversarial suppression & Capability isolation & 2 & 0.748 $\pm$ 0.219 & 0.180 $\pm$ 0.063 & 0.384 $\pm$ 0.265 & 0.466 $\pm$ 0.230 & 1.336 $\pm$ 0.363 \\
+Orthogonality penalty & Capability isolation & 2 & 0.607 $\pm$ 0.017 & 0.264 $\pm$ 0.031 & 0.216 $\pm$ 0.087 & 0.390 $\pm$ 0.124 & 0.840 $\pm$ 0.756 \\
+Combined (adversarial + orthogonal) & Capability isolation & 2 & 0.604 $\pm$ 0.021 & 0.191 $\pm$ 0.040 & 0.344 $\pm$ 0.225 & 0.500 $\pm$ 0.212 & 0.989 $\pm$ 0.190 \\
+\bottomrule
+\end{tabular}
+}

@@ -1,7 +1,7 @@
 {
   "method": "coarse_only",
   "seed": 3,
-  "git_commit": "2e97dc4b030c8099c876e950dcbed3f427d6c63b",
+  "git_commit": "e47e868f2d3f4de0771656663b9a931731b8bb9f",
   "config": {
     "data": {
       "source": "synthetic",
@@ -38,7 +38,7 @@
     "output_dir": "experiments/phase2_synthetic"
   },
   "dataset_manifest_hash": "874a6cfad139fea2",
-  "train_wall_clock_seconds": 1.516,
+  "train_wall_clock_seconds": 1.331,
   "utility": {
     "coarse_macro_f1": 0.23129251700680273,
     "coarse_balanced_accuracy": 0.3333333333333333,
@@ -51,25 +51,37 @@
       "macro_f1": 0.02880184331797235,
       "balanced_accuracy": 0.125,
       "n_train_examples": 192,
-      "fit_seconds": 0.0151
+      "fit_seconds": 0.0108
     },
     "nonlinear_probe": {
       "macro_f1": 0.02880184331797235,
       "balanced_accuracy": 0.125,
       "n_train_examples": 192,
-      "fit_seconds": 0.1542
+      "fit_seconds": 0.2032
     },
     "knn_probe": {
       "macro_f1": 0.08120886088321362,
       "balanced_accuracy": 0.09643964228203358,
       "n_train_examples": 192,
-      "fit_seconds": 0.0019
+      "fit_seconds": 0.0024
     },
     "fewshot_probe_k5": {
       "macro_f1": 0.02880184331797235,
       "balanced_accuracy": 0.125,
       "n_train_examples": 40,
-      "fit_seconds": 0.0074
+      "fit_seconds": 0.0076
+    },
+    "svm_probe": {
+      "macro_f1": 0.02880184331797235,
+      "balanced_accuracy": 0.125,
+      "n_train_examples": 192,
+      "fit_seconds": 0.0259
+    },
+    "tree_probe": {
+      "macro_f1": 0.0718593194556663,
+      "balanced_accuracy": 0.07051791203965116,
+      "n_train_examples": 192,
+      "fit_seconds": 0.8264
     }
   },
   "residual_fine_capability": 0.08120886088321362,
@@ -77,8 +89,10 @@
   "capability_recovery_efficiency_by_probe": {
     "linear_probe": 0.0,
     "nonlinear_probe": 0.0,
-    "knn_probe": 27.608836042689266,
-    "fewshot_probe_k5": 0.0
+    "knn_probe": 21.86245035878862,
+    "fewshot_probe_k5": 0.0,
+    "svm_probe": 0.0,
+    "tree_probe": 0.07148286498289777
   },
   "authorized_recovery_ratio": null
 }

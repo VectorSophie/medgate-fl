@@ -7,7 +7,8 @@ Attacker knowledge/access/budget for every row is recorded in the raw JSON (medg
 | attack | n_seeds | metric | mean | std | note |
 |---|---|---|---|---|---|
 | simplified_known_label_gradient_inversion (single unaggregated gradient) | 3 | PSNR_dB | 56.208 | 71.069 | mse mean=1.3612 |
-| membership_inference (loss-threshold) | 3 | attack_AUC | 0.510 | 0.048 | pre-registered target <= 0.55 (docs/research_scope.md) |
+| membership_inference (loss-threshold) | 3 | SymmetricAUC | 0.539 | 0.013 | raw attack_AUC (diagnostic, direction not symmetrized) mean=0.510 |
+| membership_inference (loss-threshold) | 3 | AttackAdvantage | 0.078 | 0.027 | pre-registered SymmetricAUC target <= 0.55 (docs/research_scope.md) |
 | auxiliary_data_adapter_finetuning_recovery (A2) | 3 | fine_macro_f1 @ auxiliary_examples=8, epochs=5 | 0.027 | 0.000 |  |
 | auxiliary_data_adapter_finetuning_recovery (A2) | 3 | fine_macro_f1 @ auxiliary_examples=16, epochs=5 | 0.034 | 0.013 |  |
 | auxiliary_data_adapter_finetuning_recovery (A2) | 3 | fine_macro_f1 @ auxiliary_examples=32, epochs=5 | 0.028 | 0.003 |  |

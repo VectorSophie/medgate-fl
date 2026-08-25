@@ -1,7 +1,7 @@
 {
   "method": "adapter_isolation",
   "seed": 2,
-  "git_commit": "2e97dc4b030c8099c876e950dcbed3f427d6c63b",
+  "git_commit": "e47e868f2d3f4de0771656663b9a931731b8bb9f",
   "config": {
     "data": {
       "source": "synthetic",
@@ -38,7 +38,7 @@
     "output_dir": "experiments/phase2_synthetic"
   },
   "dataset_manifest_hash": "874a6cfad139fea2",
-  "train_wall_clock_seconds": 2.11,
+  "train_wall_clock_seconds": 2.243,
   "utility": {
     "coarse_macro_f1": 0.23129251700680273,
     "coarse_balanced_accuracy": 0.3333333333333333,
@@ -51,7 +51,7 @@
       "macro_f1": 0.02880184331797235,
       "balanced_accuracy": 0.125,
       "n_train_examples": 192,
-      "fit_seconds": 0.0177
+      "fit_seconds": 0.0169
     },
     "nonlinear_probe": {
       "macro_f1": 0.02880184331797235,
@@ -63,13 +63,25 @@
       "macro_f1": 0.11477014015704401,
       "balanced_accuracy": 0.1211720073404856,
       "n_train_examples": 192,
-      "fit_seconds": 0.0068
+      "fit_seconds": 0.0018
     },
     "fewshot_probe_k5": {
       "macro_f1": 0.032792165957995105,
       "balanced_accuracy": 0.11956521739130434,
       "n_train_examples": 40,
-      "fit_seconds": 0.0134
+      "fit_seconds": 0.0111
+    },
+    "svm_probe": {
+      "macro_f1": 0.02880184331797235,
+      "balanced_accuracy": 0.125,
+      "n_train_examples": 192,
+      "fit_seconds": 0.017
+    },
+    "tree_probe": {
+      "macro_f1": 0.09825449252913462,
+      "balanced_accuracy": 0.11148757241148546,
+      "n_train_examples": 192,
+      "fit_seconds": 0.7392
     }
   },
   "residual_fine_capability": 0.11477014015704401,
@@ -77,8 +89,10 @@
   "capability_recovery_efficiency_by_probe": {
     "linear_probe": 0.0,
     "nonlinear_probe": 0.0,
-    "knn_probe": 12.685332191954965,
-    "fewshot_probe_k5": 0.29977600670650606
+    "knn_probe": 47.80313617536225,
+    "fewshot_probe_k5": 0.3614800167421752,
+    "svm_probe": 0.0,
+    "tree_probe": 0.12549599208622722
   },
   "authorized_recovery_ratio": null
 }

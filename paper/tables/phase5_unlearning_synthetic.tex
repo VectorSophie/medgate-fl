@@ -1,16 +1,18 @@
-\begin{tabular}{llcccc}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llccccc}
 \toprule
-Scenario & Method & Seeds & Retained fine F1 & Gap to gold & Forgetting AUC \\
+Scenario & Method & Seeds & Retained fine F1 & Gap to gold & SymmetricAUC & Attack advantage \\
 \midrule
-class & adapter\_deletion\_and\_retrain & 3 & 0.035 $\pm$ 0.005 & 0.003 $\pm$ 0.007 & 0.000 $\pm$ 0.000 \\
-class & checkpoint\_rollback & 3 & 0.007 $\pm$ 0.011 & -0.025 $\pm$ 0.009 & 0.988 $\pm$ 0.021 \\
-class & full\_retrain & 3 & 0.032 $\pm$ 0.002 & 0.000 $\pm$ 0.000 & 0.000 $\pm$ 0.000 \\
-class & gradient\_ascent\_unlearning & 3 & 0.035 $\pm$ 0.002 & 0.003 $\pm$ 0.002 & 0.000 $\pm$ 0.000 \\
-class & key\_revocation\_only & 3 & 0.034 $\pm$ 0.036 & 0.002 $\pm$ 0.037 & 0.821 $\pm$ 0.215 \\
-institution & adapter\_deletion\_and\_retrain & 3 & 0.036 $\pm$ 0.018 & 0.008 $\pm$ 0.018 & 0.466 $\pm$ 0.049 \\
-institution & checkpoint\_rollback & 3 & 0.035 $\pm$ 0.013 & 0.007 $\pm$ 0.013 & 0.500 $\pm$ 0.101 \\
-institution & full\_retrain & 3 & 0.028 $\pm$ 0.000 & 0.000 $\pm$ 0.000 & 0.479 $\pm$ 0.045 \\
-institution & gradient\_ascent\_unlearning & 3 & 0.029 $\pm$ 0.005 & 0.002 $\pm$ 0.005 & 0.454 $\pm$ 0.095 \\
-institution & key\_revocation\_only & 3 & 0.036 $\pm$ 0.018 & 0.008 $\pm$ 0.018 & 0.509 $\pm$ 0.047 \\
+Class-level & Adapter deletion + retrain & 3 & 0.035 $\pm$ 0.005 & 0.003 $\pm$ 0.007 & 0.567 $\pm$ 0.067 & 0.133 $\pm$ 0.135 \\
+Class-level & Checkpoint rollback & 3 & 0.007 $\pm$ 0.011 & -0.025 $\pm$ 0.009 & 0.567 $\pm$ 0.074 & 0.135 $\pm$ 0.148 \\
+Class-level & Full retrain (gold standard) & 3 & 0.032 $\pm$ 0.002 & 0.000 $\pm$ 0.000 & 0.561 $\pm$ 0.021 & 0.122 $\pm$ 0.042 \\
+Class-level & Gradient-ascent unlearning & 3 & 0.035 $\pm$ 0.002 & 0.003 $\pm$ 0.002 & 0.542 $\pm$ 0.070 & 0.085 $\pm$ 0.140 \\
+Class-level & Key revocation only & 3 & 0.034 $\pm$ 0.036 & 0.002 $\pm$ 0.037 & 0.533 $\pm$ 0.024 & 0.067 $\pm$ 0.048 \\
+Institution-level & Adapter deletion + retrain & 3 & 0.036 $\pm$ 0.018 & 0.008 $\pm$ 0.018 & 0.546 $\pm$ 0.031 & 0.092 $\pm$ 0.063 \\
+Institution-level & Checkpoint rollback & 3 & 0.035 $\pm$ 0.013 & 0.007 $\pm$ 0.013 & 0.570 $\pm$ 0.053 & 0.140 $\pm$ 0.106 \\
+Institution-level & Full retrain (gold standard) & 3 & 0.028 $\pm$ 0.000 & 0.000 $\pm$ 0.000 & 0.541 $\pm$ 0.013 & 0.083 $\pm$ 0.026 \\
+Institution-level & Gradient-ascent unlearning & 3 & 0.029 $\pm$ 0.005 & 0.002 $\pm$ 0.005 & 0.588 $\pm$ 0.025 & 0.177 $\pm$ 0.049 \\
+Institution-level & Key revocation only & 3 & 0.036 $\pm$ 0.018 & 0.008 $\pm$ 0.018 & 0.539 $\pm$ 0.009 & 0.077 $\pm$ 0.018 \\
 \bottomrule
 \end{tabular}
+}

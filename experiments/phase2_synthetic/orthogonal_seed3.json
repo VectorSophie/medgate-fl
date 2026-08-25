@@ -1,7 +1,7 @@
 {
   "method": "orthogonal",
   "seed": 3,
-  "git_commit": "2e97dc4b030c8099c876e950dcbed3f427d6c63b",
+  "git_commit": "e47e868f2d3f4de0771656663b9a931731b8bb9f",
   "config": {
     "data": {
       "source": "synthetic",
@@ -38,7 +38,7 @@
     "output_dir": "experiments/phase2_synthetic"
   },
   "dataset_manifest_hash": "874a6cfad139fea2",
-  "train_wall_clock_seconds": 3.409,
+  "train_wall_clock_seconds": 3.204,
   "utility": {
     "coarse_macro_f1": 0.23129251700680273,
     "coarse_balanced_accuracy": 0.3333333333333333,
@@ -51,34 +51,48 @@
       "macro_f1": 0.02880184331797235,
       "balanced_accuracy": 0.125,
       "n_train_examples": 192,
-      "fit_seconds": 0.1111
+      "fit_seconds": 0.0824
     },
     "nonlinear_probe": {
       "macro_f1": 0.02880184331797235,
       "balanced_accuracy": 0.125,
       "n_train_examples": 192,
-      "fit_seconds": 0.1291
+      "fit_seconds": 0.1449
     },
     "knn_probe": {
       "macro_f1": 0.09328782621514609,
       "balanced_accuracy": 0.1054445594662986,
       "n_train_examples": 192,
-      "fit_seconds": 0.004
+      "fit_seconds": 0.0019
     },
     "fewshot_probe_k5": {
       "macro_f1": 0.0929356108450936,
       "balanced_accuracy": 0.12085791925465839,
       "n_train_examples": 40,
-      "fit_seconds": 0.0326
+      "fit_seconds": 0.0546
+    },
+    "svm_probe": {
+      "macro_f1": 0.02880184331797235,
+      "balanced_accuracy": 0.125,
+      "n_train_examples": 192,
+      "fit_seconds": 0.0768
+    },
+    "tree_probe": {
+      "macro_f1": 0.11502210644652505,
+      "balanced_accuracy": 0.11700571972311104,
+      "n_train_examples": 192,
+      "fit_seconds": 0.8734
     }
   },
-  "residual_fine_capability": 0.09328782621514609,
-  "unauthorized_capability_gain": 0.06448598289717374,
+  "residual_fine_capability": 0.11502210644652505,
+  "unauthorized_capability_gain": 0.0862202631285527,
   "capability_recovery_efficiency_by_probe": {
     "linear_probe": 0.0,
     "nonlinear_probe": 0.0,
-    "knn_probe": 16.15371726329643,
-    "fewshot_probe_k5": 1.9991889187620986
+    "knn_probe": 33.972223789368336,
+    "fewshot_probe_k5": 1.2063939031518052,
+    "svm_probe": 0.0,
+    "tree_probe": 0.13734700380910445
   },
   "authorized_recovery_ratio": null
 }

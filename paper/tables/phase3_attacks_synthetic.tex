@@ -1,15 +1,18 @@
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{lcllll}
 \toprule
 Attack & Seeds & Metric & Mean & Std & Note \\
 \midrule
-gradient\_inversion (DLG, single unaggregated gradient) & 3 & PSNR\_dB & 56.208 & 71.069 & mse mean=1.3612 \\
-membership\_inference (loss-threshold) & 3 & attack\_AUC & 0.510 & 0.048 & pre-registered target <= 0.55 (docs/research\_scope.md) \\
-adapter\_reconstruction (A2) & 3 & fine\_macro\_f1 @ auxiliary\_examples=8, epochs=5 & 0.027 & 0.000 &  \\
-adapter\_reconstruction (A2) & 3 & fine\_macro\_f1 @ auxiliary\_examples=16, epochs=5 & 0.034 & 0.013 &  \\
-adapter\_reconstruction (A2) & 3 & fine\_macro\_f1 @ auxiliary\_examples=32, epochs=5 & 0.028 & 0.003 &  \\
-black\_box\_extraction (A3) & 3 & fine\_macro\_f1 @ query\_budget=16, epochs=5 & 0.028 & 0.004 &  \\
-black\_box\_extraction (A3) & 3 & fine\_macro\_f1 @ query\_budget=32, epochs=5 & 0.028 & 0.004 &  \\
-black\_box\_extraction (A3) & 3 & fine\_macro\_f1 @ query\_budget=64, epochs=5 & 0.028 & 0.004 &  \\
-collusion (2 attackers vs solo, same total budget) & 3 & fine\_macro\_f1 gain over solo & 0.005 & 0.000 &  \\
+Simplified known-label gradient inversion & 3 & PSNR\_dB & 56.208 & 71.069 & mse mean=1.3612 \\
+Loss-threshold membership inference & 3 & SymmetricAUC & 0.539 & 0.013 & raw attack\_AUC (diagnostic, direction not symmetrized) mean=0.510 \\
+Loss-threshold membership inference & 3 & AttackAdvantage & 0.078 & 0.027 & pre-registered SymmetricAUC target <= 0.55 (docs/research\_scope.md) \\
+Auxiliary-data adapter fine-tuning recovery (A2) & 3 & fine\_macro\_f1 @ auxiliary\_examples=8, epochs=5 & 0.027 & 0.000 &  \\
+Auxiliary-data adapter fine-tuning recovery (A2) & 3 & fine\_macro\_f1 @ auxiliary\_examples=16, epochs=5 & 0.034 & 0.013 &  \\
+Auxiliary-data adapter fine-tuning recovery (A2) & 3 & fine\_macro\_f1 @ auxiliary\_examples=32, epochs=5 & 0.028 & 0.003 &  \\
+Fixed-budget hard-label distillation (A3) & 3 & fine\_macro\_f1 @ query\_budget=16, epochs=5 & 0.028 & 0.004 &  \\
+Fixed-budget hard-label distillation (A3) & 3 & fine\_macro\_f1 @ query\_budget=32, epochs=5 & 0.028 & 0.004 &  \\
+Fixed-budget hard-label distillation (A3) & 3 & fine\_macro\_f1 @ query\_budget=64, epochs=5 & 0.028 & 0.004 &  \\
+Auxiliary-data ensemble collusion proxy & 3 & fine\_macro\_f1 gain over solo & 0.005 & 0.000 &  \\
 \bottomrule
 \end{tabular}
+}

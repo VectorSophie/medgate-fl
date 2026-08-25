@@ -6,9 +6,9 @@ ARR is `n/a` when the plain-adapter/public denominator was ~0 for every seed (ex
 
 | method | n_seeds | authorized fine macro-F1 | U_public (output-only probe) | RFC (best repr. probe) | UCG | ARR |
 |---|---|---|---|---|---|---|
-| adapter_isolation | 5 | 0.029 ± 0.000 | 0.029 ± 0.000 | 0.081 ± 0.040 | 0.052 ± 0.040 | n/a (0/5 seeds defined) |
-| adversarial | 5 | 0.028 ± 0.002 | 0.034 ± 0.012 | 0.111 ± 0.021 | 0.077 ± 0.023 | 1.000 ± 0.000 (1/5 seeds defined) |
-| coarse_only | 5 | 0.028 ± 0.003 | 0.029 ± 0.000 | 0.100 ± 0.024 | 0.071 ± 0.024 | n/a (0/5 seeds defined) |
-| combined | 5 | 0.033 ± 0.014 | 0.035 ± 0.013 | 0.115 ± 0.024 | 0.081 ± 0.019 | 1.000 ± 0.000 (1/5 seeds defined) |
-| hidden_fine_head | 5 | 0.029 ± 0.000 | 0.029 ± 0.000 | 0.101 ± 0.041 | 0.072 ± 0.041 | n/a (0/5 seeds defined) |
-| orthogonal | 5 | 0.029 ± 0.000 | 0.029 ± 0.000 | 0.080 ± 0.045 | 0.051 ± 0.045 | n/a (0/5 seeds defined) |
+| adapter_isolation | 5 | 0.029 ± 0.000 | 0.029 ± 0.000 | 0.085 ± 0.035 | 0.057 ± 0.035 | n/a (0/5 seeds defined) |
+| adversarial | 5 | 0.028 ± 0.002 | 0.034 ± 0.012 | 0.122 ± 0.023 | 0.087 ± 0.027 | 1.000 ± 0.000 (1/5 seeds defined) |
+| coarse_only | 5 | 0.028 ± 0.003 | 0.029 ± 0.000 | 0.113 ± 0.027 | 0.084 ± 0.027 | n/a (0/5 seeds defined) |
+| combined | 5 | 0.033 ± 0.014 | 0.035 ± 0.013 | 0.127 ± 0.029 | 0.093 ± 0.028 | 1.000 ± 0.000 (1/5 seeds defined) |
+| hidden_fine_head | 5 | 0.029 ± 0.000 | 0.029 ± 0.000 | 0.112 ± 0.044 | 0.083 ± 0.044 | n/a (0/5 seeds defined) |
+| orthogonal | 5 | 0.029 ± 0.000 | 0.029 ± 0.000 | 0.092 ± 0.047 | 0.063 ± 0.047 | n/a (0/5 seeds defined) |

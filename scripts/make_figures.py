@@ -19,6 +19,8 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from matplotlib.patches import FancyArrowPatch, FancyBboxPatch
 
+from display_names import disp
+
 OUT = Path("paper/figures")
 OUT.mkdir(parents=True, exist_ok=True)
 
@@ -77,9 +79,9 @@ def fig_architecture():
 def fig_pipeline():
     phases = [
         ("0", "repo &\ndata validation", "DONE"),
-        ("1", "primary\nutility", "synth. tier"),
-        ("2", "capability\nisolation", "synth. tier"),
-        ("3", "security\nattacks", "synth., partial"),
+        ("1", "primary\nutility", "null+hier. tier"),
+        ("2", "capability\nisolation", "null+hier. tier"),
+        ("3", "security\nattacks", "mostly done"),
         ("4", "privacy\nmechanisms", "synth. tier"),
         ("5", "revocation &\nunlearning", "synth. tier"),
         ("6", "external\nvalidation", "pending"),
@@ -119,7 +121,7 @@ def fig_phase1_utility():
     fig, ax = plt.subplots(figsize=(6, 3.2))
     ax.bar([i - w / 2 for i in x], coarse, width=w, yerr=coarse_std, color=BLUE, label="coarse macro-F1", capsize=2)
     ax.bar([i + w / 2 for i in x], fine, width=w, yerr=fine_std, color=ORANGE, label="fine macro-F1", capsize=2)
-    ax.set_xticks(list(x)); ax.set_xticklabels(baselines, rotation=20, ha="right")
+    ax.set_xticks(list(x)); ax.set_xticklabels([disp(b) for b in baselines], rotation=25, ha="right")
     ax.set_ylabel("macro-F1 (mean ± std, 5 seeds)")
     ax.set_title("Phase 1 primary utility — SYNTHETIC TIER (pipeline validation only)", fontsize=8)
     ax.legend(frameon=False, fontsize=8)
@@ -137,14 +139,37 @@ def fig_phase2_capability_isolation():
 
     x = range(len(methods)); w = 0.35
     fig, ax = plt.subplots(figsize=(6.4, 3.2))
-    ax.bar([i - w / 2 for i in x], u_public, width=w, color=AQUA, label="U_public (output-only probe)")
-    ax.bar([i + w / 2 for i in x], rfc, width=w, yerr=rfc_std, color=ORANGE, label="RFC (best representation probe)", capsize=2)
-    ax.set_xticks(list(x)); ax.set_xticklabels(methods, rotation=20, ha="right", fontsize=7.5)
+    ax.bar([i - w / 2 for i in x], u_public, width=w, color=AQUA, label="OutputLeak (public-output-only probe)")
+    ax.bar([i + w / 2 for i in x], rfc, width=w, yerr=rfc_std, color=ORANGE, label="BestProbeRFC (best representation probe)", capsize=2)
+    ax.set_xticks(list(x)); ax.set_xticklabels([disp(m) for m in methods], rotation=25, ha="right", fontsize=7.5)
     ax.set_ylabel("fine-label macro-F1 (mean ± std, 5 seeds)")
     ax.set_title("Phase 2 capability decomposition — SYNTHETIC TIER (pipeline validation only)", fontsize=8)
     ax.legend(frameon=False, fontsize=8)
     fig.tight_layout()
     fig.savefig(OUT / "fig_phase2_capability_isolation.pdf")
+    plt.close(fig)
+
+
+def fig_phase1_hierarchical():
+    path = Path("paper/tables/phase1_hierarchical.csv")
+    if not path.exists():
+        return
+    rows = read_csv(str(path))
+    methods = [r["method"] for r in rows]
+    fine = [float(r["fine_f1_mean"]) if r["fine_f1_mean"] not in ("", None) else 0.0 for r in rows]
+    fine_std = [float(r["fine_f1_std"]) if r["fine_f1_std"] not in ("", None) else 0.0 for r in rows]
+    rfc = [float(r["rfc_mean"]) if r["rfc_mean"] not in ("", None) else 0.0 for r in rows]
+
+    x = range(len(methods)); w = 0.35
+    fig, ax = plt.subplots(figsize=(8.2, 3.6))
+    ax.bar([i - w / 2 for i in x], fine, width=w, yerr=fine_std, color=BLUE, label="AuthorizedFineUtility", capsize=2)
+    ax.bar([i + w / 2 for i in x], rfc, width=w, color=ORANGE, label="BestProbeRFC")
+    ax.set_xticks(list(x)); ax.set_xticklabels([disp(m) for m in methods], rotation=30, ha="right", fontsize=7)
+    ax.set_ylabel("fine macro-F1 (mean ± std, 2 seeds)")
+    ax.set_title("Phase 1+2 fair baselines — HIERARCHICAL FIXTURE (real learnable signal, still synthetic)", fontsize=7.5)
+    ax.legend(frameon=False, fontsize=8)
+    fig.tight_layout()
+    fig.savefig(OUT / "fig_phase1_hierarchical.pdf")
     plt.close(fig)
 
 
@@ -156,10 +181,10 @@ def fig_phase4_privacy_pareto():
         arm_rows = sorted([r for r in dp_rows if r["arm"] == arm], key=lambda r: float(r["epsilon"]))
         eps = [float(r["epsilon"]) for r in arm_rows]
         f1 = [float(r["fine_macro_f1_mean"]) for r in arm_rows]
-        ax.plot(eps, f1, marker=marker, color=color, label=arm, linewidth=1.5, markersize=5)
+        ax.plot(eps, f1, marker=marker, color=color, label=disp(arm), linewidth=1.5, markersize=5)
     no_prot = [r for r in rows if r["arm"] == "no_protection"][0]
     ax.axhline(float(no_prot["fine_macro_f1_mean"]), color=MUTED, linestyle="--", linewidth=1,
-               label="no_protection (no DP noise)")
+               label=f"{disp('no_protection')} (no DP noise)")
     ax.set_xlabel(r"privacy budget $\varepsilon$ (delta=1e-5, lower = more private)")
     ax.set_ylabel("fine macro-F1 (mean, 3 seeds)")
     ax.set_title("Phase 4 privacy-utility Pareto — SYNTHETIC TIER (pipeline validation only)", fontsize=8)
@@ -182,8 +207,8 @@ def fig_phase5_unlearning():
             vals.append(float(match["retained_fine_macro_f1_mean"]))
             errs.append(float(match["retained_fine_macro_f1_std"]))
         offset = (i - 0.5) * w
-        ax.bar([xi + offset for xi in x], vals, width=w, yerr=errs, color=color, label=f"{scenario} scenario", capsize=2)
-    ax.set_xticks(list(x)); ax.set_xticklabels(methods, rotation=20, ha="right", fontsize=7.5)
+        ax.bar([xi + offset for xi in x], vals, width=w, yerr=errs, color=color, label=f"{disp(scenario)} scenario", capsize=2)
+    ax.set_xticks(list(x)); ax.set_xticklabels([disp(m) for m in methods], rotation=25, ha="right", fontsize=7.5)
     ax.set_ylabel("retained-data fine macro-F1 (mean ± std, 3 seeds)")
     ax.set_title("Phase 5 unlearning vs. retraining — SYNTHETIC TIER (pipeline validation only)", fontsize=8)
     ax.legend(frameon=False, fontsize=8)
@@ -196,6 +221,7 @@ if __name__ == "__main__":
     fig_architecture()
     fig_pipeline()
     fig_phase1_utility()
+    fig_phase1_hierarchical()
     fig_phase2_capability_isolation()
     fig_phase4_privacy_pareto()
     fig_phase5_unlearning()

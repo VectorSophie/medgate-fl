@@ -10,6 +10,15 @@
 \usepackage{enumitem}
 \usepackage{caption}
 
+% Many \texttt{snake_case_identifier} tokens throughout this document are
+% long and unhyphenatable; relax justification so they don't produce
+% visible overfull (off-the-margin) lines instead of just uglier spacing
+% (P2-13 repair: caught by visual PDF inspection, not by the LaTeX log
+% alone -- pdflatex reports overfull hboxes as warnings, not errors, so a
+% clean compile is not sufficient evidence the PDF is visually correct).
+\tolerance=9999
+\emergencystretch=3em
+
 % --- Provenance / honesty markers (project brief: never replace these
 % with invented content while work is incomplete) -----------------------
 \newcommand{\TODO}[1]{\textcolor{red}{\textbf{[TODO: #1]}}}
@@ -21,11 +30,10 @@
 \newcommand{\status}[1]{\textit{[#1]}}
 
 \title{MedGate-FL: Capability-Isolated Federated Adapters for\\ Tiered Medical AI Access\\
-\large \status{Working title -- results to date do not yet warrant choosing between this and the
-alternative title in the project scope document; see \texttt{docs/research\_scope.md}}}
+\large \status{Preliminary technical report --- synthetic validation only, real-data tier license-gated}}
 
-\author{VectorSophie \\ \status{Affiliation \TODO{fill in}}}
-\date{Draft of \today\ --- Phases 0--5 (synthetic tier) complete; real-data tier license-gated}
+\author{VectorSophie}
+\date{Draft of \today\ --- Phases 0--5 complete on two synthetic fixtures (null-signal and hierarchical); real-data tier license-gated}
 
 \begin{document}
 \maketitle
@@ -42,30 +50,57 @@ merely hiding a prediction head. We call this \emph{capability isolation}. We
 implement MedGate-FL, a federated model with a shared backbone, a public
 coarse head, and a restricted fine-grained LoRA adapter, trained under six
 objectives (coarse-only, hidden-fine-head, adapter-isolation, adversarial
-suppression, orthogonality, and their combination), and evaluate it against
-plaintext FedAvg, FedProx, and plain federated LoRA baselines, under four
-attacker models (honest-but-curious server, unauthorized model recipient,
-black-box query access, and colluding/malicious clients). We also implement
-a conservative cryptographic layer (AES-GCM adapter-at-rest encryption, a
-minimal centralized-IAM authorization service), a simplified secure-aggregation
-simulation, DP-SGD via Opacus, and five revocation/unlearning methods compared
-against full retraining as the gold standard. \textbf{The primary dataset,
-FLamby Fed-ISIC2019, requires a human to accept its license before download}
-(\S\ref{sec:methodology}); that step has not yet been completed, so every
-result in this draft is run on a synthetic fixture that mirrors Fed-ISIC2019's
-shape (6 centers, 8 classes) but carries no real diagnostic signal.
-\textbf{Every empirical number in this paper is therefore a pipeline-validation
-result, not a scientific finding about capability isolation}, and is labeled
-as such throughout. \RESULTPENDING{real Fed-ISIC2019 results for every table
-in \S\ref{sec:results}--\S\ref{sec:ablation}}. What is established here: a
-complete, tested, reproducible implementation of the full experimental
-pipeline (data, models, six training objectives, twelve attacks, four privacy
-arms, five unlearning methods, statistical aggregation, figure/table
-generation, and this document), two genuine engineering findings (two Opacus
-integration bugs found and fixed; one flawed confidentiality test written,
-caught, and replaced with a correct one), and one honestly documented metric
-confound. Whether capability isolation actually works on real medical images
-is, at this point, unknown.
+suppression, orthogonality, and their combination), and evaluate it against a
+\emph{fair} baseline family -- a random-frozen-LoRA negative control, a
+coarse-pretrained FedLoRA baseline, an ImageNet-pretrained FedLoRA baseline,
+and a full-fine-tune upper bound -- under four attacker models (honest-but-curious
+server, unauthorized model recipient, black-box query access, and colluding/malicious
+clients) with precisely named attacks, including a genuine parameter-space
+adapter-recovery attack distinct from the fresh-training attacks. We also
+implement a conservative cryptographic layer (AES-GCM adapter-at-rest
+encryption, a minimal centralized-IAM authorization service, backed by a
+negative-test suite covering nonce/key uniqueness, ciphertext tampering, and
+AAD binding), a pairwise-masking secure-aggregation simulation whose
+correctness \emph{and} failure modes (client dropout, seed collusion) are
+both directly demonstrated rather than only asserted, DP-SGD via Opacus with
+monotonicity-tested accounting, and five revocation/unlearning methods
+compared against full retraining as the gold standard, scored with a
+corrected, direction-invariant membership-inference metric (SymmetricAUC /
+AttackAdvantage) after a review caught the previous formula's sign bug.
+\textbf{The primary dataset, FLamby Fed-ISIC2019, requires a human to accept
+its license before download} (\S\ref{sec:methodology}); that step has not yet
+been completed, so every result in this draft is run on synthetic fixtures,
+not real medical images. We use two: a \emph{null-signal fixture} that
+mirrors Fed-ISIC2019's shape (6 centers, 8 classes) but carries no real
+diagnostic signal, useful only as a pipeline smoke test; and a new
+\emph{hierarchical fixture}, built from Fed-ISIC2019's own published
+per-class institution counts, with an analytically constructed coarse/fine
+label hierarchy and per-institution/per-patient nuisance variation, which we
+independently verify is learnable by both the coarse and fine heads before
+using it for any capability-isolation claim. \textbf{Every empirical number
+in this paper is therefore a validation result on synthetic data, not a
+scientific finding about capability isolation on real medical images}, and is
+labeled as such throughout. \RESULTPENDING{real Fed-ISIC2019 results for
+every table in \S\ref{sec:results}--\S\ref{sec:ablation}}. On the
+hierarchical fixture, the fair pretrained baselines show a real, non-trivial
+coarse/fine capability gap that the null-signal fixture cannot exhibit -- but
+capability isolation does \emph{not} yet show a clean win over that
+gap: at the compute budgets we could afford, the best disjoint probe's
+representation leakage is comparable to or exceeds authorized fine-task
+utility for most isolation objectives, a finding we report rather than
+suppress (\S\ref{sec:results}). What is established here: a tested,
+reproducible implementation of the experimental pipeline on two synthetic
+fixtures (data, fair baselines, six training objectives, a renamed and
+extended attack suite, four privacy arms, five unlearning methods,
+statistical aggregation, figure/table generation, and this document); several
+genuine engineering findings (two Opacus integration bugs, one flawed
+confidentiality test, and one buggy membership-inference formula, each found,
+fixed, and documented rather than quietly patched); one class-level
+unlearning confound identified and corrected with an independent control
+population, with the original confounded numbers preserved only in a
+labeled appendix; and the negative capability-isolation finding above.
+Whether capability isolation actually works on real medical images is, at
+this point, unknown.
 \end{abstract}
 
 \section{Introduction}
@@ -230,16 +265,20 @@ collaborative-learning updates; model inversion
 \citep{hitaj2017deep} reconstruct class-representative inputs rather than
 specific records; model extraction \citep{tramer2016stealing} and training-
 data extraction from language models \citep{carlini2021extracting} clone or
-recover content from black-box query access. DLG, membership inference,
-and model extraction are implemented in \S\ref{sec:security} against
-MedGate-FL specifically, adapted to ask whether the \emph{public} path
-leaks the \emph{restricted} task -- a different question from these
-attacks' original centralized or generically-federated framing.
-\citet{melis2019exploiting} is the natural source for a property-inference
-attack this paper has not yet implemented (\S\ref{sec:limitations}); iDLG,
+recover content from black-box query access. A simplified known-label
+variant of DLG, loss-threshold membership inference, model extraction (as
+fixed-budget hard-label distillation and auxiliary-data adapter fine-tuning
+recovery), and property inference \citep{melis2019exploiting} are all
+implemented and evaluated in \S\ref{sec:security} against MedGate-FL
+specifically, adapted to ask whether the \emph{public} path leaks the
+\emph{restricted} task -- a different question from these attacks' original
+centralized or generically-federated framing; property inference in
+particular is evaluated leave-one-client-out in \S\ref{sec:security}'s A4
+integrity subsection, with the small-client-count caveat stated there. iDLG,
 the cosine-similarity gradient-inversion variant, comprehensive white-box
-membership inference, model inversion, and GAN-based leakage are cited as
-background here but likewise not yet implemented as additional attacks.
+membership inference, model inversion, and GAN-based leakage remain cited as
+background here but are not implemented as additional attacks
+(\S\ref{sec:limitations}).
 
 \paragraph{Federated and medical unlearning.} Machine unlearning's exact
 gold standard, retraining from scratch, and cheaper approximations were
@@ -458,40 +497,102 @@ disease dataset. Planned only after the primary Fed-ISIC2019 tables are
 complete, per the project's phase ordering.
 \RESULTPENDING{Phase 7 -- not started.}
 
-\subsection{Synthetic fixture} \status{implemented, used for every result
-in this draft}
+\subsection{Null-signal fixture} \status{implemented, used for the Phase 1--5
+smoke-test tables in \S\ref{sec:results}--\S\ref{sec:ablation}}
 \label{sec:synthetic-fixture}
-\texttt{medgate/data/synthetic.py} draws $32\times32$ images and labels
-independently at random, partitioned into 6 centers and 8 fine classes with
-the same coarse ontology intended for the real data (melanocytic
-$=\{$MEL, NV$\}$; keratinocytic $=\{$BCC, SCC, AK, BKL$\}$; other
-$=\{$DF, VASC$\}$ -- an experimental taxonomy justified in
-\S\ref{sec:limitations}, not a clinical policy). Because labels are
-independent of images by construction, \textbf{there is no learnable signal},
-and every result below is a \emph{pipeline-validation} result: it shows the
-code runs, aggregates, evaluates, and reports correctly, and that no method
-shows an impossible above-chance number (which would indicate a leakage
-bug) -- it is not evidence for or against capability isolation.
+\texttt{medgate/data/synthetic.py} (module docstring: ``the null-signal
+fixture'') draws $32\times32$ images and labels independently at random,
+partitioned into 6 centers and 8 fine classes with the same coarse ontology
+intended for the real data (melanocytic $=\{$MEL, NV$\}$; keratinocytic
+$=\{$BCC, SCC, AK, BKL$\}$; other $=\{$DF, VASC$\}$ -- an experimental
+taxonomy justified in \S\ref{sec:limitations}, not a clinical policy).
+Because labels are independent of images by construction, \textbf{there is
+no learnable signal}, and every result on this fixture is a
+\emph{pipeline-validation} result: it shows the code runs, aggregates,
+evaluates, and reports correctly, and that no method shows an impossible
+above-chance number (which would indicate a leakage bug) -- it is not, and
+cannot be, evidence for or against capability isolation, since there is no
+capability to isolate. A single fixture that can only prove the absence of
+bugs cannot also support a claim like ``the isolation objective preserves
+utility,'' so we built a second, genuinely learnable fixture for that
+purpose.
+
+\subsection{Hierarchical fixture} \status{implemented, tested, used for the
+Phase 1+2 results in \S\ref{sec:results-hierarchical}}
+\label{sec:hierarchical-fixture}
+\texttt{medgate/data/hierarchical\_synthetic.py} constructs a second
+synthetic dataset that \emph{is} designed to be learnable, so that fair
+pretrained baselines and capability-isolation objectives can be compared on
+something other than noise. It reuses Fed-ISIC2019's own verified per-class,
+per-institution counts (\S\ref{sec:methodology}'s
+\texttt{REAL\_FED\_ISIC\_CLASS\_COUNTS}) to reproduce the real dataset's
+class imbalance and institution sizes, then generates images analytically
+rather than sampling pixels independently of label: a coarse label
+determines one of three low-frequency geometric patterns (rings, stripes, or
+a grid), a fine label within that coarse group determines an oriented
+high-frequency texture overlaid on top, and per-institution tint/blur/noise
+and per-patient pose rotation are added as nuisance variation that a good
+model must learn to ignore. Patient identity is tracked explicitly so that
+train/val/test splits are patient-disjoint (\texttt{split\_by\_patient}),
+avoiding the leakage a naive image-level split would introduce. Before using
+this fixture for any capability-isolation claim we independently verified,
+in \texttt{tests/test\_hierarchical\_synthetic.py} and
+\texttt{tests/test\_phase1\_pretrained\_baselines.py}, that (a) a coarse
+classifier trained on it reaches clearly above-chance macro-F1, (b) a fine
+classifier trained with coarse labels available as an auxiliary signal
+reaches clearly above-chance macro-F1, and (c) the coarse and fine label
+structure are not trivially reconstructible from low-level image statistics
+alone (a sanity check against having accidentally built a second null-signal
+fixture with extra steps). This fixture is still entirely synthetic: it
+establishes that the pipeline can detect and use a real hierarchical signal
+when one exists, not that Fed-ISIC2019's actual images carry a
+qualitatively similar signal.
 
 \subsection{Baselines and methods implemented} \status{implemented, tested}
 Centralized (pooled upper bound), local-only, FedAvg \citep{mcmahan2017fedavg},
-FedProx \citep{li2020fedprox}, and plain federated LoRA (backbone frozen at
-initialization, only adapter+fine head trained) -- Phase 1
-(\S\ref{sec:results}). SCAFFOLD \citep{karimireddy2020scaffold} and FedAdam
-\citep{reddi2021adaptive} are \status{proposed but not implemented}, gated on
-Phase 1's real-data tier timing a baseline run first
-(\texttt{docs/execution\_plan.md}).
+and FedProx \citep{li2020fedprox} are run as plaintext non-LoRA references.
+For the LoRA-adapter family specifically, an earlier draft of this pipeline
+used a single ``plain federated LoRA'' baseline with the backbone frozen at
+random initialization -- a review of the implementation identified this as
+an \emph{unfair} baseline (a randomly initialized, never-trained backbone
+cannot produce useful features for either head, so any coarse/fine gap it
+shows is an artifact of the backbone, not of the isolation objective) and it
+is retained only as an explicit \emph{negative control}
+(\texttt{random\_frozen\_lora}, medgate/federated/baselines.py). The fair
+LoRA baseline family used for every capability-isolation comparison in
+\S\ref{sec:results-hierarchical} is: \texttt{coarse\_pretrained\_fedlora}
+(backbone pretrained on the coarse task only, then LoRA-adapted federatedly
+for the fine task -- the intended production regime), \texttt{imagenet\_pretrained\_fedlora}
+(backbone initialized from a torchvision ImageNet-pretrained MobileNetV3-Small,
+then LoRA-adapted federatedly), and \texttt{full\_finetune} (every parameter,
+not just the adapter, trained federatedly, as an upper bound on achievable
+utility with no capability isolation at all). SCAFFOLD
+\citep{karimireddy2020scaffold} and FedAdam \citep{reddi2021adaptive} remain
+\status{proposed but not implemented}, gated on Phase 1's real-data tier
+timing a baseline run first (\texttt{docs/execution\_plan.md}).
 
 \subsection{Statistical protocol} \status{implemented}
 Fixed dataset splits (data generation seed held constant across all method
-seeds); 5 seeds for Phases 1--2, 3 seeds for Phases 3--5 (a development-tier
-choice per the project brief's ``3 for development, 5 for final''
-allowance -- final real-data runs will use 5); mean, standard deviation
-reported for every table; every raw per-run JSON preserved under
-\texttt{experiments/}. \status{not yet implemented}: bootstrap 95\% CIs,
-paired Wilcoxon signed-rank tests, Holm--Bonferroni correction -- deferred
-until real-data seed counts justify them (running significance tests on
-pipeline-validation synthetic numbers would be exactly the ``inappropriately
+seeds); 5 seeds for Phases 1--2 and 3 seeds for Phases 3--5 on the
+null-signal fixture (a development-tier choice per the project brief's ``3
+for development, 5 for final'' allowance -- final real-data runs will use
+5); mean, standard deviation reported for every table; every raw per-run
+JSON preserved under \texttt{experiments/}. The hierarchical fixture's
+Phase~1+2 results (\S\ref{sec:results-hierarchical}) use only \textbf{2
+seeds}, not 5: the originally planned configuration (25 patients/institution,
+6 pretraining epochs, 6 federated rounds$\times$3 local epochs, 3 seeds)
+exceeded 12 minutes without finishing a single seed on the CPU-only hardware
+in Table~\ref{tab:hardware} and was killed; the committed configuration
+(\texttt{configs/phase1\_hierarchical.yaml}: 12 patients/institution, 4
+pretraining epochs, 4 rounds$\times$2 local epochs, 2 seeds) was chosen to
+finish in $\sim$5 minutes instead, and the resulting 2-seed standard
+deviations in Table~\ref{tab:phase1-hierarchical} should be read as noisy,
+not as a considered statistical choice -- this is a resource constraint,
+documented here and in the config file's own comments, not a claim that 2
+seeds is methodologically sufficient. \status{not yet implemented}: bootstrap
+95\% CIs, paired Wilcoxon signed-rank tests, Holm--Bonferroni correction --
+deferred until real-data seed counts justify them (running significance
+tests on 2--5-seed synthetic numbers would be exactly the ``inappropriately
 tiny sample counts'' the project brief warns against dressing up as
 statistics).
 
@@ -522,6 +623,80 @@ degenerate-collapse behavior described in
 the marginal class frequency, different random initializations converge to
 the same shortcut. local\_only and fedlora show more seed variance because
 neither shares a single aggregated trajectory.
+
+\subsection{Phase 1+2: fair baselines and capability isolation on the
+hierarchical fixture}
+\label{sec:results-hierarchical}
+\status{implemented and executed -- hierarchical synthetic fixture, 2 seeds
+(\S\ref{sec:methodology})}
+Unlike Phase 1 above, the hierarchical fixture (\S\ref{sec:hierarchical-fixture})
+has real learnable coarse and fine structure, so these numbers can, in
+principle, actually speak to whether capability isolation preserves
+authorized utility while suppressing unauthorized leakage -- with the
+2-seed caveat from \S\ref{sec:methodology} kept firmly in view.
+\input{tables/phase1_hierarchical.tex}
+\captionof{table}{Fair baselines and capability-isolation methods on the
+hierarchical fixture, 2 seeds. OutputLeak = fine-label recovery from the
+public output alone; BestProbeRFC = fine-label recovery from the best of
+six probes on the public representation (\S\ref{sec:ablation}'s
+vocabulary applies identically here). ARR is uninformative (and can exceed
+1, or appear enormous) for \emph{coarse\_only} and \emph{hidden\_fine\_head}:
+see discussion below.}
+\label{tab:phase1-hierarchical}
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.85\textwidth]{figures/fig_phase1_hierarchical.pdf}
+\caption{AuthorizedFineUtility vs.\ BestProbeRFC by method, hierarchical
+fixture (mean $\pm$ std, 2 seeds).}
+\label{fig:phase1-hierarchical}
+\end{figure}
+Two things are established cleanly. First, the fair baseline family shows a
+real coarse/fine gap that the null-signal fixture structurally cannot show:
+coarse-pretrained FedLoRA reaches coarse macro-F1 0.857 against a
+$\approx$0.33 constant-predictor floor for 3-way coarse, confirming
+\S\ref{sec:hierarchical-fixture}'s independent learnability checks hold
+under the full federated pipeline, not just in isolated unit tests. Second,
+random-frozen LoRA (the negative control) is unambiguously the worst
+performer on both axes (fine-F1 0.076, the lowest of all ten rows) and is
+no longer used as the primary comparison point for any capability-isolation
+claim -- it is retained \emph{only} as the floor a randomly initialized,
+never-trained backbone provides, exactly the role \S\ref{sec:methodology}
+assigns it.
+
+What is \emph{not} established is a capability-isolation win. Comparing
+AuthorizedFineUtility (Fine F1 column) against BestProbeRFC directly:
+BestProbeRFC exceeds AuthorizedFineUtility for eight of the ten rows,
+including every one of the six capability-isolation objectives (e.g.\
+adversarial suppression: fine-F1 0.180 vs.\ BestProbeRFC 0.466; combined
+adversarial+orthogonal: fine-F1 0.191 vs.\ BestProbeRFC 0.500). Concretely,
+an attacker running the best of six disjoint probes against the frozen
+public representation recovers as much or more fine-grained information as
+an authorized user gets from the adapter itself, for every isolation
+objective we tried, at the compute budget this hardware could afford. We do
+not read this as ``capability isolation does not work'' -- 2 seeds and a
+12-patient-per-institution fixture is not enough evidence to falsify the
+idea -- but we equally do not read it as evidence \emph{for} isolation, and
+we report the raw comparison rather than only the composite ARR score that
+would obscure it. This is the central reason this paper's abstract and
+\S\ref{sec:discussion}'s Discussion both state the capability-isolation
+question as open rather than answered.
+
+The ARR column requires one more caveat before it is read at all: ARR's
+denominator (\texttt{coarse\_pretrained\_fedlora}'s own fine-F1, per
+\texttt{medgate/capability\_metrics.py}) is not guaranteed positive on this
+fixture. For \emph{coarse\_only} (no fine head exists, so
+AuthorizedFineUtility $=0$ by construction) and \emph{hidden\_fine\_head},
+OutputLeak (0.282 and 0.221 respectively) exceeds the plain-adapter
+reference's own fine-F1 in at least one seed, flipping the denominator's
+sign and producing the large, unstable ARR values in the table (3.918 and
+25.850) -- these are not ``isolation recovers 4--26$\times$ more utility
+than plain adapters'' claims; they are the metric's own documented failure
+mode (\texttt{authorized\_recovery\_ratio}'s docstring: ``undefined ...
+would look meaningful but isn't'') surfacing at a less extreme, non-zero
+denominator than the near-zero case that function already guards against.
+We report the raw number rather than suppress it, but the reader should
+weight AuthorizedFineUtility and BestProbeRFC directly over ARR for this
+table.
 
 \subsection{Phase 4: privacy mechanisms}
 \label{sec:privacy}
@@ -587,24 +762,76 @@ representative of a real-scale backbone}.
 \paragraph{A1/A3 -- membership inference.} A loss-threshold attack
 (explicitly \emph{not} \citeauthor{shokri2017membership}'s full
 shadow-model method \citep{shokri2017membership} -- no shadow models are
-trained here). AUC $0.510 \pm 0.048$ over 3 seeds sits near the
-pre-registered target ($\le 0.55$, \texttt{docs/research\_scope.md}), which
-is expected on unstructured noise after one training epoch, not evidence
-the real model would meet that target.
+trained here), scored with SymmetricAUC $=\max(\text{AUC}, 1-\text{AUC})$
+and AttackAdvantage $=2|\text{AUC}-0.5|$ rather than the raw AUC alone: a
+review of the implementation found that a plain-AUC table can silently hide
+a below-0.5-AUC attack (which is exactly as informative to an attacker,
+just inverted -- ``predict non-member when the loss-threshold rule says
+member'') as if it were a non-finding, so both direction-invariant metrics
+are now the primary reported numbers, with the raw AUC kept only as a
+diagnostic column (Table~\ref{tab:phase3}). SymmetricAUC $0.539 \pm 0.013$
+over 3 seeds (raw AUC $0.510 \pm 0.048$) sits near the pre-registered target
+($\le 0.55$, \texttt{docs/research\_scope.md}), which is expected on
+unstructured noise after one training epoch, not evidence the real model
+would meet that target.
 
-\paragraph{A2 -- adapter reconstruction.} Frozen public backbone, fresh
-adapter+fine head trained on 8/16/32 auxiliary examples: utility stayed
-flat ($\approx 0.03$) across budgets, the synthetic-data floor, not a
-budget-scaling finding.
+\paragraph{A2 -- auxiliary-data adapter fine-tuning recovery.} Frozen public
+backbone, fresh adapter+fine head trained on 8/16/32 auxiliary examples:
+utility stayed flat ($\approx 0.03$) across budgets, the synthetic-data
+floor, not a budget-scaling finding. This attack, like A3 below, never
+touches the true adapter's own weights -- it trains a completely fresh one
+from scratch; \S\ref{sec:adapter-recovery} reports a distinct attack that
+does operate on the real weights directly.
 
-\paragraph{A3 -- black-box extraction.} Zero access to weights, hard-label
-distillation from 16/32/64 queries (\citeauthor{tramer2016stealing}-style
-\citep{tramer2016stealing}): same flat floor.
+\paragraph{A3 -- fixed-budget hard-label distillation.} Zero access to
+weights, hard-label distillation from 16/32/64 queries
+(\citeauthor{tramer2016stealing}-style \citep{tramer2016stealing}): same
+flat floor.
 
 \paragraph{Collusion.} Two attackers with disjoint 16-example auxiliary
-halves, logit-averaged: a small positive gain over solo
-($+0.005 \pm 0.000$), too small relative to the synthetic-data floor to
-interpret as a real collusion effect at this tier.
+halves, logit-averaged (auxiliary-data ensemble collusion proxy): a small
+positive gain over solo ($+0.005 \pm 0.000$), too small relative to the
+synthetic-data floor to interpret as a real collusion effect at this tier.
+
+\subsection{A5: genuine parameter-space adapter recovery}
+\label{sec:adapter-recovery}
+\status{implemented, tested, executed -- synthetic tier}
+A2/A3/collusion above all train a fresh adapter from public/auxiliary data
+and never touch the protected artifact's actual parameters. This subsection
+adds the one attack in this project that does: the attacker starts from a
+\emph{partial, genuinely leaked} copy of the true adapter's own \texttt{up}
+weight matrix -- e.g.\ an insufficiently protected memory dump or a
+side-channel on a device that had already decrypted the adapter -- and
+completes the missing entries via low-rank matrix completion, exploiting
+that this project's LoRA adapter is low-rank \emph{by construction}
+(\texttt{medgate/attacks/adapter\_recovery.py}). \textbf{This is not an
+attack on AES-GCM}: a correctly implemented AEAD ciphertext reveals nothing
+about the plaintext bit-by-bit, so partial leakage of ciphertext is not
+equivalent to partial leakage of adapter weights, and this module makes no
+claim about breaking encryption -- its threat model is a leak of already-decrypted
+plaintext weights.
+\input{tables/phase3_adapter_recovery_synthetic.tex}
+\captionof{table}{Genuine parameter-space adapter recovery, synthetic
+tier, 3 seeds. Cosine sim./Frob.\ error are computed against the true
+\texttt{adapter.up} matrix directly; functional fine-F1 plugs the completed
+adapter into the model and evaluates the fine task on the (signal-free)
+synthetic test pool.}
+\label{tab:phase3-adapter-recovery}
+Two findings are real and hold regardless of the fixture's lack of
+diagnostic signal, because they concern parameter-space geometry, not the
+fine task: recovery quality improves monotonically with more revealed
+entries (cosine similarity 0.453 at 20\% reveal $\to$ 0.967 at 90\% reveal),
+and collusion strictly helps single-attacker-vs-pooled parameter recovery
+(two independent 30\%-each leaks pool to $\approx$53\% coverage and raise
+cosine similarity from 0.543 solo to 0.710 pooled) -- both are direct,
+mechanical consequences of matrix completion having more constraints to
+work with, not synthetic-data artifacts. What is a synthetic-data artifact:
+functional fine-F1 stays flat at $\approx 0.03$ even at 90\% parameter
+reveal (cosine similarity 0.967), because the fine task itself carries no
+signal for a recovered adapter to exploit -- this attack's \emph{parameter}-space
+success is real and measured against ground truth, but its
+\emph{functional} consequence cannot be assessed until real Fed-ISIC2019
+data is available.
 
 \subsection{A4: integrity attacks vs.\ aggregators, and property inference}
 \label{sec:integrity}
@@ -670,29 +897,41 @@ place.
 
 \input{tables/phase2_capability_isolation_synthetic.tex}
 \captionof{table}{Phase 2 capability-isolation methods, synthetic tier, 5
-seeds. ARR is \texttt{n/a} where its denominator
-($U_{\text{plain adapter}} - U_{\text{public}}$) was $\approx 0$ for every
-seed -- the metric correctly declining to report a number it cannot
-support (\texttt{medgate/capability\_metrics.py}), not a bug.}
+seeds, re-run under the expanded six-probe suite (P1-8 repair, see below).
+ARR is \texttt{n/a} where its denominator
+(\texttt{adapter\_isolation}'s own AuthorizedFineUtility minus OutputLeak --
+the ``plain adapter'' reference point, \S\ref{sec:medgate-objectives}) was
+$\approx 0$ for every seed -- the metric correctly declining to report a
+number it cannot support
+(\texttt{medgate/capability\_metrics.py}), not a bug; contrast with
+\S\ref{sec:results-hierarchical}, where the same denominator is small but
+nonzero and ARR becomes unstable rather than \texttt{n/a} instead.}
 \label{tab:phase2}
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.75\textwidth]{figures/fig_phase2_capability_isolation.pdf}
-\caption{$U_{\text{public}}$ vs.\ RFC by method (synthetic tier; error bars
+\caption{OutputLeak vs.\ BestProbeRFC by method (synthetic tier; error bars
 = std over 5 seeds).}
 \label{fig:phase2}
 \end{figure}
-$U_{\text{public}}$ is operationalized as the fine-label macro-F1 of a
-linear probe fit on the public \emph{output} (coarse logits) alone --
-the floor an unauthorized user with zero representation access gets;
-RFC is the best of four probes (linear, nonlinear, $k$-NN, few-shot,
-$k{=}5$) fit on the frozen public \emph{representation}
-(\texttt{medgate/attacks/probes.py}). On this synthetic fixture RFC bounces
-in a $\approx 0.03$--$0.14$ range across all six methods -- test-set-size
-noise (38 examples/fine-class in the pooled test set), not a real isolation
-effect; \textbf{no method's RFC-vs-$U_{\text{public}}$ gap here supports or
-refutes whether adversarial suppression or the orthogonality term actually
-help}, which is exactly the question real data is needed to answer.
+OutputLeak is operationalized as the fine-label macro-F1 of a linear probe
+fit on the public \emph{output} (coarse logits) alone -- the floor an
+unauthorized user with zero representation access gets; BestProbeRFC is the
+best of six probes (linear, nonlinear, $k$-NN, few-shot $k{=}5$, SVM,
+decision tree) fit on the frozen public \emph{representation}
+(\texttt{medgate/attacks/probes.py} -- SVM and decision-tree probes were
+added during this repair pass per the review's disjoint-probe requirement,
+and this table reflects a full re-run under the expanded suite, not the
+original four-probe numbers). On this synthetic fixture BestProbeRFC
+bounces in a $\approx 0.085$--$0.127$ range across all six methods --
+test-set-size noise (38 examples/fine-class in the pooled test set), not a
+real isolation effect; \textbf{no method's BestProbeRFC-vs-OutputLeak gap
+here supports or refutes whether adversarial suppression or the
+orthogonality term actually help}, which is exactly the question real data
+is needed to answer -- and exactly the question
+\S\ref{sec:results-hierarchical}'s learnable fixture was built to make
+askable, where (unlike here) the answer so far leans negative rather than
+undecidable.
 
 \paragraph{Coarse-ontology sensitivity.} \status{proposed, not yet
 implemented} The project brief requires at least one alternative coarse
@@ -709,11 +948,16 @@ map.}
 class-level only}
 
 \input{tables/phase5_unlearning_synthetic.tex}
-\captionof{table}{Phase 5, synthetic tier, 3 seeds. Forgetting AUC:
-membership-inference AUC between removed training data and held-out
-retained test data; $\approx 0.5$ = no longer distinguishable from
-never-seen data (good forgetting). \textbf{The class scenario's forgetting
-AUC is confounded} (see text) and should not be read at face value.}
+\captionof{table}{Phase 5, synthetic tier, 3 seeds, using the corrected
+never-trained-same-class control population (see text). SymmetricAUC /
+AttackAdvantage: the same direction-invariant membership-inference metrics
+used in \S\ref{sec:security} (\S\ref{sec:security}'s A1/A3 paragraph),
+applied here between removed training data and an independent held-out
+control; SymmetricAUC $\approx 0.5$, AttackAdvantage $\approx 0$ = no longer
+distinguishable from data the model never saw (good forgetting). The
+previously reported, class-confounded numbers are preserved for comparison
+in Table~\ref{tab:phase5-confounded} (Appendix), clearly marked as not to
+be used as evidence.}
 \label{tab:phase5}
 \begin{figure}[h]
 \centering
@@ -736,38 +980,83 @@ Patient-level and patient-group-level removal were \textbf{not run}: the
 synthetic fixture has no patient/lesion manifest to remove by; only real
 Fed-ISIC2019 data will have one.
 
-\paragraph{A confound found and documented, not hidden.} The class-scenario
-forgetting AUC is contaminated: removed data is entirely one class and
-retained test data is the other seven, so any class-level loss asymmetry
-that exists even in an \emph{untrained} model biases this AUC regardless of
-real memorization. This is directly visible in
-Table~\ref{tab:phase5}: \texttt{checkpoint\_rollback} (never trained on the
-post-removal data at all) still shows forgetting AUC $\approx 0.99$ in the
-class scenario, purely from this confound. The institution scenario does
-not have this problem (all institutions share the same label distribution),
-and there \texttt{key\_revocation\_only}'s forgetting AUC sits statistically
-indistinguishable from every other method's ($\approx 0.45$--$0.51$) --
-expected on synthetic noise, since there is nothing to memorize in the
-first place, and therefore \emph{not} evidence that revocation and
-unlearning are equivalent; establishing the real gap the project's
-non-claim asserts exists requires real, learnable data.
+\paragraph{A confound found, documented, and fixed.} The class-scenario
+forgetting metric was originally contaminated: removed data was entirely
+one class and the ``retained'' control pool used to score membership
+inference was the other seven classes, so any class-level loss asymmetry
+that exists even in an \emph{untrained} model biased the score regardless
+of real memorization. This was directly visible in the original numbers:
+\texttt{checkpoint\_rollback} (never trained on the post-removal data at
+all, so it has nothing to forget) still showed forgetting AUC
+$\approx 0.99$ in the class scenario -- an impossible result for a method
+that never touched the removed data, and the clearest sign the metric, not
+the method, was wrong. The fix (\texttt{medgate/data/synthetic.py}'s
+\texttt{make\_never\_trained\_class\_pool}) builds a genuinely independent
+control population: fresh synthetic examples of the \emph{same} removed
+class, generated from a disjoint seed offset, that the model never trained
+on regardless of scenario or method -- so any remaining loss asymmetry
+between ``removed'' and ``control'' now reflects the removal method's
+actual effect, not a pre-existing class-difficulty gap. Table~\ref{tab:phase5}
+reports this corrected metric as primary, and the fix's effect is visible
+directly: \texttt{checkpoint\_rollback}'s class-scenario score drops from
+the confounded SymmetricAUC $0.988 \pm 0.021$ (Table~\ref{tab:phase5-confounded},
+Appendix) to a corrected $0.567 \pm 0.074$ -- much closer to the $\approx 0.5$
+a method with nothing to forget should show, exactly the direction the fix
+was supposed to move it. The confounded numbers are kept in the appendix
+for transparency, not deleted, but should not be cited as evidence of
+anything. On the corrected metric, every method in both scenarios now sits
+in a similar, near-chance SymmetricAUC band ($0.53$--$0.59$) with
+overlapping standard deviations across only 3 seeds -- consistent with
+there being nothing to memorize on a null-signal fixture in the first
+place, and therefore still \emph{not} evidence that revocation and full
+unlearning are equivalent in general; establishing the real gap the
+project's non-claim asserts exists requires real, learnable data.
 
 \section{Discussion}
 \label{sec:discussion}
-Nothing in this draft yet supports or refutes MedGate-FL's central
-hypothesis -- that capability isolation survives realistic attacks better
-than a plain adapter or a hidden fine head -- because every number so far
-comes from a fixture with no learnable signal by construction
-(\S\ref{sec:synthetic-fixture}). What this phase of the work does support:
-the full experimental pipeline (six training objectives, four privacy arms,
-twelve attacks, five unlearning methods, statistics, figures, tables, this
-document) runs end-to-end, is deterministic given a seed, and produces
-numbers that behave exactly as a correct implementation with no signal
-should -- no method spuriously exceeds chance, secure aggregation's masking
-provably cancels in the aggregate, DP-SGD's accountant returns sane
-epsilons, and a mistaken security test was caught by its own failure rather
-than shipped. That is a necessary, not sufficient, condition for the real
-result to be trustworthy once the license-gated data is available.
+The null-signal fixture (\S\ref{sec:synthetic-fixture}) cannot, by
+construction, speak to MedGate-FL's central hypothesis -- that capability
+isolation survives realistic attacks better than a plain adapter or a hidden
+fine head -- and we do not claim it does. What it supports: the full
+experimental pipeline (fair baselines, six training objectives, four privacy
+arms, a renamed and extended attack suite, five unlearning methods,
+statistics, figures, tables, this document) runs end-to-end, is
+deterministic given a seed, and produces numbers that behave exactly as a
+correct implementation with no signal should -- no method spuriously
+exceeds chance, secure aggregation's masking provably cancels in the
+aggregate, DP-SGD's accountant returns sane epsilons, and mistakes found
+along the way (a flawed confidentiality test, a sign-buggy membership-inference
+formula, an unfair baseline, a class-level unlearning confound) were each
+caught by their own failure and fixed rather than shipped.
+
+The hierarchical fixture (\S\ref{sec:hierarchical-fixture},
+\S\ref{sec:results-hierarchical}) goes one step further and is where the
+central hypothesis becomes, for the first time in this project, actually
+testable rather than structurally undecidable -- and the honest answer at
+this compute budget is \emph{not yet supported}: on 2 seeds, the best
+disjoint representation probe recovers as much or more fine-grained
+information as the authorized adapter path provides, for every
+capability-isolation objective tried. We see three explanations, not yet
+distinguishable with the evidence in hand, and list them in the order we
+find most to least likely: (1) the training budget (4 federated rounds
+$\times$ 2 local epochs on 12 patients/institution, \S\ref{sec:methodology})
+is too small for the isolation objectives' adversarial/orthogonality
+penalties to actually suppress representation leakage before the run ends,
+a hyperparameter-and-compute problem rather than a conceptual one; (2) the
+hierarchical fixture's coarse and fine labels are more entangled in
+representation space than real Fed-ISIC2019 images would be, since the fine
+texture overlay in \texttt{hierarchical\_synthetic.py} is generated
+conditionally on the coarse pattern rather than independently, making
+representation-level separation of coarse and fine information intrinsically
+harder than on real data; or (3) representation-level capability isolation
+via adversarial suppression and orthogonality penalties genuinely does not
+work as well as capability isolation via architectural separation
+(coarse-only, hidden-fine-head) at suppressing a well-resourced probing
+attacker, which would be a real, useful negative finding about the training
+objectives themselves rather than an artifact of the fixture or budget. Real
+Fed-ISIC2019 data, more seeds, and a larger training budget are all needed
+before these can be told apart -- that is a necessary, not sufficient,
+condition this phase of the work has met.
 
 \section{Limitations}
 \label{sec:limitations}
@@ -826,19 +1115,24 @@ standard, well-established assumptions, not a proof specific to this
 system; the secure-aggregation simulation and LoREnc-style obfuscation
 discussion (\S\ref{sec:related}) are described only as protection/
 obfuscation mechanisms, never as proofs.
-\item \textbf{Attacks now implemented} (\S\ref{sec:integrity}, added after
-an earlier draft of this list): property inference, and the A4 integrity
-attacks (label-flipping, sign-flipping, model-replacement, backdoor,
-free-rider, malformed-update, and token-replay -- the last via
+\item \textbf{Attacks now implemented} (added after earlier drafts of this
+list): property inference and the A4 integrity attacks
+(\S\ref{sec:integrity}: label-flipping, sign-flipping, model-replacement,
+backdoor, free-rider, malformed-update, and token-replay -- the last via
 \texttt{medgate/crypto/authorization.py}'s TTL/expiry support, tested in
-\texttt{tests/test\_phase3\_integrity\_and\_property.py}). \textbf{Attacks
-still not implemented}, listed exactly, not glossed over: client
-attribution, full fine-tuning recovery under a fixed compute budget
-distinct from the few-shot probe already implemented, low-rank adapter
-completion, known-adapter comparison, and the stronger gradient-inversion
-variants iDLG/Geiping et al. (both now \texttt{VERIFIED} citations,
-\S\ref{sec:related}, but not yet implemented as additional attacks
-alongside the simplified DLG in \S\ref{sec:security}).
+\texttt{tests/test\_phase3\_integrity\_and\_property.py}); and, added
+during this repair pass, genuine parameter-space low-rank adapter
+completion and its two-attacker collusion variant (\S\ref{sec:adapter-recovery}),
+disjoint SVM/decision-tree probes alongside the original four
+(\S\ref{sec:ablation}), and a fair pretrained-baseline family replacing the
+single unfair frozen-backbone baseline (\S\ref{sec:results-hierarchical}).
+\textbf{Attacks still not implemented}, listed exactly, not glossed over:
+client attribution, full fine-tuning recovery under a fixed compute budget
+distinct from the few-shot probe already implemented, known-adapter
+comparison, and the stronger gradient-inversion variants iDLG/Geiping et
+al. (both now \texttt{VERIFIED} citations, \S\ref{sec:related}, but not yet
+implemented as additional attacks alongside the simplified DLG in
+\S\ref{sec:security}).
 \item \textbf{Statistical rigor deferred.} Bootstrap confidence intervals,
 paired significance tests, and Holm--Bonferroni correction are not yet
 applied (\S\ref{sec:methodology}) -- deliberately, to avoid running them on
@@ -869,26 +1163,52 @@ Tables are generated only by \texttt{scripts/make\_phaseN\_table.py} and
 hand. Environment: \texttt{requirements.txt} (direct) and
 \texttt{requirements.lock.txt} (full pinned closure via \texttt{pip
 freeze}); PyTorch 2.13.0 CPU build. One-command smoke test:
-\texttt{bash scripts/smoke\_test.sh} (30/30 tests passing as of this
-draft). Compilation: \texttt{pdflatex main; bibtex main; pdflatex main;
+\texttt{bash scripts/smoke\_test.sh} (85/85 tests passing as of this draft,
+up from 30/30 in the pre-repair draft -- the growth is new coverage added
+during this repair pass: the hierarchical fixture, fair pretrained
+baselines, corrected unlearning/representation metrics, genuine adapter
+recovery, and an expanded AES-GCM/secure-aggregation negative-test suite,
+not evidence of a larger pipeline surface alone). Compilation: \texttt{pdflatex main; bibtex main; pdflatex main;
 pdflatex main}, run from \texttt{paper/} -- verified to succeed on a
 freshly-installed, user-space TeX Live (scheme-basic + hyperref, booktabs,
 geometry, xcolor, natbib, enumitem, caption) during this project.
 
 \section{Conclusion}
-This paper implements, tests, and runs the complete MedGate-FL pipeline --
-architecture, six training objectives, four privacy arms, twelve attacks,
-five unlearning methods, and this document -- against a synthetic fixture
-because the real primary dataset's license has not yet been accepted by a
-human. Every mechanism runs correctly and every number behaves as expected
-for data with no signal, including two real Opacus bugs fixed and one
-flawed security test caught and corrected along the way. Whether capability
-isolation actually works -- whether authorized users recover fine utility,
-unauthorized attackers stay near the public floor, and the combined
-objective earns its added complexity over the five simpler alternatives --
-remains open, and is exactly what Phase 1's real-data tier
-(\S\ref{sec:methodology}) will test once unblocked.
-\RESULTPENDING{the paper's actual scientific conclusion.}
+This paper implements, tests, and runs the MedGate-FL pipeline --
+architecture, a fair pretrained-baseline family, six training objectives,
+four privacy arms, a precisely-named and extended attack suite (including a
+genuine parameter-space adapter-recovery attack), five unlearning methods,
+and this document -- against two synthetic fixtures, because the real
+primary dataset's license has not yet been accepted by a human. What
+changed since the version of this project a review found to be a
+``no-signal pipeline smoke test described too confidently'': the single
+unfair frozen-backbone baseline is now a labeled negative control, not the
+default comparison point; a second, independently-verified-learnable
+hierarchical fixture exists specifically because the null-signal fixture
+structurally cannot support any capability-isolation claim; a sign-buggy
+membership-inference formula and a class-level unlearning confound were
+each found, documented, and fixed, with their old numbers kept only in
+clearly marked appendices; and every attack, metric, and baseline name in
+this document now names the thing it actually measures. What works, on
+synthetic data: the pipeline runs correctly end-to-end on both fixtures,
+the fair baselines show a real coarse/fine capability gap on the
+hierarchical fixture, secure aggregation's masking correctness and failure
+modes are both directly demonstrated, DP-SGD's accounting is monotonic and
+tested, and the crypto layer resists the negative tests we wrote against
+it. What does not yet work, or is not yet known: capability isolation
+itself does not show a clean win on the one fixture capable of testing
+it -- the best disjoint probe matches or beats authorized fine utility for
+every isolation objective at this compute budget (\S\ref{sec:results-hierarchical},
+\S\ref{sec:discussion}) -- and we report that as a finding, not a caveat to
+be minimized. Whether that negative result reflects the training budget,
+the fixture's coarse/fine entanglement, or a real limitation of
+representation-level isolation objectives, and whether any of this
+transfers to real dermoscopic images at all, remains open, and is exactly
+what Phase 1's real-data tier (\S\ref{sec:methodology}) will test once the
+Fed-ISIC2019 license is accepted.
+\RESULTPENDING{the paper's actual scientific conclusion -- capability
+isolation's real-world validity, which no synthetic fixture, however
+carefully built, can establish.}
 
 \bibliographystyle{plainnat}
 \bibliography{references}
@@ -896,8 +1216,14 @@ remains open, and is exactly what Phase 1's real-data tier
 \appendix
 \section{Hyperparameters}
 \status{implemented} Full hyperparameters for every synthetic-tier run are
-in \texttt{configs/phase\{1,2,3,4,5\}\_synthetic.yaml}, not restated here
-to avoid drift between two copies -- see \S\ref{sec:reproducibility}.
+in the eight per-phase YAML files under \texttt{configs/} (one each for
+Phase 1, Phase 1-hierarchical, Phase 2, Phase 3, Phase 3-adapter-recovery,
+Phase 3-integrity, Phase 4, and Phase 5; the hierarchical and
+adapter-recovery configs added in this repair pass document their own
+resource-driven parameter choices inline, e.g.\
+\texttt{configs/phase1\_hierarchical.yaml}'s 2-seed, 12-patient
+scale-down -- \S\ref{sec:methodology}), not restated here to avoid drift
+between two copies -- see \S\ref{sec:reproducibility}.
 
 \section{Additional detail on the confidentiality-test correction}
 \label{app:confidentiality-fix}
@@ -917,6 +1243,56 @@ the \emph{same} true update, masked with two different (attacker-unknown)
 seeds, produces clearly different outputs -- the property that actually
 demonstrates hiding. Both the wrong reasoning and the fix are kept in
 \texttt{medgate/privacy/secure\_aggregation.py}'s
-\texttt{confidentiality\_check} docstring so the mistake is not repeated.
+\texttt{masking\_correctness\_diagnostic} docstring (renamed from
+\texttt{confidentiality\_check} during this repair pass, since
+``confidentiality'' overstated what a single-process, no-DH,
+no-dropout-recovery simulation can establish -- \S\ref{sec:privacy}) so the
+mistake is not repeated.
+
+\section{Additional detail on the membership-inference metric correction}
+\label{app:mi-metric-fix}
+A second measurement bug, distinct from the confidentiality-test mistake
+above, was found in \texttt{medgate/attacks/membership\_inference.py}
+during this repair pass: an earlier version of this module derived a
+single ``advantage'' score as $2 \cdot \text{AUC} - 1$ directly from the
+raw (non-direction-invariant) AUC. This formula is only correct for
+AUC $\ge 0.5$; for AUC $< 0.5$ it returns a \emph{negative} number that
+reads as ``the attack did worse than random'' when in fact an AUC
+of, say, 0.3 is exactly as informative to an attacker as an AUC of 0.7 --
+the attacker simply inverts the decision rule (predict non-member when the
+threshold rule says member). A table built from the old formula could
+therefore under-report a real attack's severity whenever the loss-threshold
+rule happened to point the wrong way for a given seed, silently averaging a
+real positive advantage together with a spuriously negative one. The fix
+adds \texttt{symmetric\_auc(auc) = max(auc, 1 - auc)} and
+\texttt{attack\_advantage(auc) = 2\,|\text{auc} - 0.5|}, both direction-invariant,
+as the primary reported quantities everywhere in this paper a
+membership-inference-style AUC is used (\S\ref{sec:security},
+\S\ref{sec:unlearning}); the raw AUC is retained only as a diagnostic
+column. \texttt{tests/test\_unlearning\_metrics.py} includes boundary
+cases (AUC exactly 0.0, 0.5, 1.0, and the symmetric pairs 0.1/0.9,
+0.25/0.75) that concretely demonstrate the old formula's failure mode --
+one test is named, verbatim,
+\texttt{test\_raw\_auc\_near\_zero\_would\_have\_been\_misread\_as\_good\_forgetting\_by\_the\_old\_code}
+-- and the new formula's correctness.
+
+\section{Confounded class-scenario unlearning numbers (historical)}
+\label{app:phase5-confounded}
+{\sloppy Preserved for transparency, per \S\ref{sec:unlearning}'s
+discussion of the class-scenario confound and its fix -- \textbf{do not
+cite these numbers as evidence of anything}. These are the class-scenario
+SymmetricAUC values computed against the original, contaminated ``retained
+test data'' control (the other seven classes), before
+\texttt{make\_never\_trained\_class\_pool} (in
+\texttt{medgate/data/synthetic.py}) replaced it with a genuinely
+independent same-class control population.\par}
+\input{tables/phase5_unlearning_confounded_appendix.tex}
+\captionof{table}{Class-scenario forgetting, confounded metric, 3 seeds.
+Compare against Table~\ref{tab:phase5}'s corrected class-scenario rows --
+every method here reads as near-perfect forgetting (SymmetricAUC
+$\ge 0.82$, most $= 1.000$) purely from the confound, including
+\texttt{checkpoint\_rollback}, which never trained on the removed data at
+all and therefore cannot have ``forgotten'' anything in the first place.}
+\label{tab:phase5-confounded}
 
 \end{document}
