@@ -166,12 +166,59 @@ gradient inversion are deferred pending their citations being verified.
   floor, not a finding about budget-scaling.
 
 ## Phase 4 — privacy mechanisms
-Status: **PENDING**
+Status: **synthetic tier DONE (pipeline validation only)**; real-data tier
+`BLOCKED-LICENSE`
 
-No protection / secure aggregation (simulated, since this is single-machine
-cross-silo) / DP-SGD via Opacus at multiple budgets / secure agg + DP.
-Report privacy-utility Pareto curves from recorded per-run metrics, never
-hand-typed numbers.
+Four arms implemented: no protection (plain FedAvg), secure aggregation
+(pairwise-additive-masking simulation of Bonawitz et al. 2017's
+mathematical core — `medgate/privacy/secure_aggregation.py`, explicitly
+NOT the full protocol: no Diffie-Hellman key agreement, no Shamir
+secret-sharing dropout recovery, single-process simulation only), DP-SGD
+via Opacus at 3 noise multipliers (`medgate/privacy/dp_sgd.py`, required
+two fixes to the model itself — non-inplace ReLU, and excluding
+`adversary_head` from the DP-tracked optimizer — both documented in that
+file), and secure aggregation + DP-SGD combined.
+
+- [x] Two real Opacus integration bugs found and fixed while building this
+      (not routed around): inplace ReLU breaks Opacus's backward hooks;
+      Opacus's optimizer requires every tracked parameter to have received
+      a per-sample gradient every batch, which `model.adversary_head`
+      (Phase 2's addition, unused by the plain coarse+fine objective)
+      violated. Both fixes are permanent, in `medgate/models/backbone.py`
+      and `medgate/attacks/gradient_inversion.py`'s `attack_params()`
+      (reused here rather than duplicated).
+- [x] `scripts/run_phase4_synthetic.py` + `configs/phase4_synthetic.yaml`:
+      3 seeds x (no_protection, secure_agg, 3x dp_sgd, 3x
+      secure_agg_plus_dp) = 24 runs, ~3m23s wall-clock, raw JSON under
+      `experiments/phase4_synthetic/`, Pareto table in
+      `paper/tables/phase4_privacy_synthetic.{csv,md}` via
+      `scripts/make_phase4_table.py`.
+- [x] `tests/test_phase4_privacy.py`: 5 tests. Correctness (masked updates
+      still sum exactly right) is checked directly. **A confidentiality
+      test was written wrong on the first pass and is worth recording**:
+      it asserted low cosine similarity between an individual masked
+      update and the true update, which failed at n=3-10 clients (measured
+      mean |cos sim| 0.3-0.6) — not because masking is broken (the sum is
+      still exact), but because that similarity is the wrong thing to
+      measure: the real security argument is that the mask is a secret,
+      uniformly-random one-time pad, which is a property of the
+      *distribution*, not of one sampled geometric distance. Replaced with
+      a test of the property that actually demonstrates hiding: the same
+      true update, masked with two different unknown seeds, produces
+      clearly different outputs. The wrong version and why it was wrong
+      are kept in `medgate/privacy/secure_aggregation.py`'s
+      `confidentiality_check` docstring so this mistake isn't repeated.
+- **Reading the numbers**: `dp_sgd` and `secure_agg_plus_dp` produce
+  IDENTICAL utility at every noise multiplier and seed in
+  `paper/tables/phase4_privacy_synthetic.md` — this is correct and
+  expected (masking cancels exactly in the aggregate; it changes what the
+  server can *observe* per-client, never the final trained model), and is
+  itself a useful correctness check on the implementation, not evidence
+  the two arms are redundant to compare. `no_protection` and `secure_agg`
+  are likewise identical for the same reason. Utility differences between
+  DP and non-DP arms on this synthetic fixture (~0.03 vs ~0.04) are within
+  noise given the fixture has no real signal — not a privacy-utility
+  finding. Real epsilon-vs-utility tradeoffs need real data.
 
 ## Phase 5 — revocation and unlearning
 Status: **PENDING**

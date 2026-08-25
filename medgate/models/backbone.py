@@ -20,10 +20,10 @@ class SmallBackbone(nn.Module):
         super().__init__()
         self.conv = nn.Sequential(
             nn.Conv2d(in_channels, 16, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
+            nn.ReLU(),  # not inplace: Opacus's per-sample-gradient hooks (medgate/privacy/dp_sgd.py) break on inplace ops
             nn.MaxPool2d(2),
             nn.Conv2d(16, 32, kernel_size=3, padding=1),
-            nn.ReLU(inplace=True),
+            nn.ReLU(),  # not inplace: Opacus's per-sample-gradient hooks (medgate/privacy/dp_sgd.py) break on inplace ops
             nn.AdaptiveAvgPool2d(4),
         )
         self.proj = nn.Linear(32 * 4 * 4, feature_dim)

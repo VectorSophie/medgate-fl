@@ -1,13 +1,13 @@
 == hardware snapshot ==
 {
-  "captured_at_utc": "2026-08-25T03:09:19.545889+00:00",
+  "captured_at_utc": "2026-08-25T03:20:20.282211+00:00",
   "platform": "Linux-6.17.0-14-generic-x86_64-with-glibc2.39",
   "python_version": "3.12.3 (main, Jan 22 2026, 20:57:42) [GCC 13.3.0]",
   "cpu_count_logical": 8,
   "gpus": [],
   "mem": {
     "MemTotal": "7739112 kB",
-    "MemAvailable": "2813728 kB",
+    "MemAvailable": "2780744 kB",
     "SwapTotal": "2097148 kB"
   },
   "disk_free_gb": 55.4,
@@ -17,33 +17,47 @@
     "cuda_available": false,
     "mps_available": false
   },
-  "git_commit": "175e88db6a6682455d842d2e900e956f5f61fb68"
+  "git_commit": "817b8aaedae2522fda31ff84a223c470eab90f25"
 }
 == Phase 0 tests ==
 ============================= test session starts ==============================
 platform linux -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0 -- /home/vectorsophie/Desktop/Workspace/FLB/.venv/bin/python
 cachedir: .pytest_cache
 rootdir: /home/vectorsophie/Desktop/Workspace/FLB
-collecting ... collected 13 items
+collecting ... collected 19 items
 
-tests/test_phase0_fedavg_round.py::test_two_client_fedavg_round_changes_and_preserves_the_model PASSED [  7%]
-tests/test_phase0_forward_backward.py::test_forward_backward_pass_produces_finite_gradients PASSED [ 15%]
-tests/test_phase0_forward_backward.py::test_zero_init_adapter_starts_as_identity_residual PASSED [ 23%]
-tests/test_phase2_capability_isolation.py::test_grad_reverse_negates_and_scales_the_gradient PASSED [ 30%]
-tests/test_phase2_capability_isolation.py::test_orthogonality_loss_bounded_and_zero_for_orthogonal_vectors PASSED [ 38%]
-tests/test_phase2_capability_isolation.py::test_all_six_methods_forward_backward_without_error PASSED [ 46%]
-tests/test_phase2_capability_isolation.py::test_adversary_head_only_gets_gradient_under_adversarial_and_combined PASSED [ 53%]
-tests/test_phase3_attacks.py::test_attack_params_excludes_adversary_head PASSED [ 61%]
-tests/test_phase3_attacks.py::test_dlg_attack_reduces_gradient_mismatch_and_stays_finite PASSED [ 69%]
-tests/test_phase3_attacks.py::test_membership_inference_auc_in_valid_range PASSED [ 76%]
-tests/test_phase3_attacks.py::test_adapter_reconstruction_trains_a_fresh_adapter_not_the_original PASSED [ 84%]
-tests/test_phase3_attacks.py::test_black_box_extraction_produces_evaluable_student PASSED [ 92%]
-tests/test_phase3_attacks.py::test_collusion_ensemble_is_evaluable PASSED [100%]
+tests/test_phase0_fedavg_round.py::test_two_client_fedavg_round_changes_and_preserves_the_model PASSED [  5%]
+tests/test_phase0_forward_backward.py::test_forward_backward_pass_produces_finite_gradients PASSED [ 10%]
+tests/test_phase0_forward_backward.py::test_zero_init_adapter_starts_as_identity_residual PASSED [ 15%]
+tests/test_phase2_capability_isolation.py::test_grad_reverse_negates_and_scales_the_gradient PASSED [ 21%]
+tests/test_phase2_capability_isolation.py::test_orthogonality_loss_bounded_and_zero_for_orthogonal_vectors PASSED [ 26%]
+tests/test_phase2_capability_isolation.py::test_all_six_methods_forward_backward_without_error PASSED [ 31%]
+tests/test_phase2_capability_isolation.py::test_adversary_head_only_gets_gradient_under_adversarial_and_combined PASSED [ 36%]
+tests/test_phase3_attacks.py::test_attack_params_excludes_adversary_head PASSED [ 42%]
+tests/test_phase3_attacks.py::test_dlg_attack_reduces_gradient_mismatch_and_stays_finite PASSED [ 47%]
+tests/test_phase3_attacks.py::test_membership_inference_auc_in_valid_range PASSED [ 52%]
+tests/test_phase3_attacks.py::test_adapter_reconstruction_trains_a_fresh_adapter_not_the_original PASSED [ 57%]
+tests/test_phase3_attacks.py::test_black_box_extraction_produces_evaluable_student PASSED [ 63%]
+tests/test_phase3_attacks.py::test_collusion_ensemble_is_evaluable PASSED [ 68%]
+tests/test_phase4_privacy.py::test_masking_preserves_the_exact_sum PASSED [ 73%]
+tests/test_phase4_privacy.py::test_masking_correctness_error_is_essentially_zero PASSED [ 78%]
+tests/test_phase4_privacy.py::test_masking_output_depends_on_secret_mask_not_recoverable_without_it PASSED [ 84%]
+tests/test_phase4_privacy.py::test_secure_aggregate_rejects_unequal_weights PASSED [ 89%]
+tests/test_phase4_privacy.py::test_secure_fedavg_round_changes_the_model_and_stays_finite PASSED [ 94%]
+tests/test_phase4_privacy.py::test_dp_local_train_produces_finite_params_and_epsilon PASSED [100%]
 
 =============================== warnings summary ===============================
 tests/test_phase3_attacks.py::test_adapter_reconstruction_trains_a_fresh_adapter_not_the_original
   /home/vectorsophie/Desktop/Workspace/FLB/.venv/lib/python3.12/site-packages/sklearn/metrics/_classification.py:2939: UserWarning: y_pred contains classes not in y_true
     warnings.warn("y_pred contains classes not in y_true")
 
+tests/test_phase4_privacy.py::test_dp_local_train_produces_finite_params_and_epsilon
+  /home/vectorsophie/Desktop/Workspace/FLB/.venv/lib/python3.12/site-packages/opacus/privacy_engine.py:98: UserWarning: Secure RNG turned off. This is perfectly fine for experimentation as it allows for much faster training performance, but remember to turn it on and retrain one last time before production with ``secure_mode`` turned on.
+    warnings.warn(
+
+tests/test_phase4_privacy.py::test_dp_local_train_produces_finite_params_and_epsilon
+  /home/vectorsophie/Desktop/Workspace/FLB/medgate/privacy/dp_sgd.py:61: UserWarning: Full backward hook is firing when gradients are computed with respect to module outputs since no inputs require gradients. See https://docs.pytorch.org/docs/main/generated/torch.nn.Module.html#torch.nn.Module.register_full_backward_hook for more details.
+    loss.backward()
+
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-======================== 13 passed, 1 warning in 10.75s ========================
+======================== 19 passed, 3 warnings in 7.53s ========================
