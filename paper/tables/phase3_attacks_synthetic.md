@@ -8,10 +8,10 @@ Attacker knowledge/access/budget for every row is recorded in the raw JSON (medg
 |---|---|---|---|---|---|
 | gradient_inversion (DLG, single unaggregated gradient) | 3 | PSNR_dB | 56.208 | 71.069 | mse mean=1.3612 |
 | membership_inference (loss-threshold) | 3 | attack_AUC | 0.510 | 0.048 | pre-registered target <= 0.55 (docs/research_scope.md) |
-| adapter_reconstruction (A2) | 3 | fine_macro_f1 @ {'auxiliary_examples': 8, 'epochs': 5} | 0.027 | 0.000 |  |
-| adapter_reconstruction (A2) | 3 | fine_macro_f1 @ {'auxiliary_examples': 16, 'epochs': 5} | 0.034 | 0.013 |  |
-| adapter_reconstruction (A2) | 3 | fine_macro_f1 @ {'auxiliary_examples': 32, 'epochs': 5} | 0.028 | 0.003 |  |
-| black_box_extraction (A3) | 3 | fine_macro_f1 @ {'query_budget': 16, 'epochs': 5} | 0.028 | 0.004 |  |
-| black_box_extraction (A3) | 3 | fine_macro_f1 @ {'query_budget': 32, 'epochs': 5} | 0.028 | 0.004 |  |
-| black_box_extraction (A3) | 3 | fine_macro_f1 @ {'query_budget': 64, 'epochs': 5} | 0.028 | 0.004 |  |
+| adapter_reconstruction (A2) | 3 | fine_macro_f1 @ auxiliary_examples=8, epochs=5 | 0.027 | 0.000 |  |
+| adapter_reconstruction (A2) | 3 | fine_macro_f1 @ auxiliary_examples=16, epochs=5 | 0.034 | 0.013 |  |
+| adapter_reconstruction (A2) | 3 | fine_macro_f1 @ auxiliary_examples=32, epochs=5 | 0.028 | 0.003 |  |
+| black_box_extraction (A3) | 3 | fine_macro_f1 @ query_budget=16, epochs=5 | 0.028 | 0.004 |  |
+| black_box_extraction (A3) | 3 | fine_macro_f1 @ query_budget=32, epochs=5 | 0.028 | 0.004 |  |
+| black_box_extraction (A3) | 3 | fine_macro_f1 @ query_budget=64, epochs=5 | 0.028 | 0.004 |  |
 | collusion (2 attackers vs solo, same total budget) | 3 | fine_macro_f1 gain over solo | 0.005 | 0.000 |  |

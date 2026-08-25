@@ -23,6 +23,7 @@ class Credential:
     issued_at: float
     revoked: bool = False
     revoked_at: float | None = None
+    expires_at: float | None = None  # None = no expiry
 
 
 class CentralizedIAM:
@@ -34,10 +35,12 @@ class CentralizedIAM:
         self._credentials: dict[str, Credential] = {}
         self.audit_log: list[dict] = []
 
-    def issue(self, subject_id: str, key: bytes) -> str:
+    def issue(self, subject_id: str, key: bytes, ttl_seconds: float | None = None) -> str:
         start = time.perf_counter()
         key_id = str(uuid.uuid4())
-        self._credentials[key_id] = Credential(subject_id=subject_id, key=key, issued_at=time.time())
+        now = time.time()
+        expires_at = now + ttl_seconds if ttl_seconds is not None else None
+        self._credentials[key_id] = Credential(subject_id=subject_id, key=key, issued_at=now, expires_at=expires_at)
         latency = time.perf_counter() - start
         self.audit_log.append({"event": "issue", "key_id": key_id, "subject_id": subject_id, "latency_s": latency})
         return key_id
@@ -54,18 +57,29 @@ class CentralizedIAM:
         self.audit_log.append({"event": "revoke", "key_id": key_id, "latency_s": latency})
         return latency
 
-    def authorize(self, key_id: str) -> bytes:
-        """Returns the key IF the credential exists and is not revoked;
-        raises PermissionError otherwise. The pre-registered success
-        criterion (docs/research_scope.md): revoked-credential acceptance
-        rate must be exactly zero — every caller of this class in
-        tests/scripts checks that a revoked key_id always raises here,
-        never silently returns a key."""
+    def authorize(self, key_id: str, now: float | None = None) -> bytes:
+        """Returns the key IF the credential exists, is not revoked, and
+        (if issued with a TTL) has not expired; raises PermissionError
+        otherwise. `now` is injectable for tests that simulate the clock
+        advancing past expiry without a real sleep. The pre-registered
+        success criterion (docs/research_scope.md): revoked/expired
+        credential acceptance rate must be exactly zero — every caller of
+        this class in tests/scripts checks that a revoked OR expired
+        key_id always raises here, never silently returns a key. This is
+        also the mandatory 'replay of expired authorization tokens'
+        integrity check: presenting an expired key_id again (replaying it)
+        must be denied every time, not just the first time after expiry."""
         start = time.perf_counter()
+        now = time.time() if now is None else now
         cred = self._credentials.get(key_id)
-        allowed = cred is not None and not cred.revoked
+        expired = cred is not None and cred.expires_at is not None and now >= cred.expires_at
+        allowed = cred is not None and not cred.revoked and not expired
         latency = time.perf_counter() - start
-        self.audit_log.append({"event": "authorize", "key_id": key_id, "allowed": allowed, "latency_s": latency})
+        self.audit_log.append({
+            "event": "authorize", "key_id": key_id, "allowed": allowed,
+            "expired": expired, "latency_s": latency,
+        })
         if not allowed:
-            raise PermissionError(f"key_id {key_id} is unknown or revoked")
+            reason = "expired" if expired else "unknown or revoked"
+            raise PermissionError(f"key_id {key_id} is {reason}")
         return cred.key

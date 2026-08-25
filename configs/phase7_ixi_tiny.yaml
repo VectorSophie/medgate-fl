@@ -1,0 +1,41 @@
+# Phase 7 IXI Tiny extension -- PLANNING CONFIG, NOT YET EXECUTABLE.
+# Gated behind (a) Phase 1's real Fed-ISIC2019 primary tables (project
+# brief's explicit phase ordering: this extension runs AFTER the primary
+# 2D study, not before/alongside it) and (b) a human accepting FLamby's
+# programmatic IXI license prompt -- see
+# scripts/download_fed_ixi_INSTRUCTIONS.md (verified 2026-08-25 against
+# FLamby's own download.py: it calls an accept_license() helper before
+# downloading, a consent gate the agent will not click through).
+status: NOT_EXECUTABLE_YET
+
+dataset:
+  literature_matrix_id: ixi-official-flamby-doc
+  gate: "VERIFIED facts (566 subjects, 3 hospitals, CC BY-SA 3.0, ~444MB,
+         binary brain/non-brain segmentation), but the download itself is
+         license-gated on human action -- see status above."
+
+task: "Tests whether capability isolation (docs/research_scope.md 'MedGate-FL')
+       transfers from 2D classification (Fed-ISIC2019) to 3D segmentation.
+       IXI subjects are healthy volunteers -- never described as a
+       neurological disease dataset."
+
+capability_tiering_plan:
+  public: "coarse brain/non-brain mask (or a coarse anatomical region mask if the raw labels support one)"
+  restricted: "fine voxel-level segmentation (whatever granularity the real IXI Tiny masks support beyond the coarse binary mask -- to be determined once the real label files are inspected, not assumed)"
+  site_adapter: "scanner/institution adaptation across the 3 hospitals (Guy's 1.5T Philips, Hammersmith 3T Philips, Institute of Psychiatry 1.5T GE) -- a genuinely different site-heterogeneity axis (scanner field strength + vendor) than Fed-ISIC2019's center heterogeneity"
+
+architecture_note: >
+  medgate/models/backbone.py's MedGateModel is a 2D image classifier
+  (Conv2d backbone, linear heads). 3D segmentation needs a different
+  backbone (e.g. a small 3D U-Net) and different heads (per-voxel output,
+  not per-image logits) -- NOT a drop-in reuse of the existing model.
+  This is flagged here as a real architecture-design task for when Phase 7
+  starts, not something already solved by the 2D code.
+
+metrics_plan:
+  - Dice
+  - Hausdorff Distance 95 (HD95)
+  - institution-wise Dice
+  - worst-site Dice
+  - (capability-isolation composites ARR/UCG/RFC/CRE, medgate/capability_metrics.py,
+     reused with Dice as the utility function U instead of macro-F1)

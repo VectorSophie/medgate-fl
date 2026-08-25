@@ -59,7 +59,7 @@ result, not a scientific finding about capability isolation}, and is labeled
 as such throughout. \RESULTPENDING{real Fed-ISIC2019 results for every table
 in \S\ref{sec:results}--\S\ref{sec:ablation}}. What is established here: a
 complete, tested, reproducible implementation of the full experimental
-pipeline (data, models, six training objectives, five attacks, four privacy
+pipeline (data, models, six training objectives, twelve attacks, four privacy
 arms, five unlearning methods, statistical aggregation, figure/table
 generation, and this document), two genuine engineering findings (two Opacus
 integration bugs found and fixed; one flawed confidentiality test written,
@@ -566,7 +566,7 @@ gradient-inversion attacks (\S\ref{sec:security}) for the identical reason.
 \status{partially implemented and executed -- synthetic tier; several
 mandatory attacks not yet built, listed in \S\ref{sec:limitations}}
 
-\input{tables/phase3_attacks_synthetic.tex}
+\resizebox{\textwidth}{!}{\input{tables/phase3_attacks_synthetic.tex}}
 \captionof{table}{Phase 3 attacks, synthetic tier, 3 seeds. Attacker
 knowledge/access/budget for every row is recorded in the raw JSON
 (\texttt{medgate/attacks/*.py}), not only summarized here.}
@@ -605,6 +605,64 @@ distillation from 16/32/64 queries (\citeauthor{tramer2016stealing}-style
 halves, logit-averaged: a small positive gain over solo
 ($+0.005 \pm 0.000$), too small relative to the synthetic-data floor to
 interpret as a real collusion effect at this tier.
+
+\subsection{A4: integrity attacks vs.\ aggregators, and property inference}
+\label{sec:integrity}
+\status{implemented and executed -- synthetic tier}
+Six client behaviors (honest baseline, label flipping, backdoor insertion,
+sign flipping, model replacement, free-riding) and a seventh malformed-update
+case, each with one malicious client (of six) against three aggregators
+(plaintext FedAvg, coordinate-wise median, trimmed mean) plus, for the
+malformed case, a validating FedAvg that drops non-finite updates before
+averaging (\S\ref{sec:limitations} lists sign/label-flipping,
+backdoor, free-rider, and malformed-update attacks as previously not
+implemented; they are as of this subsection).
+\resizebox{\textwidth}{!}{\input{tables/phase3_integrity_synthetic.tex}}
+\captionof{table}{Integrity attacks, synthetic tier, 3 seeds. Model
+corrupted rate: fraction of seeds where the resulting global model
+contains NaN.}
+\label{tab:phase3-integrity}
+
+Two results are structural, not synthetic-data artifacts, and hold at any
+data scale: \textbf{a single malformed (NaN) update corrupts the entire
+global model under plaintext FedAvg in 3/3 seeds} (\texttt{malformed} +
+\texttt{fedavg}, model corrupted rate 1.00) -- one client's bad update
+propagates through the mean to every parameter, irrecoverably, unless
+validated first (\texttt{validated\_fedavg}, corrupted rate 0.00, the
+literal demonstration of \S\ref{sec:limitations}'s ``no method here claims
+an immutable record detects a malicious update'' caveat: validation
+\emph{catches malformed structure}, it does not detect semantically
+plausible poisoning). Second, \textbf{the backdoor succeeds 100\% of the
+time against every aggregator, including both robust ones}
+(Table~\ref{tab:phase3-integrity}) -- median and trimmed-mean aggregation
+resist \emph{magnitude}-based attacks (visibly: \texttt{sign\_flip} and
+\texttt{model\_replacement} show slightly higher fine-macro-F1 variance
+under plain FedAvg than under the robust aggregators), but a backdoor
+update is not conspicuously larger in magnitude than an honest one, so
+coordinate-wise robustness does not touch it. This is a real, if
+small-scale, illustration of exactly the tension \S\ref{sec:limitations}
+names between hiding updates and validating them: neither secure
+aggregation nor simple robust aggregation is a poisoning defense in
+general, only against the specific failure mode (raw magnitude) each
+targets.
+
+\paragraph{Property inference.} A leave-one-client-out logistic-regression
+meta-classifier (\citet{melis2019exploiting}'s framing, a much simpler
+classifier than their neural meta-classifier -- \S\ref{sec:related})
+predicting, from one client's plaintext update alone, whether a chosen
+fine class is that client's local majority label. AUC $= 1.000 \pm 0.000$
+across all 3 seeds -- unlike this paper's other synthetic-tier numbers,
+this is \emph{not} a null-signal artifact: each client's local label
+distribution is a real (if incidental) property of its random sample, and
+a client's raw gradient update genuinely encodes which classes it saw more
+of, at least at this model scale. Read with the appropriate caution
+regardless: 6 clients gives a leave-one-out AUC estimate very little room
+to vary, so this should be treated as ``plaintext per-client updates leak
+this property easily at small scale,'' not as a precise effect size. This
+result is exactly why Phase 4's secure-aggregation arm
+(\S\ref{sec:privacy}) matters: masked updates (Table~\ref{tab:phase4})
+give the server nothing to run this classifier against in the first
+place.
 
 \section{Ablation and Sensitivity Analysis}
 \label{sec:ablation}
@@ -702,7 +760,7 @@ than a plain adapter or a hidden fine head -- because every number so far
 comes from a fixture with no learnable signal by construction
 (\S\ref{sec:synthetic-fixture}). What this phase of the work does support:
 the full experimental pipeline (six training objectives, four privacy arms,
-five attacks, five unlearning methods, statistics, figures, tables, this
+twelve attacks, five unlearning methods, statistics, figures, tables, this
 document) runs end-to-end, is deterministic given a seed, and produces
 numbers that behave exactly as a correct implementation with no signal
 should -- no method spuriously exceeds chance, secure aggregation's masking
@@ -741,11 +799,17 @@ information space it was trained from.
 \item \textbf{Key exfiltration / already-exported artifacts.} Revocation
 (\S\ref{sec:unlearning}) cannot undo a plaintext export that happened
 before revocation; this project makes no claim otherwise.
-\item \textbf{Secure aggregation vs.\ poisoning validation tension.} Hiding
-individual updates (Phase 4) and validating them for poisoning (A4,
-\S\ref{sec:threat}) are in tension; this draft implements the former but
-not yet A4 poisoning/backdoor/replay attacks (below), so the tension is
-stated, not yet empirically explored.
+\item \textbf{Secure aggregation vs.\ poisoning validation tension --
+now empirically illustrated, not just stated} (\S\ref{sec:integrity}):
+robust aggregation needs to see each client's raw update to down-weight
+it, which is exactly what secure aggregation (\S\ref{sec:privacy}) hides;
+this draft does not run the two together (i.e.\ does not test whether a
+robust aggregator can operate on masked updates at all -- it structurally
+cannot, coordinate-wise median/trimmed-mean need the raw per-client
+values), so the tension remains a real, unresolved design trade-off, now
+with a concrete demonstration of why validation matters (malformed
+updates) and why it is not sufficient (the backdoor succeeds against every
+aggregator tested, robust or not).
 \item \textbf{Cross-dataset duplication and domain shift.} Not yet
 evaluated -- Phase 6 (external validation: ISIC 2020, MILK10k,
 PAD-UFES-20) is gated on those datasets' citations moving from
@@ -762,14 +826,19 @@ standard, well-established assumptions, not a proof specific to this
 system; the secure-aggregation simulation and LoREnc-style obfuscation
 discussion (\S\ref{sec:related}) are described only as protection/
 obfuscation mechanisms, never as proofs.
-\item \textbf{Attacks not yet implemented}, listed exactly, not glossed
-over: property inference (source citation still
-\UNVERIFIED{}), client attribution, sign-flipping/label-flipping/backdoor/
-free-rider/malformed-update/replay integrity attacks (A4), full
-fine-tuning recovery under a fixed compute budget distinct from the
-few-shot probe already implemented, low-rank adapter completion, and
-known-adapter comparison. iDLG/Geiping-style stronger gradient inversion
-are deferred pending citation verification.
+\item \textbf{Attacks now implemented} (\S\ref{sec:integrity}, added after
+an earlier draft of this list): property inference, and the A4 integrity
+attacks (label-flipping, sign-flipping, model-replacement, backdoor,
+free-rider, malformed-update, and token-replay -- the last via
+\texttt{medgate/crypto/authorization.py}'s TTL/expiry support, tested in
+\texttt{tests/test\_phase3\_integrity\_and\_property.py}). \textbf{Attacks
+still not implemented}, listed exactly, not glossed over: client
+attribution, full fine-tuning recovery under a fixed compute budget
+distinct from the few-shot probe already implemented, low-rank adapter
+completion, known-adapter comparison, and the stronger gradient-inversion
+variants iDLG/Geiping et al. (both now \texttt{VERIFIED} citations,
+\S\ref{sec:related}, but not yet implemented as additional attacks
+alongside the simplified DLG in \S\ref{sec:security}).
 \item \textbf{Statistical rigor deferred.} Bootstrap confidence intervals,
 paired significance tests, and Holm--Bonferroni correction are not yet
 applied (\S\ref{sec:methodology}) -- deliberately, to avoid running them on
@@ -808,7 +877,7 @@ geometry, xcolor, natbib, enumitem, caption) during this project.
 
 \section{Conclusion}
 This paper implements, tests, and runs the complete MedGate-FL pipeline --
-architecture, six training objectives, four privacy arms, five attacks,
+architecture, six training objectives, four privacy arms, twelve attacks,
 five unlearning methods, and this document -- against a synthetic fixture
 because the real primary dataset's license has not yet been accepted by a
 human. Every mechanism runs correctly and every number behaves as expected

@@ -115,8 +115,8 @@ always reported alongside the raw probe numbers, never in place of them.
   isolation** — that question needs real, structured Fed-ISIC2019 data.
 
 ## Phase 3 — security
-Status: **synthetic tier PARTIAL (pipeline validation only)**; real-data
-tier `BLOCKED-LICENSE`
+Status: **synthetic tier MOSTLY DONE (pipeline validation only)**;
+real-data tier `BLOCKED-LICENSE`
 
 Implemented: gradient inversion (DLG, simplified — Adam not L-BFGS, labels
 fixed not jointly optimized, deviation documented in
@@ -124,20 +124,52 @@ fixed not jointly optimized, deviation documented in
 inference (simplified — no shadow models, documented in
 `medgate/attacks/membership_inference.py`), adapter reconstruction (A2,
 `medgate/attacks/reconstruction.py`), black-box hard-label extraction (A3,
-same file), two-attacker collusion (same file). Every attack result JSON
-carries `attacker_knowledge`/`attacker_access`/`compute_budget` fields —
-no attack is reported without that record, per the project brief.
+same file), two-attacker collusion (same file), property inference
+(`medgate/attacks/property_inference.py`, `melis2019-unintended-leakage`
+citation moved to `VERIFIED` in the second literature pass, so this is
+now properly attributed rather than gated), and the A4 integrity family
+(`medgate/attacks/integrity.py`: label-flipping, sign-flipping,
+model-replacement, backdoor, free-rider, malformed-update) plus
+token-replay/expiry (`medgate/crypto/authorization.py`). Every attack
+result JSON carries `attacker_knowledge`/`attacker_access`/`compute_budget`
+fields — no attack is reported without that record, per the project brief.
 
-**Not yet implemented**: property inference (source citation
-`melis2019-unintended-leakage` is UNVERIFIED — gated per
-`docs/literature_matrix.md`'s rule that unverified sources aren't used to
-justify a method design until checked), client attribution, sign-flipping/
-label-flipping/backdoor/free-rider/malformed-update/replay integrity
-attacks (these target A4 malicious-client behavior during aggregation,
-not yet built), full-fine-tuning recovery with a fixed compute budget
-distinct from the few-shot probe already in Phase 2, low-rank adapter
-completion, and known-adapter comparison. iDLG/Geiping-style stronger
-gradient inversion are deferred pending their citations being verified.
+- [x] `scripts/run_phase3_integrity_synthetic.py` + `configs/phase3_integrity_synthetic.yaml`:
+      3 seeds x (6 attacks x 3 aggregators + 1 malformed-update x 2
+      aggregators) + property inference = 20 attack/aggregator combos per
+      seed, ~44s/seed wall-clock, raw JSON under
+      `experiments/phase3_integrity_synthetic/`, table in
+      `paper/tables/phase3_integrity_synthetic.{csv,md}` via
+      `scripts/make_phase3_integrity_table.py`.
+- [x] `medgate/federated/robust_aggregation.py`: coordinate-wise median,
+      trimmed mean, and a validation gate (`validate_update`/
+      `validated_fedavg_aggregate`) that drops NaN/Inf/empty updates
+      before aggregating.
+- [x] `tests/test_phase3_integrity_and_property.py`: 11 tests, including a
+      structural one (median/trimmed-mean resist one extreme numeric
+      outlier while plain FedAvg is dragged by it) and one for the
+      property-inference attack's own sanity (it recovers a deliberately
+      separable property before any null result elsewhere is trusted).
+- **Two structural findings, not synthetic-data artifacts** (hold at any
+  data scale, see `paper/main.tex` §8.1 for the full writeup): (1) a
+  single malformed (NaN) update corrupts the ENTIRE global model under
+  plaintext FedAvg in 3/3 seeds — irrecoverable without validation; (2) a
+  backdoor succeeds 100% of the time against every aggregator tested,
+  including both robust ones — median/trimmed-mean resist magnitude-based
+  attacks (sign-flip, model-replacement) but not a same-magnitude semantic
+  backdoor, a real illustration of the "hiding vs. validating updates"
+  tension the project brief names. (3) Property-inference AUC is a
+  perfect 1.000 across all 3 seeds — also not a null-signal artifact
+  (each client's local label distribution is a real, if incidental,
+  property of its random draw, and a raw per-client update genuinely
+  encodes it at this model scale) but reported with the caveat that 6
+  clients gives a leave-one-out AUC estimate very little room to vary.
+- **Still not implemented**: client attribution, full-fine-tuning recovery
+  with a fixed compute budget distinct from the few-shot probe already in
+  Phase 2, low-rank adapter completion, and known-adapter comparison.
+  iDLG/Geiping-style stronger gradient inversion are now `VERIFIED`
+  citations but still not implemented as additional attacks alongside the
+  simplified DLG already in place.
 
 - [x] `scripts/run_phase3_synthetic.py` + `configs/phase3_synthetic.yaml`:
       3 seeds (statistical protocol: 3 for this development pass, 5
@@ -322,11 +354,22 @@ report on an incomplete study, not a polished conclusion — read
 
 1. **License acceptance for Fed-ISIC2019** (ISIC2019 + HAM10000) — needs a
    human. Procedure: `scripts/download_fed_isic2019_INSTRUCTIONS.md`.
-2. **43 of 59 literature-matrix rows are UNVERIFIED** — see
-   `docs/literature_matrix.md` for which ones gate which phase.
+2. **21 of 59 literature-matrix rows are still UNVERIFIED** (down from 43
+   after a second verification pass) — see `docs/literature_matrix.md` for
+   which ones gate which phase.
 3. **No GPU** — bounds model scale and which attacks (esp. gradient
    inversion at realistic image size, DP-SGD sweeps) are practical within a
    session; see `docs/hardware_report.md`.
-4. **IXI Tiny's own license-acceptance mechanics** were not found in the
-   fetched `fed_ixi/README.md` excerpt — re-check before Phase 7 in case a
-   similar human-acceptance step applies.
+4. **IXI Tiny's own license-acceptance mechanics — now confirmed.**
+   FLamby's `fed_ixi/dataset_creation_scripts/download.py` calls an
+   `accept_license(...)` helper before downloading: a programmatic (not
+   website-click) consent prompt, but still a human-consent gate the agent
+   will not click through. Procedure and exact reasoning:
+   `scripts/download_fed_ixi_INSTRUCTIONS.md`. Phase 7's planning config
+   (`configs/phase7_ixi_tiny.yaml`) is ready; execution is additionally
+   gated behind Phase 1's real-data tier completing first, per the
+   project's phase ordering.
+5. **Phase 6 planning config exists** (`configs/phase6_external_validation.yaml`)
+   but every external dataset it names (ISIC 2020, MILK10k, PAD-UFES-20)
+   remains `UNVERIFIED` in the literature matrix — nothing in Phase 6 runs
+   until at least one of those is checked against a primary source.

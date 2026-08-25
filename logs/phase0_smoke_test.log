@@ -1,60 +1,71 @@
 == hardware snapshot ==
 {
-  "captured_at_utc": "2026-08-25T03:25:45.623066+00:00",
+  "captured_at_utc": "2026-08-25T11:34:47.343813+00:00",
   "platform": "Linux-6.17.0-14-generic-x86_64-with-glibc2.39",
   "python_version": "3.12.3 (main, Jan 22 2026, 20:57:42) [GCC 13.3.0]",
   "cpu_count_logical": 8,
   "gpus": [],
   "mem": {
     "MemTotal": "7739112 kB",
-    "MemAvailable": "2800992 kB",
+    "MemAvailable": "2613432 kB",
     "SwapTotal": "2097148 kB"
   },
-  "disk_free_gb": 55.4,
+  "disk_free_gb": 55.0,
   "disk_total_gb": 232.4,
   "torch": {
     "torch_version": "2.13.0+cpu",
     "cuda_available": false,
     "mps_available": false
   },
-  "git_commit": "5e8ce663f12fbe450ac41efa971f9806c59e19d3"
+  "git_commit": "72ad6ff9f847583c875009450bc2a7da3124a0c5"
 }
 == Phase 0 tests ==
 ============================= test session starts ==============================
 platform linux -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0 -- /home/vectorsophie/Desktop/Workspace/FLB/.venv/bin/python
 cachedir: .pytest_cache
 rootdir: /home/vectorsophie/Desktop/Workspace/FLB
-collecting ... collected 30 items
+collecting ... collected 41 items
 
-tests/test_crypto_layer.py::test_encrypt_decrypt_roundtrip_is_exact PASSED [  3%]
-tests/test_crypto_layer.py::test_wrong_key_fails_to_decrypt PASSED       [  6%]
-tests/test_crypto_layer.py::test_tampered_metadata_is_detected PASSED    [ 10%]
-tests/test_crypto_layer.py::test_revoked_credential_is_never_accepted PASSED [ 13%]
-tests/test_crypto_layer.py::test_unknown_key_id_is_denied PASSED         [ 16%]
-tests/test_crypto_layer.py::test_audit_log_records_every_event PASSED    [ 20%]
-tests/test_phase0_fedavg_round.py::test_two_client_fedavg_round_changes_and_preserves_the_model PASSED [ 23%]
-tests/test_phase0_forward_backward.py::test_forward_backward_pass_produces_finite_gradients PASSED [ 26%]
-tests/test_phase0_forward_backward.py::test_zero_init_adapter_starts_as_identity_residual PASSED [ 30%]
-tests/test_phase2_capability_isolation.py::test_grad_reverse_negates_and_scales_the_gradient PASSED [ 33%]
-tests/test_phase2_capability_isolation.py::test_orthogonality_loss_bounded_and_zero_for_orthogonal_vectors PASSED [ 36%]
-tests/test_phase2_capability_isolation.py::test_all_six_methods_forward_backward_without_error PASSED [ 40%]
-tests/test_phase2_capability_isolation.py::test_adversary_head_only_gets_gradient_under_adversarial_and_combined PASSED [ 43%]
-tests/test_phase3_attacks.py::test_attack_params_excludes_adversary_head PASSED [ 46%]
-tests/test_phase3_attacks.py::test_dlg_attack_reduces_gradient_mismatch_and_stays_finite PASSED [ 50%]
-tests/test_phase3_attacks.py::test_membership_inference_auc_in_valid_range PASSED [ 53%]
-tests/test_phase3_attacks.py::test_adapter_reconstruction_trains_a_fresh_adapter_not_the_original PASSED [ 56%]
-tests/test_phase3_attacks.py::test_black_box_extraction_produces_evaluable_student PASSED [ 60%]
-tests/test_phase3_attacks.py::test_collusion_ensemble_is_evaluable PASSED [ 63%]
-tests/test_phase4_privacy.py::test_masking_preserves_the_exact_sum PASSED [ 66%]
-tests/test_phase4_privacy.py::test_masking_correctness_error_is_essentially_zero PASSED [ 70%]
-tests/test_phase4_privacy.py::test_masking_output_depends_on_secret_mask_not_recoverable_without_it PASSED [ 73%]
-tests/test_phase4_privacy.py::test_secure_aggregate_rejects_unequal_weights PASSED [ 76%]
-tests/test_phase4_privacy.py::test_secure_fedavg_round_changes_the_model_and_stays_finite PASSED [ 80%]
-tests/test_phase4_privacy.py::test_dp_local_train_produces_finite_params_and_epsilon PASSED [ 83%]
-tests/test_phase5_unlearning.py::test_key_revocation_only_returns_the_identical_object PASSED [ 86%]
-tests/test_phase5_unlearning.py::test_checkpoint_rollback_matches_a_fresh_same_seed_init PASSED [ 90%]
-tests/test_phase5_unlearning.py::test_adapter_deletion_changes_adapter_but_not_backbone PASSED [ 93%]
-tests/test_phase5_unlearning.py::test_gradient_ascent_unlearning_moves_the_model PASSED [ 96%]
+tests/test_crypto_layer.py::test_encrypt_decrypt_roundtrip_is_exact PASSED [  2%]
+tests/test_crypto_layer.py::test_wrong_key_fails_to_decrypt PASSED       [  4%]
+tests/test_crypto_layer.py::test_tampered_metadata_is_detected PASSED    [  7%]
+tests/test_crypto_layer.py::test_revoked_credential_is_never_accepted PASSED [  9%]
+tests/test_crypto_layer.py::test_unknown_key_id_is_denied PASSED         [ 12%]
+tests/test_crypto_layer.py::test_audit_log_records_every_event PASSED    [ 14%]
+tests/test_phase0_fedavg_round.py::test_two_client_fedavg_round_changes_and_preserves_the_model PASSED [ 17%]
+tests/test_phase0_forward_backward.py::test_forward_backward_pass_produces_finite_gradients PASSED [ 19%]
+tests/test_phase0_forward_backward.py::test_zero_init_adapter_starts_as_identity_residual PASSED [ 21%]
+tests/test_phase2_capability_isolation.py::test_grad_reverse_negates_and_scales_the_gradient PASSED [ 24%]
+tests/test_phase2_capability_isolation.py::test_orthogonality_loss_bounded_and_zero_for_orthogonal_vectors PASSED [ 26%]
+tests/test_phase2_capability_isolation.py::test_all_six_methods_forward_backward_without_error PASSED [ 29%]
+tests/test_phase2_capability_isolation.py::test_adversary_head_only_gets_gradient_under_adversarial_and_combined PASSED [ 31%]
+tests/test_phase3_attacks.py::test_attack_params_excludes_adversary_head PASSED [ 34%]
+tests/test_phase3_attacks.py::test_dlg_attack_reduces_gradient_mismatch_and_stays_finite PASSED [ 36%]
+tests/test_phase3_attacks.py::test_membership_inference_auc_in_valid_range PASSED [ 39%]
+tests/test_phase3_attacks.py::test_adapter_reconstruction_trains_a_fresh_adapter_not_the_original PASSED [ 41%]
+tests/test_phase3_attacks.py::test_black_box_extraction_produces_evaluable_student PASSED [ 43%]
+tests/test_phase3_attacks.py::test_collusion_ensemble_is_evaluable PASSED [ 46%]
+tests/test_phase3_integrity_and_property.py::test_property_inference_recovers_a_clearly_separable_property PASSED [ 48%]
+tests/test_phase3_integrity_and_property.py::test_property_inference_returns_none_for_constant_property PASSED [ 51%]
+tests/test_phase3_integrity_and_property.py::test_label_flipping_actually_changes_the_training_labels PASSED [ 53%]
+tests/test_phase3_integrity_and_property.py::test_sign_flipping_negates_the_true_delta PASSED [ 56%]
+tests/test_phase3_integrity_and_property.py::test_model_replacement_scales_the_delta PASSED [ 58%]
+tests/test_phase3_integrity_and_property.py::test_free_rider_contributes_exactly_zero_delta PASSED [ 60%]
+tests/test_phase3_integrity_and_property.py::test_malformed_update_detected_by_validation PASSED [ 63%]
+tests/test_phase3_integrity_and_property.py::test_validated_fedavg_drops_malformed_and_keeps_the_rest PASSED [ 65%]
+tests/test_phase3_integrity_and_property.py::test_backdoor_success_rate_in_valid_range PASSED [ 68%]
+tests/test_phase3_integrity_and_property.py::test_median_and_trimmed_mean_resist_one_extreme_outlier PASSED [ 70%]
+tests/test_phase3_integrity_and_property.py::test_expired_token_is_denied_and_replay_is_always_denied PASSED [ 73%]
+tests/test_phase4_privacy.py::test_masking_preserves_the_exact_sum PASSED [ 75%]
+tests/test_phase4_privacy.py::test_masking_correctness_error_is_essentially_zero PASSED [ 78%]
+tests/test_phase4_privacy.py::test_masking_output_depends_on_secret_mask_not_recoverable_without_it PASSED [ 80%]
+tests/test_phase4_privacy.py::test_secure_aggregate_rejects_unequal_weights PASSED [ 82%]
+tests/test_phase4_privacy.py::test_secure_fedavg_round_changes_the_model_and_stays_finite PASSED [ 85%]
+tests/test_phase4_privacy.py::test_dp_local_train_produces_finite_params_and_epsilon PASSED [ 87%]
+tests/test_phase5_unlearning.py::test_key_revocation_only_returns_the_identical_object PASSED [ 90%]
+tests/test_phase5_unlearning.py::test_checkpoint_rollback_matches_a_fresh_same_seed_init PASSED [ 92%]
+tests/test_phase5_unlearning.py::test_adapter_deletion_changes_adapter_but_not_backbone PASSED [ 95%]
+tests/test_phase5_unlearning.py::test_gradient_ascent_unlearning_moves_the_model PASSED [ 97%]
 tests/test_phase5_unlearning.py::test_full_retrain_is_deterministic_given_the_same_seed PASSED [100%]
 
 =============================== warnings summary ===============================
@@ -71,4 +82,4 @@ tests/test_phase4_privacy.py::test_dp_local_train_produces_finite_params_and_eps
     loss.backward()
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-======================== 30 passed, 3 warnings in 4.24s ========================
+======================= 41 passed, 3 warnings in 18.51s ========================

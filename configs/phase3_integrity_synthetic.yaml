@@ -1,0 +1,25 @@
+# Phase 3 continued: A4 integrity attacks + property inference, SYNTHETIC
+# TIER ONLY. Same caveat as the rest of Phase 1-5: no real diagnostic
+# signal, so this validates the attack/defense code paths and demonstrates
+# real, interpretable mechanism properties (e.g. one NaN client corrupts
+# the whole plaintext-FedAvg model; robust aggregators resist it) rather
+# than measuring real attack effectiveness on real data.
+data:
+  source: synthetic
+  num_centers: 6
+  samples_per_center: 32
+  image_size: 32
+  data_seed: 0
+model:
+  feature_dim: 64
+  adapter_rank: 4
+train:
+  rounds: 3
+  epochs_per_round: 1
+  batch_size: 8
+  lr: 0.01
+malicious_client_index: 0
+model_replacement_boost: 6.0   # ~ num_clients, so the boosted delta approximately cancels the other 5 honest clients in the average
+backdoor_target_fine_class: 0  # MEL
+seeds: [0, 1, 2]
+output_dir: experiments/phase3_integrity_synthetic

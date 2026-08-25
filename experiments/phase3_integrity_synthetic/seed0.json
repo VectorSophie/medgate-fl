@@ -1,0 +1,205 @@
+{
+  "seed": 0,
+  "git_commit": "72ad6ff9f847583c875009450bc2a7da3124a0c5",
+  "config": {
+    "data": {
+      "source": "synthetic",
+      "num_centers": 6,
+      "samples_per_center": 32,
+      "image_size": 32,
+      "data_seed": 0
+    },
+    "model": {
+      "feature_dim": 64,
+      "adapter_rank": 4
+    },
+    "train": {
+      "rounds": 3,
+      "epochs_per_round": 1,
+      "batch_size": 8,
+      "lr": 0.01
+    },
+    "malicious_client_index": 0,
+    "model_replacement_boost": 6.0,
+    "backdoor_target_fine_class": 0,
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "output_dir": "experiments/phase3_integrity_synthetic"
+  },
+  "dataset_manifest_hash": "874a6cfad139fea2",
+  "wall_clock_seconds": 43.89,
+  "integrity_results": [
+    {
+      "attack": "none",
+      "aggregator": "fedavg",
+      "seed": 0,
+      "aggregation_failed": null,
+      "fine_macro_f1": 0.02880184331797235,
+      "model_has_nan": false
+    },
+    {
+      "attack": "none",
+      "aggregator": "coordinate_median",
+      "seed": 0,
+      "aggregation_failed": null,
+      "fine_macro_f1": 0.02880184331797235,
+      "model_has_nan": false
+    },
+    {
+      "attack": "none",
+      "aggregator": "trimmed_mean",
+      "seed": 0,
+      "aggregation_failed": null,
+      "fine_macro_f1": 0.02880184331797235,
+      "model_has_nan": false
+    },
+    {
+      "attack": "label_flip",
+      "aggregator": "fedavg",
+      "seed": 0,
+      "aggregation_failed": null,
+      "fine_macro_f1": 0.02880184331797235,
+      "model_has_nan": false
+    },
+    {
+      "attack": "label_flip",
+      "aggregator": "coordinate_median",
+      "seed": 0,
+      "aggregation_failed": null,
+      "fine_macro_f1": 0.02880184331797235,
+      "model_has_nan": false
+    },
+    {
+      "attack": "label_flip",
+      "aggregator": "trimmed_mean",
+      "seed": 0,
+      "aggregation_failed": null,
+      "fine_macro_f1": 0.02880184331797235,
+      "model_has_nan": false
+    },
+    {
+      "attack": "backdoor",
+      "aggregator": "fedavg",
+      "seed": 0,
+      "aggregation_failed": null,
+      "fine_macro_f1": 0.02880184331797235,
+      "model_has_nan": false,
+      "backdoor_success_rate": 1.0
+    },
+    {
+      "attack": "backdoor",
+      "aggregator": "coordinate_median",
+      "seed": 0,
+      "aggregation_failed": null,
+      "fine_macro_f1": 0.02880184331797235,
+      "model_has_nan": false,
+      "backdoor_success_rate": 1.0
+    },
+    {
+      "attack": "backdoor",
+      "aggregator": "trimmed_mean",
+      "seed": 0,
+      "aggregation_failed": null,
+      "fine_macro_f1": 0.02880184331797235,
+      "model_has_nan": false,
+      "backdoor_success_rate": 1.0
+    },
+    {
+      "attack": "sign_flip",
+      "aggregator": "fedavg",
+      "seed": 0,
+      "aggregation_failed": null,
+      "fine_macro_f1": 0.02358490566037736,
+      "model_has_nan": false
+    },
+    {
+      "attack": "sign_flip",
+      "aggregator": "coordinate_median",
+      "seed": 0,
+      "aggregation_failed": null,
+      "fine_macro_f1": 0.02880184331797235,
+      "model_has_nan": false
+    },
+    {
+      "attack": "sign_flip",
+      "aggregator": "trimmed_mean",
+      "seed": 0,
+      "aggregation_failed": null,
+      "fine_macro_f1": 0.02880184331797235,
+      "model_has_nan": false
+    },
+    {
+      "attack": "model_replacement",
+      "aggregator": "fedavg",
+      "seed": 0,
+      "aggregation_failed": null,
+      "fine_macro_f1": 0.026744186046511628,
+      "model_has_nan": false
+    },
+    {
+      "attack": "model_replacement",
+      "aggregator": "coordinate_median",
+      "seed": 0,
+      "aggregation_failed": null,
+      "fine_macro_f1": 0.02880184331797235,
+      "model_has_nan": false
+    },
+    {
+      "attack": "model_replacement",
+      "aggregator": "trimmed_mean",
+      "seed": 0,
+      "aggregation_failed": null,
+      "fine_macro_f1": 0.02880184331797235,
+      "model_has_nan": false
+    },
+    {
+      "attack": "free_rider",
+      "aggregator": "fedavg",
+      "seed": 0,
+      "aggregation_failed": null,
+      "fine_macro_f1": 0.02880184331797235,
+      "model_has_nan": false
+    },
+    {
+      "attack": "free_rider",
+      "aggregator": "coordinate_median",
+      "seed": 0,
+      "aggregation_failed": null,
+      "fine_macro_f1": 0.02880184331797235,
+      "model_has_nan": false
+    },
+    {
+      "attack": "free_rider",
+      "aggregator": "trimmed_mean",
+      "seed": 0,
+      "aggregation_failed": null,
+      "fine_macro_f1": 0.02880184331797235,
+      "model_has_nan": false
+    },
+    {
+      "attack": "malformed",
+      "aggregator": "fedavg",
+      "seed": 0,
+      "aggregation_failed": null,
+      "fine_macro_f1": 0.02880184331797235,
+      "model_has_nan": true
+    },
+    {
+      "attack": "malformed",
+      "aggregator": "validated_fedavg",
+      "seed": 0,
+      "aggregation_failed": null,
+      "fine_macro_f1": 0.02880184331797235,
+      "model_has_nan": false
+    }
+  ],
+  "property_inference": {
+    "attacker_knowledge": "one raw per-client update each (no secure aggregation); logistic-regression meta-classifier (simplified vs. Melis et al.'s neural meta-classifier)",
+    "attacker_access": "6 clients' updates, leave-one-client-out evaluation",
+    "n_clients": 6,
+    "attack_auc": 1.0
+  }
+}

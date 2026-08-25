@@ -38,17 +38,20 @@ def main():
                  "metric": "attack_AUC", "mean": m, "std": s,
                  "note": f"pre-registered target <= 0.55 (docs/research_scope.md)"})
 
+    def fmt_budget(b: dict) -> str:
+        return ", ".join(f"{k}={v}" for k, v in b.items())
+
     for i, budget in enumerate(runs[0]["adapter_reconstruction"]):
         vals = [r["adapter_reconstruction"][i]["u_attack_fine_macro_f1"] for r in runs]
         m, s = mean_std(vals)
         rows.append({"attack": "adapter_reconstruction (A2)", "n_seeds": len(runs),
-                     "metric": f"fine_macro_f1 @ {budget['compute_budget']}", "mean": m, "std": s, "note": ""})
+                     "metric": f"fine_macro_f1 @ {fmt_budget(budget['compute_budget'])}", "mean": m, "std": s, "note": ""})
 
     for i, budget in enumerate(runs[0]["extraction"]):
         vals = [r["extraction"][i]["u_attack_fine_macro_f1"] for r in runs]
         m, s = mean_std(vals)
         rows.append({"attack": "black_box_extraction (A3)", "n_seeds": len(runs),
-                     "metric": f"fine_macro_f1 @ {budget['compute_budget']}", "mean": m, "std": s, "note": ""})
+                     "metric": f"fine_macro_f1 @ {fmt_budget(budget['compute_budget'])}", "mean": m, "std": s, "note": ""})
 
     col_gain = [r["collusion"]["collusion_gain_over_solo"] for r in runs]
     m, s = mean_std(col_gain)

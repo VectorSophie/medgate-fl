@@ -1,0 +1,26 @@
+\begin{tabular}{llccccc}
+\toprule
+Attack & Aggregator & Seeds & Fine macro-F1 & Model corrupted rate & Backdoor success rate \\
+\midrule
+backdoor & coordinate\_median & 3 & 0.029 $\pm$ 0.000 & 0.00 & 1.000 \\
+backdoor & fedavg & 3 & 0.029 $\pm$ 0.000 & 0.00 & 1.000 \\
+backdoor & trimmed\_mean & 3 & 0.029 $\pm$ 0.000 & 0.00 & 1.000 \\
+free\_rider & coordinate\_median & 3 & 0.029 $\pm$ 0.000 & 0.00 & n/a \\
+free\_rider & fedavg & 3 & 0.029 $\pm$ 0.000 & 0.00 & n/a \\
+free\_rider & trimmed\_mean & 3 & 0.029 $\pm$ 0.000 & 0.00 & n/a \\
+label\_flip & coordinate\_median & 3 & 0.029 $\pm$ 0.000 & 0.00 & n/a \\
+label\_flip & fedavg & 3 & 0.029 $\pm$ 0.000 & 0.00 & n/a \\
+label\_flip & trimmed\_mean & 3 & 0.029 $\pm$ 0.000 & 0.00 & n/a \\
+malformed & fedavg & 3 & 0.029 $\pm$ 0.000 & 1.00 & n/a \\
+malformed & validated\_fedavg & 3 & 0.029 $\pm$ 0.000 & 0.00 & n/a \\
+model\_replacement & coordinate\_median & 3 & 0.029 $\pm$ 0.000 & 0.00 & n/a \\
+model\_replacement & fedavg & 3 & 0.029 $\pm$ 0.002 & 0.00 & n/a \\
+model\_replacement & trimmed\_mean & 3 & 0.029 $\pm$ 0.000 & 0.00 & n/a \\
+none & coordinate\_median & 3 & 0.029 $\pm$ 0.000 & 0.00 & n/a \\
+none & fedavg & 3 & 0.029 $\pm$ 0.000 & 0.00 & n/a \\
+none & trimmed\_mean & 3 & 0.029 $\pm$ 0.000 & 0.00 & n/a \\
+sign\_flip & coordinate\_median & 3 & 0.029 $\pm$ 0.000 & 0.00 & n/a \\
+sign\_flip & fedavg & 3 & 0.027 $\pm$ 0.003 & 0.00 & n/a \\
+sign\_flip & trimmed\_mean & 3 & 0.029 $\pm$ 0.000 & 0.00 & n/a \\
+\bottomrule
+\end{tabular}

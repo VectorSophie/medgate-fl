@@ -1,0 +1,50 @@
+# Phase 6 external validation and fusion -- PLANNING CONFIG, NOT YET
+# EXECUTABLE. docs/execution_plan.md Phase 6 is gated on the dataset rows
+# below moving from UNVERIFIED to VERIFIED in docs/literature_matrix.csv,
+# and on their own license/access procedures being checked the same way
+# Fed-ISIC2019's was (docs/research_scope.md §5). None of that has
+# happened yet -- this file documents the INTENDED setup so the work is
+# ready to start the moment those gates clear, per the project brief's
+# "prepare all downstream scripts... continue with synthetic fixtures"
+# rule for license-gated steps. Running this config today would fail
+# fast (no data paths exist) rather than silently doing something else.
+status: NOT_EXECUTABLE_YET
+
+common_coarse_ontology:
+  # Reuses Fed-ISIC2019's primary ontology (docs/research_scope.md §7:
+  # melanocytic / keratinocytic / other) as the shared coarse label space.
+  # Per the project brief: "Do not force incompatible labels into a false
+  # common ontology" -- any external dataset's own fine labels that do not
+  # map cleanly to one of these three buckets go to an explicit
+  # `unknown_ood` bucket, never silently dropped or force-mapped.
+  buckets: [melanocytic, keratinocytic, other, unknown_ood]
+
+datasets:
+  isic2020:
+    role: "external melanoma-vs-benign evaluation only, AFTER cross-dataset deduplication against Fed-ISIC2019"
+    literature_matrix_id: isic-archive-2021-descriptor
+    gate: "UNVERIFIED -- citation not yet checked against a primary source"
+    dedup_required_against: [fed_isic2019]
+    dedup_method_planned: "exact hash + perceptual hash (imagehash, already a project dependency) over image content; ISIC year-over-year overlap is a known issue per the project brief"
+    fine_head: "dataset-specific -- ISIC 2020's own label set is melanoma/benign, not the 8-class Fed-ISIC2019 taxonomy; no forced mapping to the 8 fine classes"
+  milk10k:
+    role: "external acquisition, paired-image, and subgroup/generalization evaluation, IF license and labels permit"
+    literature_matrix_id: milk10k-dataset-record
+    gate: "UNVERIFIED -- exact release, DOI, biopsy proportion, label ontology, and skin-tone variables not yet confirmed; project brief explicitly requires verifying all of these before any use"
+    fine_head: "TBD pending label-ontology verification"
+  pad_ufes_20:
+    role: "external smartphone/clinical-image domain-shift evaluation"
+    literature_matrix_id: pad-ufes-20
+    gate: "UNVERIFIED -- dataset paper, access method, labels, and license not yet confirmed"
+    fine_head: "TBD pending label-ontology verification"
+  isic2018:
+    role: "optional lesion-segmentation or representation-learning source only -- NEVER an allegedly independent external test set without deduplication (project brief is explicit about this)"
+    gate: "not in current literature_matrix.csv as its own row; add and verify before use"
+
+leakage_audit_plan:
+  # Reuses the same manifest/audit machinery Phase 0 documents for
+  # Fed-ISIC2019 (docs/research_scope.md "Dataset manifest") -- not yet
+  # implemented for any real dataset since none is downloaded.
+  checks: [duplicate_image_id, duplicate_lesion_id, duplicate_patient_id,
+           exact_hash, perceptual_hash, transformed_copy, cross_year_isic_overlap]
+  tooling: "medgate/data/manifest.py (TODO -- not yet written; see docs/execution_plan.md)"

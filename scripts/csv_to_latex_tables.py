@@ -66,6 +66,19 @@ def phase3():
     write_tabular("phase3_attacks_synthetic.tex", ["Attack", "Seeds", "Metric", "Mean", "Std", "Note"], out, "lcllll")
 
 
+def phase3_integrity():
+    rows = list(csv.DictReader(open(TABLES / "phase3_integrity_synthetic.csv")))
+    out = []
+    for r in rows:
+        bd = "n/a" if r["backdoor_success_rate_mean"] == "" else fmt_num(r["backdoor_success_rate_mean"])
+        out.append([esc(r["attack"]), esc(r["aggregator"]), r["n_seeds"],
+                    f"{fmt_num(r['fine_macro_f1_mean'])} $\\pm$ {fmt_num(r['fine_macro_f1_std'])}",
+                    fmt_num(r["model_corrupted_rate"], 2), bd])
+    write_tabular("phase3_integrity_synthetic.tex",
+                  ["Attack", "Aggregator", "Seeds", "Fine macro-F1", "Model corrupted rate", "Backdoor success rate"],
+                  out, "llccccc")
+
+
 def phase4():
     rows = list(csv.DictReader(open(TABLES / "phase4_privacy_synthetic.csv")))
     out = []
@@ -89,5 +102,5 @@ def phase5():
 
 
 if __name__ == "__main__":
-    phase1(); phase2(); phase3(); phase4(); phase5()
+    phase1(); phase2(); phase3(); phase3_integrity(); phase4(); phase5()
     print("wrote LaTeX tables to", TABLES)
