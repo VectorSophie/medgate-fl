@@ -6,37 +6,47 @@
     "full_retrain": {
       "retained_fine_macro_f1": 0.027777777777777776,
       "gap_to_gold_standard": 0.0,
-      "forgetting_auc": 0.5302734375,
+      "forgetting_symmetric_auc": 0.5302734375,
+      "forgetting_attack_advantage": 0.060546875,
+      "forgetting_raw_auc_diagnostic_only": 0.5302734375,
       "mean_removed_data_loss": 2.072524070739746,
-      "mean_retained_test_loss": 2.082094669342041
+      "mean_nonmember_loss": 2.082094669342041
     },
     "checkpoint_rollback": {
       "retained_fine_macro_f1": 0.04980008567756676,
       "gap_to_gold_standard": 0.022022307899788984,
-      "forgetting_auc": 0.59609375,
+      "forgetting_symmetric_auc": 0.59609375,
+      "forgetting_attack_advantage": 0.19218749999999996,
+      "forgetting_raw_auc_diagnostic_only": 0.59609375,
       "mean_removed_data_loss": 2.046142101287842,
-      "mean_retained_test_loss": 2.075836658477783
+      "mean_nonmember_loss": 2.075836658477783
     },
     "adapter_deletion_and_retrain": {
       "retained_fine_macro_f1": 0.05646606914212547,
       "gap_to_gold_standard": 0.028688291364347696,
-      "forgetting_auc": 0.4205078125,
+      "forgetting_symmetric_auc": 0.5794921875,
+      "forgetting_attack_advantage": 0.15898437499999996,
+      "forgetting_raw_auc_diagnostic_only": 0.4205078125,
       "mean_removed_data_loss": 2.1827757358551025,
-      "mean_retained_test_loss": 2.1261253356933594
+      "mean_nonmember_loss": 2.1261253356933594
     },
     "gradient_ascent_unlearning": {
       "retained_fine_macro_f1": 0.025280898876404494,
       "gap_to_gold_standard": -0.0024968789013732826,
-      "forgetting_auc": 0.387890625,
+      "forgetting_symmetric_auc": 0.612109375,
+      "forgetting_attack_advantage": 0.22421875000000002,
+      "forgetting_raw_auc_diagnostic_only": 0.387890625,
       "mean_removed_data_loss": 5.290095806121826,
-      "mean_retained_test_loss": 4.243385314941406
+      "mean_nonmember_loss": 4.243385314941406
     },
     "key_revocation_only": {
       "retained_fine_macro_f1": 0.02401129943502825,
       "gap_to_gold_standard": -0.003766478342749527,
-      "forgetting_auc": 0.5279296874999999,
+      "forgetting_symmetric_auc": 0.5279296874999999,
+      "forgetting_attack_advantage": 0.05585937499999982,
+      "forgetting_raw_auc_diagnostic_only": 0.5279296874999999,
       "mean_removed_data_loss": 2.076603889465332,
-      "mean_retained_test_loss": 2.105905532836914
+      "mean_nonmember_loss": 2.105905532836914
     }
   },
   "config": {
@@ -75,7 +85,7 @@
     ],
     "output_dir": "experiments/phase5_synthetic"
   },
-  "git_commit": "5e8ce663f12fbe450ac41efa971f9806c59e19d3",
+  "git_commit": "987b540badf09101f863bf2e609530eea177764c",
   "dataset_manifest_hash": "874a6cfad139fea2",
-  "wall_clock_seconds": 2.4
+  "wall_clock_seconds": 27.13
 }

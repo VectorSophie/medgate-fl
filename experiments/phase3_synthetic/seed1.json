@@ -1,6 +1,6 @@
 {
   "seed": 1,
-  "git_commit": "175e88db6a6682455d842d2e900e956f5f61fb68",
+  "git_commit": "987b540badf09101f863bf2e609530eea177764c",
   "u_authorized_fine_macro_f1": 0.02880184331797235,
   "gradient_inversion": {
     "attacker_knowledge": "full model weights + ONE raw single-example gradient + true labels (simplified DLG)",
@@ -14,13 +14,14 @@
     "attacker_knowledge": "white-box loss access only, no shadow models trained (simplified variant)",
     "attacker_access": "per-example fine-task loss on a candidate pool",
     "attack_auc": 0.4568684895833333,
-    "attack_advantage": -0.08626302083333337,
+    "symmetric_auc": 0.5431315104166667,
+    "attack_advantage": 0.08626302083333337,
     "n_members": 32,
     "n_nonmembers": 192,
     "mean_member_loss": 2.091503143310547,
     "mean_nonmember_loss": 2.08261775970459
   },
-  "adapter_reconstruction": [
+  "auxiliary_data_adapter_finetuning_recovery": [
     {
       "attacker_knowledge": "public backbone + public coarse head (frozen), FRESH untrained adapter/fine_head",
       "attacker_access": "8 auxiliary labeled examples, 5 local epochs",
@@ -52,7 +53,7 @@
       "capability_recovery_efficiency": 0.007648828316931988
     }
   ],
-  "extraction": [
+  "fixed_budget_hard_label_distillation": [
     {
       "attacker_knowledge": "none of the target's weights; only its output predictions",
       "attacker_access": "16 black-box queries (fixed query budget), 5 local epochs on the student",
@@ -84,7 +85,7 @@
       "capability_recovery_efficiency": 0.006899657711607677
     }
   ],
-  "collusion": {
+  "auxiliary_data_ensemble_collusion_proxy": {
     "attacker_knowledge": "two colluding A2 attackers, disjoint auxiliary data, logit-averaged ensemble",
     "attacker_access": "16+16 auxiliary examples total (same total budget as either solo attack x2)",
     "compute_budget": {
@@ -162,5 +163,5 @@
     "output_dir": "experiments/phase3_synthetic"
   },
   "dataset_manifest_hash": "bf4ade0697cb58af",
-  "wall_clock_seconds": 11.2
+  "wall_clock_seconds": 18.98
 }

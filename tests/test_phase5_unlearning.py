@@ -5,7 +5,14 @@ Run: PYTHONPATH=. pytest tests/test_phase5_unlearning.py -v
 """
 import torch
 
-from medgate.data.synthetic import COARSE_CLASSES, FINE_CLASSES, SyntheticFedISIC, make_synthetic_centers
+from medgate.data.synthetic import (
+    COARSE_CLASSES,
+    FINE_CLASSES,
+    SyntheticFedISIC,
+    make_never_trained_class_pool,
+    make_synthetic_centers,
+    make_synthetic_train_test_centers,
+)
 from medgate.models.backbone import MedGateModel
 from medgate.unlearning.methods import (
     adapter_deletion_and_retrain,
@@ -16,6 +23,25 @@ from medgate.unlearning.methods import (
 )
 
 MODEL_KWARGS = dict(num_coarse=len(COARSE_CLASSES), num_fine=len(FINE_CLASSES), feature_dim=16, adapter_rank=2)
+
+
+def test_never_trained_class_pool_is_disjoint_from_train_and_test_centers():
+    """P0-3 confound fix (docs/execution_plan.md Phase 5): the within-
+    class control pool must not accidentally BE (or overlap the seed range
+    of) any train/test center's data -- checked by seed-range disjointness
+    (the generator is continuous Gaussian noise, so exact-value collision
+    isn't the meaningful check; using the same seed range would be)."""
+    train_centers, test_centers = make_synthetic_train_test_centers(samples_per_center=16, image_size=16, seed=0)
+    pool = make_never_trained_class_pool(fine_class_idx=0, num_samples=16, image_size=16, seed=0)
+    assert len(pool) == 16
+    # Every image in the pool is labeled the requested class, by construction.
+    fine_labels = torch.stack([pool[i][1] for i in range(len(pool))])
+    assert torch.all(fine_labels == 0)
+    # Sanity: the pool's images are not bit-identical to any train/test center's
+    # images (would indicate an accidental seed collision).
+    pool_images = torch.stack([pool[i][0] for i in range(len(pool))])
+    for c in train_centers + test_centers:
+        assert not torch.equal(pool_images, c.images), "never-trained pool collided with a train/test center's exact seed"
 
 
 def _authorized_model_and_data():
@@ -73,6 +99,7 @@ def test_full_retrain_is_deterministic_given_the_same_seed():
 
 
 if __name__ == "__main__":
+    test_never_trained_class_pool_is_disjoint_from_train_and_test_centers()
     test_key_revocation_only_returns_the_identical_object()
     test_checkpoint_rollback_matches_a_fresh_same_seed_init()
     test_adapter_deletion_changes_adapter_but_not_backbone()

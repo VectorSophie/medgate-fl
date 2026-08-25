@@ -29,7 +29,7 @@ def main():
     dlg_psnr = [r["gradient_inversion"]["psnr_db"] for r in runs]
     dlg_mse = [r["gradient_inversion"]["mse"] for r in runs]
     m, s = mean_std(dlg_psnr)
-    rows.append({"attack": "gradient_inversion (DLG, single unaggregated gradient)", "n_seeds": len(runs),
+    rows.append({"attack": "simplified_known_label_gradient_inversion (single unaggregated gradient)", "n_seeds": len(runs),
                  "metric": "PSNR_dB", "mean": m, "std": s, "note": f"mse mean={statistics.mean(dlg_mse):.4f}"})
 
     mi_auc = [r["membership_inference"]["attack_auc"] for r in runs]
@@ -41,21 +41,21 @@ def main():
     def fmt_budget(b: dict) -> str:
         return ", ".join(f"{k}={v}" for k, v in b.items())
 
-    for i, budget in enumerate(runs[0]["adapter_reconstruction"]):
-        vals = [r["adapter_reconstruction"][i]["u_attack_fine_macro_f1"] for r in runs]
+    for i, budget in enumerate(runs[0]["auxiliary_data_adapter_finetuning_recovery"]):
+        vals = [r["auxiliary_data_adapter_finetuning_recovery"][i]["u_attack_fine_macro_f1"] for r in runs]
         m, s = mean_std(vals)
-        rows.append({"attack": "adapter_reconstruction (A2)", "n_seeds": len(runs),
+        rows.append({"attack": "auxiliary_data_adapter_finetuning_recovery (A2)", "n_seeds": len(runs),
                      "metric": f"fine_macro_f1 @ {fmt_budget(budget['compute_budget'])}", "mean": m, "std": s, "note": ""})
 
-    for i, budget in enumerate(runs[0]["extraction"]):
-        vals = [r["extraction"][i]["u_attack_fine_macro_f1"] for r in runs]
+    for i, budget in enumerate(runs[0]["fixed_budget_hard_label_distillation"]):
+        vals = [r["fixed_budget_hard_label_distillation"][i]["u_attack_fine_macro_f1"] for r in runs]
         m, s = mean_std(vals)
-        rows.append({"attack": "black_box_extraction (A3)", "n_seeds": len(runs),
+        rows.append({"attack": "fixed_budget_hard_label_distillation (A3)", "n_seeds": len(runs),
                      "metric": f"fine_macro_f1 @ {fmt_budget(budget['compute_budget'])}", "mean": m, "std": s, "note": ""})
 
-    col_gain = [r["collusion"]["collusion_gain_over_solo"] for r in runs]
+    col_gain = [r["auxiliary_data_ensemble_collusion_proxy"]["collusion_gain_over_solo"] for r in runs]
     m, s = mean_std(col_gain)
-    rows.append({"attack": "collusion (2 attackers vs solo, same total budget)", "n_seeds": len(runs),
+    rows.append({"attack": "auxiliary_data_ensemble_collusion_proxy (2 attackers vs solo, same total budget)", "n_seeds": len(runs),
                  "metric": "fine_macro_f1 gain over solo", "mean": m, "std": s, "note": ""})
 
     OUT_CSV.parent.mkdir(parents=True, exist_ok=True)

@@ -1,0 +1,13 @@
+{
+  "kind": "imagenet_pretrained",
+  "seed": 1,
+  "config": {
+    "epochs": 4,
+    "batch_size": 16,
+    "lr": 0.01
+  },
+  "git_commit": "987b540badf09101f863bf2e609530eea177764c",
+  "pretrain_coarse_macro_f1": 0.5745868945868947,
+  "checkpoint_name": "hier_imagenet_pretrained_seed1",
+  "state_dict_sha256": "1f5327fa3da9bf5226acefe91ad98b417d8a1a49e3c6af563887e97acc4f2a96"
+}

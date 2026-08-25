@@ -1,6 +1,6 @@
 {
   "seed": 0,
-  "git_commit": "817b8aaedae2522fda31ff84a223c470eab90f25",
+  "git_commit": "987b540badf09101f863bf2e609530eea177764c",
   "config": {
     "data": {
       "source": "synthetic",
@@ -36,7 +36,7 @@
     "output_dir": "experiments/phase4_synthetic"
   },
   "dataset_manifest_hash": "874a6cfad139fea2",
-  "wall_clock_seconds": 63.55,
+  "wall_clock_seconds": 79.59,
   "arms": [
     {
       "arm": "no_protection",
@@ -72,6 +72,19 @@
         "coarse_balanced_accuracy": 0.3333333333333333,
         "fine_macro_f1": 0.03786057692307693,
         "fine_balanced_accuracy": 0.13043478260869565
+      },
+      "dp_accountant_metadata": {
+        "adjacency": "example-level (record-level), NOT client-level",
+        "accountant": "Opacus RDP accountant (default)",
+        "sampling_mechanism": "shuffled mini-batches, poisson_sampling=False (not Poisson subsampling)",
+        "delta": 1e-05,
+        "max_grad_norm": 1.0,
+        "noise_multiplier": 0.5,
+        "local_epochs_per_round": 1,
+        "federated_rounds": 2,
+        "composition_scope": "within one client's local dp_local_train call only; reported epsilon = max over clients THIS ROUND, NOT cumulative across rounds (see dp_fedavg_round docstring)",
+        "params_covered": "backbone, coarse_head, adapter, fine_head (medgate.attacks.gradient_inversion.attack_params)",
+        "params_excluded": "adversary_head (architecturally unused by this training path -- receives no gradient at all)"
       }
     },
     {
@@ -84,6 +97,19 @@
         "coarse_balanced_accuracy": 0.3333333333333333,
         "fine_macro_f1": 0.03786057692307693,
         "fine_balanced_accuracy": 0.13043478260869565
+      },
+      "dp_accountant_metadata": {
+        "adjacency": "example-level (record-level), NOT client-level",
+        "accountant": "Opacus RDP accountant (default)",
+        "sampling_mechanism": "shuffled mini-batches, poisson_sampling=False (not Poisson subsampling)",
+        "delta": 1e-05,
+        "max_grad_norm": 1.0,
+        "noise_multiplier": 0.5,
+        "local_epochs_per_round": 1,
+        "federated_rounds": 2,
+        "composition_scope": "within one client's local dp_local_train call only; reported epsilon = max over clients THIS ROUND, NOT cumulative across rounds (see dp_fedavg_round docstring)",
+        "params_covered": "backbone, coarse_head, adapter, fine_head (medgate.attacks.gradient_inversion.attack_params)",
+        "params_excluded": "adversary_head (architecturally unused by this training path -- receives no gradient at all)"
       }
     },
     {
@@ -96,6 +122,19 @@
         "coarse_balanced_accuracy": 0.3333333333333333,
         "fine_macro_f1": 0.03922008068130883,
         "fine_balanced_accuracy": 0.12086956521739131
+      },
+      "dp_accountant_metadata": {
+        "adjacency": "example-level (record-level), NOT client-level",
+        "accountant": "Opacus RDP accountant (default)",
+        "sampling_mechanism": "shuffled mini-batches, poisson_sampling=False (not Poisson subsampling)",
+        "delta": 1e-05,
+        "max_grad_norm": 1.0,
+        "noise_multiplier": 1.0,
+        "local_epochs_per_round": 1,
+        "federated_rounds": 2,
+        "composition_scope": "within one client's local dp_local_train call only; reported epsilon = max over clients THIS ROUND, NOT cumulative across rounds (see dp_fedavg_round docstring)",
+        "params_covered": "backbone, coarse_head, adapter, fine_head (medgate.attacks.gradient_inversion.attack_params)",
+        "params_excluded": "adversary_head (architecturally unused by this training path -- receives no gradient at all)"
       }
     },
     {
@@ -108,6 +147,19 @@
         "coarse_balanced_accuracy": 0.3333333333333333,
         "fine_macro_f1": 0.03922008068130883,
         "fine_balanced_accuracy": 0.12086956521739131
+      },
+      "dp_accountant_metadata": {
+        "adjacency": "example-level (record-level), NOT client-level",
+        "accountant": "Opacus RDP accountant (default)",
+        "sampling_mechanism": "shuffled mini-batches, poisson_sampling=False (not Poisson subsampling)",
+        "delta": 1e-05,
+        "max_grad_norm": 1.0,
+        "noise_multiplier": 1.0,
+        "local_epochs_per_round": 1,
+        "federated_rounds": 2,
+        "composition_scope": "within one client's local dp_local_train call only; reported epsilon = max over clients THIS ROUND, NOT cumulative across rounds (see dp_fedavg_round docstring)",
+        "params_covered": "backbone, coarse_head, adapter, fine_head (medgate.attacks.gradient_inversion.attack_params)",
+        "params_excluded": "adversary_head (architecturally unused by this training path -- receives no gradient at all)"
       }
     },
     {
@@ -120,6 +172,19 @@
         "coarse_balanced_accuracy": 0.3206699346405229,
         "fine_macro_f1": 0.04993825254708244,
         "fine_balanced_accuracy": 0.13260869565217392
+      },
+      "dp_accountant_metadata": {
+        "adjacency": "example-level (record-level), NOT client-level",
+        "accountant": "Opacus RDP accountant (default)",
+        "sampling_mechanism": "shuffled mini-batches, poisson_sampling=False (not Poisson subsampling)",
+        "delta": 1e-05,
+        "max_grad_norm": 1.0,
+        "noise_multiplier": 2.0,
+        "local_epochs_per_round": 1,
+        "federated_rounds": 2,
+        "composition_scope": "within one client's local dp_local_train call only; reported epsilon = max over clients THIS ROUND, NOT cumulative across rounds (see dp_fedavg_round docstring)",
+        "params_covered": "backbone, coarse_head, adapter, fine_head (medgate.attacks.gradient_inversion.attack_params)",
+        "params_excluded": "adversary_head (architecturally unused by this training path -- receives no gradient at all)"
       }
     },
     {
@@ -132,7 +197,31 @@
         "coarse_balanced_accuracy": 0.3206699346405229,
         "fine_macro_f1": 0.04993825254708244,
         "fine_balanced_accuracy": 0.13260869565217392
+      },
+      "dp_accountant_metadata": {
+        "adjacency": "example-level (record-level), NOT client-level",
+        "accountant": "Opacus RDP accountant (default)",
+        "sampling_mechanism": "shuffled mini-batches, poisson_sampling=False (not Poisson subsampling)",
+        "delta": 1e-05,
+        "max_grad_norm": 1.0,
+        "noise_multiplier": 2.0,
+        "local_epochs_per_round": 1,
+        "federated_rounds": 2,
+        "composition_scope": "within one client's local dp_local_train call only; reported epsilon = max over clients THIS ROUND, NOT cumulative across rounds (see dp_fedavg_round docstring)",
+        "params_covered": "backbone, coarse_head, adapter, fine_head (medgate.attacks.gradient_inversion.attack_params)",
+        "params_excluded": "adversary_head (architecturally unused by this training path -- receives no gradient at all)"
       }
     }
-  ]
+  ],
+  "secure_agg_empirical_concealment_sanity_check": {
+    "masked_case_attack_auc": 1.0,
+    "masked_case_attack_auc_95ci": [
+      0.9999999999999999,
+      1.0
+    ],
+    "unmasked_control_attack_auc": 1.0,
+    "n_samples_per_distribution": 100,
+    "mean_shift": 2.0,
+    "not_a_security_proof": "see empirical_concealment_sanity_check docstring"
+  }
 }

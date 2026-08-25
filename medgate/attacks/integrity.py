@@ -7,7 +7,7 @@ medgate.federated.robust_aggregation) alongside honest clients' states.
 Attacker model throughout: a single malicious client (A4, "normal client
 role in one or more rounds", docs/research_scope.md). No collusion between
 multiple malicious clients is modeled here (see
-medgate/attacks/reconstruction.py's collusion_attack for a DIFFERENT kind
+medgate/attacks/reconstruction.py's auxiliary_data_ensemble_collusion_proxy for a DIFFERENT kind
 of collusion, between two A2 attackers reconstructing an adapter, not
 between A4 poisoners).
 """

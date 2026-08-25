@@ -1,12 +1,28 @@
 """Recovery-via-retraining attacks: A2 (unauthorized recipient with the
 public backbone) and A3 (fully black-box query access), plus a minimal
-two-attacker collusion variant.
+two-attacker collusion PROXY.
+
+Naming, precise on purpose (docs/execution_plan.md P1-6 attack-naming
+audit): none of these functions "reconstruct" an existing protected
+artifact (the real adapter's weights, an encrypted tensor, a missing
+parameter) -- they each train a FRESH replacement from scratch using
+auxiliary data or query access, then measure how much fine-task utility
+that fresh replacement recovers. "Reconstruction" would overclaim that
+something specific was recovered; what actually happens is fine-tuning
+(A2) or distillation (A3) recovery. Likewise `auxiliary_data_ensemble_
+collusion_proxy` is a PROXY for collusion (two independent auxiliary-data
+attackers, logit-averaged) -- see medgate/attacks/property_inference.py
+and medgate/attacks/integrity.py for the project's other, different uses
+of "collusion" (A1 property inference over plaintext updates; A4 malicious-
+client poisoning), none of which this module implements or claims to.
+Genuine parameter-space adapter recovery (SVD/low-rank completion, a
+known-partial-adapter attack, etc.) is a SEPARATE, not-yet-implemented
+track -- see docs/execution_plan.md P1-7.
 
 These are distinct from the frozen-feature probes in
 medgate/attacks/probes.py: here the attacker actually trains new gradient-
 based parameters (a fresh adapter, or a fresh full model), not just a
-classifier on top of fixed features. This is the project brief's "adapter
-reconstruction" / "fine-tuning recovery" / "collusion" attack family.
+classifier on top of fixed features.
 """
 import copy
 
@@ -16,7 +32,7 @@ import torch.nn as nn
 from medgate.federated.fedavg import local_train
 
 
-def adapter_reconstruction_attack(
+def auxiliary_data_adapter_finetuning_recovery(
     authorized_model, auxiliary_dataset, epochs: int, batch_size: int, lr: float, seed: int
 ):
     """A2: attacker has the public backbone + coarse head (frozen, exactly
@@ -53,7 +69,7 @@ def _query_hard_labels(authorized_model, images) -> torch.Tensor:
     return authorized_model.forward_fine(images).argmax(dim=1)
 
 
-def black_box_extraction_attack(
+def fixed_budget_hard_label_distillation(
     authorized_model, query_images: torch.Tensor, model_kwargs: dict, epochs: int, batch_size: int, lr: float, seed: int
 ):
     """A3: fully black-box. Attacker never sees the backbone or any
@@ -91,17 +107,17 @@ def _model_from_kwargs(model_kwargs: dict):
     return MedGateModel(**model_kwargs)
 
 
-def collusion_attack(
+def auxiliary_data_ensemble_collusion_proxy(
     authorized_model, auxiliary_dataset_a, auxiliary_dataset_b, epochs: int, batch_size: int, lr: float, seed: int
 ):
     """Two-attacker collusion (A4-adjacent): two independent A2 attackers,
     each with a DISJOINT slice of auxiliary data, each reconstruct their
-    own adapter (adapter_reconstruction_attack) — then pool their fine
+    own adapter (auxiliary_data_adapter_finetuning_recovery) — then pool their fine
     predictions by averaging logits. Tests whether collusion recovers more
     capability than either attacker alone, using the SAME total auxiliary
     data and compute as the two solo attacks combined (no extra budget)."""
-    model_a, meta_a = adapter_reconstruction_attack(authorized_model, auxiliary_dataset_a, epochs, batch_size, lr, seed)
-    model_b, meta_b = adapter_reconstruction_attack(authorized_model, auxiliary_dataset_b, epochs, batch_size, lr, seed + 1)
+    model_a, meta_a = auxiliary_data_adapter_finetuning_recovery(authorized_model, auxiliary_dataset_a, epochs, batch_size, lr, seed)
+    model_b, meta_b = auxiliary_data_adapter_finetuning_recovery(authorized_model, auxiliary_dataset_b, epochs, batch_size, lr, seed + 1)
 
     class ColludedEnsemble(nn.Module):
         def __init__(self, m1, m2):

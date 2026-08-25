@@ -55,13 +55,33 @@ def run_arm(arm_name: str, seed: int, cfg: dict, train_centers, test_pool, noise
         model.load_state_dict(state)
 
     utility = evaluate_both(model, test_pool)
-    return {
+    result = {
         "arm": arm_name,
         "noise_multiplier": noise_multiplier,
         "seed": seed,
         "epsilon": max(epsilons) if epsilons else None,
         "utility": utility,
     }
+    if arm_name in ("dp_sgd", "secure_agg_plus_dp"):
+        # P1-10: accountant metadata recorded in every DP result, not just
+        # documented in prose -- see medgate/privacy/dp_sgd.py's module
+        # docstring for what each field means and does not mean.
+        result["dp_accountant_metadata"] = {
+            "adjacency": "example-level (record-level), NOT client-level",
+            "accountant": "Opacus RDP accountant (default)",
+            "sampling_mechanism": "shuffled mini-batches, poisson_sampling=False (not Poisson subsampling)",
+            "delta": dp["delta"],
+            "max_grad_norm": dp["max_grad_norm"],
+            "noise_multiplier": noise_multiplier,
+            "local_epochs_per_round": t["epochs_per_round"],
+            "federated_rounds": t["rounds"],
+            "composition_scope": "within one client's local dp_local_train call only; "
+                                  "reported epsilon = max over clients THIS ROUND, "
+                                  "NOT cumulative across rounds (see dp_fedavg_round docstring)",
+            "params_covered": "backbone, coarse_head, adapter, fine_head (medgate.attacks.gradient_inversion.attack_params)",
+            "params_excluded": "adversary_head (architecturally unused by this training path -- receives no gradient at all)",
+        }
+    return result
 
 
 def main():
@@ -86,11 +106,15 @@ def main():
             results.append(run_arm("dp_sgd", seed, cfg, train_centers, test_pool, noise_multiplier=nm))
             results.append(run_arm("secure_agg_plus_dp", seed, cfg, train_centers, test_pool, noise_multiplier=nm))
 
+        from medgate.privacy.secure_aggregation import empirical_concealment_sanity_check
+        concealment = empirical_concealment_sanity_check(shape=(64,), seed=seed, n_samples=100, mean_shift=2.0, n_bootstrap=200)
+
         out = {
             "seed": seed, "git_commit": commit, "config": cfg,
             "dataset_manifest_hash": manifest_hash(cfg["data"]),
             "wall_clock_seconds": round(time.time() - start, 2),
             "arms": results,
+            "secure_agg_empirical_concealment_sanity_check": concealment,  # NOT a security proof -- see its docstring
         }
         out_path = out_dir / f"seed{seed}.json"
         out_path.write_text(json.dumps(out, indent=2))

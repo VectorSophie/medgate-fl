@@ -35,6 +35,47 @@ class SmallBackbone(nn.Module):
         return self.proj(z)
 
 
+class PretrainedMobileNetBackbone(nn.Module):
+    """f_theta(x) backed by torchvision's mobilenet_v3_small with
+    ImageNet-1k pretrained weights (2.5M params, ~10MB download, cached
+    after the first run) -- the `imagenet_pretrained_fedlora` /
+    `imagenet_pretrained_full_finetune` baselines' starting point
+    (docs/execution_plan.md Phase 1 fair-baseline repair). A linear layer
+    projects mobilenet's 576-channel pooled feature down to `feature_dim`
+    so this is a drop-in replacement for SmallBackbone (same forward(x) ->
+    (batch, feature_dim) interface, same .feature_dim attribute).
+
+    Not meant for the null-signal fixture's 32x32 noise images in any
+    meaningful pretrained sense -- ImageNet features are only informative
+    on the hierarchical-signal fixture's structured images (still just
+    procedurally-generated patterns, not real photos, so 'pretrained' here
+    means 'started from real ImageNet weights', not 'domain-matched to
+    medical images' -- stated explicitly to avoid overclaiming)."""
+
+    _MOBILENET_FEATURE_CHANNELS = 576
+
+    def __init__(self, feature_dim: int = 64, freeze: bool = True):
+        super().__init__()
+        import torchvision
+
+        mobilenet = torchvision.models.mobilenet_v3_small(
+            weights=torchvision.models.MobileNet_V3_Small_Weights.IMAGENET1K_V1
+        )
+        self.features = mobilenet.features
+        self.pool = nn.AdaptiveAvgPool2d(1)
+        self.proj = nn.Linear(self._MOBILENET_FEATURE_CHANNELS, feature_dim)
+        self.feature_dim = feature_dim
+        if freeze:
+            for p in self.features.parameters():
+                p.requires_grad_(False)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        z = self.features(x)
+        z = self.pool(z)
+        z = torch.flatten(z, 1)
+        return self.proj(z)
+
+
 class LinearHead(nn.Module):
     """h_c or h_f: representation -> class logits."""
 
@@ -119,9 +160,15 @@ class MedGateModel(nn.Module):
         feature_dim: int = 64,
         adapter_rank: int = 4,
         in_channels: int = 3,
+        backbone: nn.Module | None = None,
     ):
+        """`backbone`: an already-constructed module exposing
+        forward(x)->(batch, feature_dim) and a `.feature_dim` attribute
+        (e.g. PretrainedMobileNetBackbone). Defaults to a fresh
+        SmallBackbone, unchanged from every prior phase's behavior — this
+        parameter is additive, not a breaking change."""
         super().__init__()
-        self.backbone = SmallBackbone(in_channels=in_channels, feature_dim=feature_dim)
+        self.backbone = backbone if backbone is not None else SmallBackbone(in_channels=in_channels, feature_dim=feature_dim)
         self.coarse_head = LinearHead(feature_dim, num_coarse)
         self.adapter = LoRAAdapter(feature_dim, rank=adapter_rank)
         self.fine_head = LinearHead(feature_dim, num_fine)

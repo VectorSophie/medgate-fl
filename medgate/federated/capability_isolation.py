@@ -94,7 +94,13 @@ def train_capability_isolation(
     batch_size: int,
     lr: float,
     seed: int,
+    init_state_dict: dict | None = None,
 ):
+    """`init_state_dict`: if given, the model starts from these weights
+    instead of a fresh random init -- lets `proposed_isolation` (Phase 1's
+    fair-baseline repair, docs/execution_plan.md) start from EXACTLY the
+    same pretrained checkpoint as coarse_pretrained_fedlora/full_finetune,
+    so the comparison isolates the training objective, not the init."""
     # local imports to avoid a circular import (baselines imports fedavg,
     # this module is imported by scripts, not by baselines.py)
     from medgate.federated.baselines import set_seed
@@ -103,6 +109,8 @@ def train_capability_isolation(
 
     set_seed(seed)
     model = MedGateModel(**model_kwargs)
+    if init_state_dict is not None:
+        model.load_state_dict(init_state_dict)
     loss_fn = METHODS[method_name]
     for _ in range(rounds):
         agg = run_round(model, client_train_datasets, epochs, batch_size, lr, batch_loss_fn=loss_fn)

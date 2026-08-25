@@ -57,6 +57,23 @@ class CentralizedIAM:
         self.audit_log.append({"event": "revoke", "key_id": key_id, "latency_s": latency})
         return latency
 
+    def rotate(self, old_key_id: str, new_key: bytes, ttl_seconds: float | None = None) -> str:
+        """Key rotation = revoke the old credential + issue a fresh one
+        for the same subject (P1-11 review requirement: 'explicit
+        key-rotation ... behavior'). Does NOT re-encrypt any adapter
+        already sealed under the old key — that is a separate,
+        caller-driven step (decrypt with the old key while it's still
+        valid, i.e. BEFORE calling rotate, then re-encrypt with the
+        returned new key_id's key) — this method only handles the
+        credential lifecycle, matching medgate/crypto/adapter_encryption.py's
+        own separation of concerns (encryption vs. key distribution)."""
+        cred = self._credentials.get(old_key_id)
+        if cred is None:
+            raise KeyError(f"unknown key_id {old_key_id}")
+        subject_id = cred.subject_id
+        self.revoke(old_key_id)
+        return self.issue(subject_id, new_key, ttl_seconds=ttl_seconds)
+
     def authorize(self, key_id: str, now: float | None = None) -> bytes:
         """Returns the key IF the credential exists, is not revoked, and
         (if issued with a TTL) has not expired; raises PermissionError

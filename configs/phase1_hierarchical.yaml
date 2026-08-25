@@ -1,0 +1,43 @@
+# Phase 1+2 fair-baseline repair, HIERARCHICAL-SIGNAL FIXTURE
+# (medgate/data/hierarchical_synthetic.py -- real, controllable, learnable
+# structure; see that module's docstring). This is still a synthetic
+# fixture, not real Fed-ISIC2019 data (BLOCKED-LICENSE,
+# docs/execution_plan.md) -- procedurally generated patterns, not medical
+# images -- but unlike configs/phase1_synthetic.yaml's null-signal fixture,
+# results here are not pipeline-validation-only: there is real signal to
+# learn, isolate, and attack, so utility/ranking claims are meaningful
+# (at synthetic-fixture scale) rather than floor-level noise everywhere.
+data:
+  # Scaled down from an earlier (25 patients/6 pretrain epochs/6 rounds x 3)
+  # config that was killed after >12 minutes wall-clock without finishing
+  # even seed 0 on this hardware (docs/hardware_report.md, CPU-only) --
+  # the dominant cost turned out to be the probe suite (4 probes x 10
+  # methods per seed, including an sklearn MLPClassifier), not the
+  # federated training itself. This smaller config is still a REAL
+  # learnable-signal run (see tests/test_phase1_pretrained_baselines.py
+  # for the same properties verified at this same scale), just fewer
+  # seeds/patients than would be ideal with more compute.
+  num_patients_per_institution: 12
+  observations_per_patient: 3
+  image_size: 32
+  class_imbalance_strength: 0.5
+  sensitive_property_correlation: 0.6
+  data_seed: 0
+  train_frac: 0.6
+  val_frac: 0.2   # test_frac = 1 - train_frac - val_frac
+model:
+  feature_dim: 32
+  adapter_rank: 4
+pretrain:
+  epochs: 4
+  batch_size: 16
+  lr: 0.01
+train:
+  rounds: 4
+  epochs_per_round: 2
+  batch_size: 8
+  lr: 0.02
+baselines: [random_frozen_lora, coarse_pretrained_fedlora, imagenet_pretrained_fedlora, full_finetune]
+capability_isolation_methods: [coarse_only, hidden_fine_head, adapter_isolation, adversarial, orthogonal, combined]
+seeds: [0, 1]
+output_dir: experiments/phase1_hierarchical

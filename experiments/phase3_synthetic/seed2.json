@@ -1,6 +1,6 @@
 {
   "seed": 2,
-  "git_commit": "175e88db6a6682455d842d2e900e956f5f61fb68",
+  "git_commit": "987b540badf09101f863bf2e609530eea177764c",
   "u_authorized_fine_macro_f1": 0.0567572598659717,
   "gradient_inversion": {
     "attacker_knowledge": "full model weights + ONE raw single-example gradient + true labels (simplified DLG)",
@@ -14,13 +14,14 @@
     "attacker_knowledge": "white-box loss access only, no shadow models trained (simplified variant)",
     "attacker_access": "per-example fine-task loss on a candidate pool",
     "attack_auc": 0.5501302083333334,
+    "symmetric_auc": 0.5501302083333334,
     "attack_advantage": 0.10026041666666674,
     "n_members": 32,
     "n_nonmembers": 192,
     "mean_member_loss": 2.0882911682128906,
     "mean_nonmember_loss": 2.109668493270874
   },
-  "adapter_reconstruction": [
+  "auxiliary_data_adapter_finetuning_recovery": [
     {
       "attacker_knowledge": "public backbone + public coarse head (frozen), FRESH untrained adapter/fine_head",
       "attacker_access": "8 auxiliary labeled examples, 5 local epochs",
@@ -52,7 +53,7 @@
       "capability_recovery_efficiency": 0.009099989420539637
     }
   ],
-  "extraction": [
+  "fixed_budget_hard_label_distillation": [
     {
       "attacker_knowledge": "none of the target's weights; only its output predictions",
       "attacker_access": "16 black-box queries (fixed query budget), 5 local epochs on the student",
@@ -84,7 +85,7 @@
       "capability_recovery_efficiency": 0.007622240046496045
     }
   ],
-  "collusion": {
+  "auxiliary_data_ensemble_collusion_proxy": {
     "attacker_knowledge": "two colluding A2 attackers, disjoint auxiliary data, logit-averaged ensemble",
     "attacker_access": "16+16 auxiliary examples total (same total budget as either solo attack x2)",
     "compute_budget": {
@@ -162,5 +163,5 @@
     "output_dir": "experiments/phase3_synthetic"
   },
   "dataset_manifest_hash": "bf4ade0697cb58af",
-  "wall_clock_seconds": 11.4
+  "wall_clock_seconds": 20.32
 }

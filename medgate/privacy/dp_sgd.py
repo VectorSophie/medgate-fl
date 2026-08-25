@@ -1,19 +1,65 @@
 """DP-SGD (Abadi et al. 2016, docs/literature_matrix.csv id abadi2016-dpsgd)
-via Opacus — per-example gradient clipping + Gaussian noise, applied to one
-client's LOCAL training (client-level composition across FedAvg rounds is
-NOT separately accounted here; see the docstring on dp_fedavg_round below
-for exactly what epsilon does and does not cover).
+via Opacus — per-EXAMPLE gradient clipping + Gaussian noise, applied to one
+client's LOCAL training.
+
+EXACT PRIVACY UNIT AND ADJACENCY (P1-10 review requirement — stated
+precisely so this is never mis-called "client-level DP", which is a
+different, stronger, NOT-implemented guarantee):
+  - Adjacency: EXAMPLE-level (a.k.a. record-level). Opacus's PrivacyEngine
+    clips and noises the PER-SAMPLE gradient inside dp_local_train's
+    DataLoader batches — the unit two "adjacent" datasets differ by is ONE
+    TRAINING EXAMPLE within one client's local data, not one client's
+    entire dataset. A client-level guarantee (protecting a client's WHOLE
+    contribution, the more relevant unit for cross-silo FL where each
+    "client" is a hospital) is NOT what this module provides and is NOT
+    claimed anywhere in this project.
+  - Sampling mechanism: `poisson_sampling=False` (medgate/privacy/dp_sgd.py
+    dp_local_train) — i.e. plain shuffled mini-batches via a standard
+    DataLoader, NOT Poisson/random subsampling. This is a real, deliberate
+    deviation from Opacus's recommended default (which assumes Poisson
+    sampling for its tightest RDP accounting): the accountant still
+    computes a numeric epsilon under `poisson_sampling=False`, but that
+    epsilon is accordingly LESS TIGHT than the Poisson-sampled analysis
+    the DP-SGD literature usually reports — stated here so the reported
+    epsilon is never read as the tightest possible bound.
+  - Composition: WITHIN one dp_local_train call, Opacus's accountant
+    (RDP-based, the Opacus default) composes across every local
+    mini-batch step across `epochs` — that part IS accounted. ACROSS
+    FedAvg rounds and across which clients participate in which rounds,
+    composition is NOT accounted (dp_fedavg_round reports the MAX of each
+    round's independent per-client epsilon, not a cumulative sum/
+    composition across rounds — see that function's own docstring). A
+    client that participates in every round of a multi-round experiment
+    has a TRUE cumulative epsilon higher than any single round's reported
+    number; this project does not compute that cumulative figure.
+  - delta: caller-supplied (dp_local_train's `delta` parameter, default
+    1e-5 throughout this project's configs) — not derived from dataset
+    size via any rule of thumb; stated as a fixed choice, not tuned.
+  - Parameters COVERED by DP: exactly medgate.attacks.gradient_inversion.
+    attack_params(model) — backbone + coarse_head + adapter + fine_head.
+    Every one of those receives a per-sample gradient every batch (Opacus
+    requires this; see test_all_dp_tracked_params_receive_per_sample_gradients
+    in tests/test_phase4_privacy.py).
+  - Parameters EXCLUDED from DP: model.adversary_head. It is excluded
+    because it is architecturally UNUSED by the plain joint_loss objective
+    this module trains (medgate.federated.fedavg.joint_loss never calls
+    model.adversary_logits) — it receives NO gradient at all, private or
+    otherwise, in this training path, and its weights are never updated
+    nor released as a function of any private example here. This DP-SGD
+    integration is NOT wired up for Phase 2's adversarial/orthogonality
+    objectives (which DO use adversary_head) — if adversary_head is ever
+    trained under one of those objectives while DP-SGD is also active, the
+    epsilon this module reports would NOT cover that adversary head's
+    parameters, and that configuration is out of scope for any DP claim in
+    this project (docs/execution_plan.md Phase 4 evaluates DP-SGD only
+    against the plain adapter-isolation architecture, never combined with
+    Phase 2's adversarial suppression).
 
 Two fixes required to make our architecture Opacus-compatible, both
 already applied and documented in medgate/models/backbone.py:
   1. no inplace ReLU (Opacus's backward hooks break on inplace ops).
-  2. the optimizer must be built over medgate.attacks.gradient_inversion.
-     attack_params(model) — the params actually used by the coarse+fine
-     loss — not model.parameters(), because Opacus's optimizer requires
-     EVERY tracked param to have received a per-sample gradient this batch,
-     and model.adversary_head (present for Phase 2's adversarial/combined
-     methods but unused by the plain joint_loss objective) would violate
-     that whenever it isn't part of the loss being trained.
+  2. the optimizer must be built over attack_params(model) — see the
+     'parameters excluded from DP' point above for exactly why.
 """
 import copy
 

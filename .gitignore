@@ -17,11 +17,16 @@ data/processed/
 ## summary logs ARE committed as reproducibility evidence; only bulk
 ## per-run training logs and checkpoints are excluded.
 logs/runs/
-logs/**/checkpoints/
-experiments/**/checkpoints/
+logs/**/checkpoints/*
+logs/**/checkpoints/*.json
+experiments/**/checkpoints/*
 *.pt
 *.pth
 *.ckpt
+## ...but DO commit checkpoint sidecar metadata (config/seed/sha256, no
+## weights) -- same traceability role as every other committed result JSON.
+!experiments/**/checkpoints/*.json
+!logs/**/checkpoints/*.json
 
 ## LaTeX build junk
 paper/*.aux
@@ -32,6 +37,11 @@ paper/*.blg
 paper/*.fls
 paper/*.fdb_latexmk
 paper/*.synctex.gz
+
+## Crypto key material (medgate/crypto/ never persists keys to disk today --
+## this is a preventive rule in case that ever changes)
+*.key
+*.pem
 
 ## OS / editor
 .DS_Store

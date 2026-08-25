@@ -5,9 +5,9 @@ Run: PYTHONPATH=. pytest tests/test_phase3_attacks.py -v
 """
 import torch
 
-from medgate.attacks.gradient_inversion import attack_params, dlg_attack
+from medgate.attacks.gradient_inversion import attack_params, simplified_known_label_gradient_inversion
 from medgate.attacks.membership_inference import loss_threshold_membership_inference
-from medgate.attacks.reconstruction import adapter_reconstruction_attack, black_box_extraction_attack, collusion_attack
+from medgate.attacks.reconstruction import auxiliary_data_adapter_finetuning_recovery, fixed_budget_hard_label_distillation, auxiliary_data_ensemble_collusion_proxy
 from medgate.data.synthetic import COARSE_CLASSES, FINE_CLASSES, SyntheticFedISIC
 from medgate.metrics import evaluate_fine
 from medgate.models.backbone import MedGateModel
@@ -30,7 +30,7 @@ def test_dlg_attack_reduces_gradient_mismatch_and_stays_finite():
     model = _model()
     dataset = SyntheticFedISIC(num_samples=1, image_size=16, seed=3)
     img, y_fine, y_coarse = dataset[0]
-    result = dlg_attack(model, img.unsqueeze(0), y_coarse.unsqueeze(0), y_fine.unsqueeze(0), steps=20, lr=0.1, seed=0)
+    result = simplified_known_label_gradient_inversion(model, img.unsqueeze(0), y_coarse.unsqueeze(0), y_fine.unsqueeze(0), steps=20, lr=0.1, seed=0)
     assert result["mse"] >= 0
     assert torch.isfinite(torch.tensor(result["final_grad_diff"]))
     assert result["compute_budget_steps"] == 20
@@ -49,7 +49,7 @@ def test_adapter_reconstruction_trains_a_fresh_adapter_not_the_original():
     authorized = _model()
     original_adapter_weight = authorized.adapter.up.weight.clone()
     aux = SyntheticFedISIC(num_samples=8, image_size=16, seed=5)
-    attacker_model, meta = adapter_reconstruction_attack(authorized, aux, epochs=2, batch_size=4, lr=0.05, seed=0)
+    attacker_model, meta = auxiliary_data_adapter_finetuning_recovery(authorized, aux, epochs=2, batch_size=4, lr=0.05, seed=0)
     # the attacker's adapter must NOT be the same object/weights as the authorized one
     assert attacker_model.adapter is not authorized.adapter
     assert not torch.allclose(attacker_model.adapter.up.weight, original_adapter_weight)
@@ -62,7 +62,7 @@ def test_adapter_reconstruction_trains_a_fresh_adapter_not_the_original():
 def test_black_box_extraction_produces_evaluable_student():
     authorized = _model()
     query_images = torch.stack([SyntheticFedISIC(1, image_size=16, seed=s)[0][0] for s in range(8)])
-    student, meta = black_box_extraction_attack(authorized, query_images, MODEL_KWARGS, epochs=2, batch_size=4, lr=0.05, seed=0)
+    student, meta = fixed_budget_hard_label_distillation(authorized, query_images, MODEL_KWARGS, epochs=2, batch_size=4, lr=0.05, seed=0)
     assert meta["compute_budget"]["query_budget"] == 8
     test_set = SyntheticFedISIC(num_samples=8, image_size=16, seed=9)
     util = evaluate_fine(student, test_set, batch_size=4)
@@ -73,7 +73,7 @@ def test_collusion_ensemble_is_evaluable():
     authorized = _model()
     aux_a = SyntheticFedISIC(num_samples=6, image_size=16, seed=11)
     aux_b = SyntheticFedISIC(num_samples=6, image_size=16, seed=12)
-    ensemble, meta = collusion_attack(authorized, aux_a, aux_b, epochs=2, batch_size=3, lr=0.05, seed=0)
+    ensemble, meta = auxiliary_data_ensemble_collusion_proxy(authorized, aux_a, aux_b, epochs=2, batch_size=3, lr=0.05, seed=0)
     assert "solo_a" in meta and "solo_b" in meta
     test_set = SyntheticFedISIC(num_samples=8, image_size=16, seed=13)
     util = evaluate_fine(ensemble, test_set, batch_size=4)

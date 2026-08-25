@@ -6,37 +6,52 @@
     "full_retrain": {
       "retained_fine_macro_f1": 0.030557677616501144,
       "gap_to_gold_standard": 0.0,
-      "forgetting_auc": 0.0,
+      "forgetting_symmetric_auc": 0.5854166666666667,
+      "forgetting_attack_advantage": 0.1708333333333334,
+      "forgetting_raw_auc_diagnostic_only": 0.4145833333333333,
       "mean_removed_data_loss": 3.0887644290924072,
-      "mean_retained_test_loss": 1.9993816614151
+      "mean_nonmember_loss": 3.0833234786987305,
+      "confounded_cross_class_forgetting_symmetric_auc_DO_NOT_USE_AS_EVIDENCE": 1.0
     },
     "checkpoint_rollback": {
       "retained_fine_macro_f1": 0.0,
       "gap_to_gold_standard": -0.030557677616501144,
-      "forgetting_auc": 1.0,
+      "forgetting_symmetric_auc": 0.5354166666666667,
+      "forgetting_attack_advantage": 0.0708333333333333,
+      "forgetting_raw_auc_diagnostic_only": 0.46458333333333335,
       "mean_removed_data_loss": 1.8447222709655762,
-      "mean_retained_test_loss": 2.118640661239624
+      "mean_nonmember_loss": 1.8436279296875,
+      "confounded_cross_class_forgetting_symmetric_auc_DO_NOT_USE_AS_EVIDENCE": 1.0
     },
     "adapter_deletion_and_retrain": {
       "retained_fine_macro_f1": 0.03976435935198822,
       "gap_to_gold_standard": 0.009206681735487079,
-      "forgetting_auc": 0.0,
+      "forgetting_symmetric_auc": 0.5114583333333333,
+      "forgetting_attack_advantage": 0.022916666666666696,
+      "forgetting_raw_auc_diagnostic_only": 0.5114583333333333,
       "mean_removed_data_loss": 9.65780258178711,
-      "mean_retained_test_loss": 2.0148472785949707
+      "mean_nonmember_loss": 9.667651176452637,
+      "confounded_cross_class_forgetting_symmetric_auc_DO_NOT_USE_AS_EVIDENCE": 1.0
     },
     "gradient_ascent_unlearning": {
       "retained_fine_macro_f1": 0.03590127150336574,
       "gap_to_gold_standard": 0.0053435938868646,
-      "forgetting_auc": 0.0,
+      "forgetting_symmetric_auc": 0.5041666666666667,
+      "forgetting_attack_advantage": 0.008333333333333415,
+      "forgetting_raw_auc_diagnostic_only": 0.4958333333333333,
       "mean_removed_data_loss": 262.21978759765625,
-      "mean_retained_test_loss": 20.5306396484375
+      "mean_nonmember_loss": 262.0579833984375,
+      "confounded_cross_class_forgetting_symmetric_auc_DO_NOT_USE_AS_EVIDENCE": 1.0
     },
     "key_revocation_only": {
       "retained_fine_macro_f1": 0.07232870909668539,
       "gap_to_gold_standard": 0.04177103148018424,
-      "forgetting_auc": 0.5818363273453094,
+      "forgetting_symmetric_auc": 0.5572916666666667,
+      "forgetting_attack_advantage": 0.11458333333333348,
+      "forgetting_raw_auc_diagnostic_only": 0.5572916666666667,
       "mean_removed_data_loss": 2.0177743434906006,
-      "mean_retained_test_loss": 2.123110771179199
+      "mean_nonmember_loss": 2.018888473510742,
+      "confounded_cross_class_forgetting_symmetric_auc_DO_NOT_USE_AS_EVIDENCE": 0.5818363273453094
     }
   },
   "config": {
@@ -75,7 +90,7 @@
     ],
     "output_dir": "experiments/phase5_synthetic"
   },
-  "git_commit": "5e8ce663f12fbe450ac41efa971f9806c59e19d3",
+  "git_commit": "987b540badf09101f863bf2e609530eea177764c",
   "dataset_manifest_hash": "874a6cfad139fea2",
-  "wall_clock_seconds": 1.8
+  "wall_clock_seconds": 12.0
 }

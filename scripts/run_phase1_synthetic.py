@@ -93,8 +93,8 @@ def run_one(baseline_name: str, seed: int, cfg: dict, train_centers, test_center
             mu=t["fedprox_mu"],
         )
         eval_metrics = evaluate_federated_model(model, test_centers)
-    elif baseline_name == "fedlora":
-        model = baselines.train_fedlora(
+    elif baseline_name == "random_frozen_lora":
+        model, param_summary = baselines.train_random_frozen_lora(
             train_centers, model_kwargs, t["rounds"], t["epochs_per_round"], t["batch_size"], t["lr"], seed
         )
         eval_metrics = evaluate_federated_model(model, test_centers)
@@ -102,7 +102,7 @@ def run_one(baseline_name: str, seed: int, cfg: dict, train_centers, test_center
         raise ValueError(f"unknown baseline {baseline_name}")
 
     wall_clock_s = time.time() - start
-    return {
+    result = {
         "baseline": baseline_name,
         "seed": seed,
         "git_commit": commit,
@@ -111,6 +111,10 @@ def run_one(baseline_name: str, seed: int, cfg: dict, train_centers, test_center
         "wall_clock_seconds": round(wall_clock_s, 3),
         "metrics": eval_metrics,
     }
+    if baseline_name == "random_frozen_lora":
+        result["param_summary"] = param_summary
+        result["note"] = "NEGATIVE SANITY CONTROL only -- backbone frozen at RANDOM init, not a fair FedLoRA baseline. See configs/phase1_hierarchical.yaml for the fair pretrained baselines."
+    return result
 
 
 def main():

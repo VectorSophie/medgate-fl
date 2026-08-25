@@ -45,7 +45,7 @@ def compute_true_gradient(model, image, y_coarse, y_fine):
     return [g.detach() for g in grads]
 
 
-def dlg_attack(model, true_image: torch.Tensor, y_coarse, y_fine, steps: int = 300, lr: float = 0.1, seed: int = 0) -> dict:
+def simplified_known_label_gradient_inversion(model, true_image: torch.Tensor, y_coarse, y_fine, steps: int = 300, lr: float = 0.1, seed: int = 0) -> dict:
     torch.manual_seed(seed)
     trainable = attack_params(model)
     true_grads = compute_true_gradient(model, true_image, y_coarse, y_fine)

@@ -15,9 +15,9 @@ from pathlib import Path
 import torch
 import yaml
 
-from medgate.attacks.gradient_inversion import dlg_attack
+from medgate.attacks.gradient_inversion import simplified_known_label_gradient_inversion
 from medgate.attacks.membership_inference import loss_threshold_membership_inference
-from medgate.attacks.reconstruction import adapter_reconstruction_attack, black_box_extraction_attack, collusion_attack
+from medgate.attacks.reconstruction import auxiliary_data_adapter_finetuning_recovery, fixed_budget_hard_label_distillation, auxiliary_data_ensemble_collusion_proxy
 from medgate.capability_metrics import capability_recovery_efficiency
 from medgate.data.synthetic import COARSE_CLASSES, FINE_CLASSES, make_synthetic_centers, make_synthetic_train_test_centers
 from medgate.federated.capability_isolation import train_capability_isolation
@@ -41,7 +41,7 @@ def run_seed(seed: int, cfg: dict, train_centers, test_centers, aux_centers, com
     # --- A1: gradient inversion (DLG) on one example from client 0 ---
     dlg_cfg = cfg["dlg"]
     img, y_fine, y_coarse = train_centers[0][0]
-    dlg_result = dlg_attack(
+    dlg_result = simplified_known_label_gradient_inversion(
         authorized_model, img.unsqueeze(0), y_coarse.unsqueeze(0), y_fine.unsqueeze(0),
         steps=dlg_cfg["steps"], lr=dlg_cfg["lr"], seed=seed,
     )
@@ -54,28 +54,28 @@ def run_seed(seed: int, cfg: dict, train_centers, test_centers, aux_centers, com
 
     # --- A2: adapter reconstruction at several auxiliary-data budgets ---
     ar_cfg = cfg["adapter_reconstruction"]
-    result["adapter_reconstruction"] = []
+    result["auxiliary_data_adapter_finetuning_recovery"] = []
     for budget in ar_cfg["budgets"]:
         aux_subset = torch.utils.data.Subset(aux_pool, range(min(budget, len(aux_pool))))
-        attacker_model, meta = adapter_reconstruction_attack(
+        attacker_model, meta = auxiliary_data_adapter_finetuning_recovery(
             authorized_model, aux_subset, ar_cfg["epochs"], min(8, budget), t["lr"], seed
         )
         u_attack = evaluate_fine(attacker_model, test_pool)["fine_macro_f1"]
-        result["adapter_reconstruction"].append({
+        result["auxiliary_data_adapter_finetuning_recovery"].append({
             **meta, "u_attack_fine_macro_f1": u_attack,
             "capability_recovery_efficiency": capability_recovery_efficiency(u_attack, 0.0, budget),
         })
 
     # --- A3: black-box extraction at several query budgets ---
     ex_cfg = cfg["extraction"]
-    result["extraction"] = []
+    result["fixed_budget_hard_label_distillation"] = []
     for q in ex_cfg["query_budgets"]:
         query_images = torch.stack([aux_pool[i][0] for i in range(min(q, len(aux_pool)))])
-        student, meta = black_box_extraction_attack(
+        student, meta = fixed_budget_hard_label_distillation(
             authorized_model, query_images, model_kwargs, ex_cfg["epochs"], min(8, q), t["lr"], seed
         )
         u_attack = evaluate_fine(student, test_pool)["fine_macro_f1"]
-        result["extraction"].append({
+        result["fixed_budget_hard_label_distillation"].append({
             **meta, "u_attack_fine_macro_f1": u_attack,
             "capability_recovery_efficiency": capability_recovery_efficiency(u_attack, 0.0, q),
         })
@@ -85,10 +85,10 @@ def run_seed(seed: int, cfg: dict, train_centers, test_centers, aux_centers, com
     b = col_cfg["budget_each"]
     aux_a = torch.utils.data.Subset(aux_pool, range(0, b))
     aux_b = torch.utils.data.Subset(aux_pool, range(b, 2 * b))
-    ensemble, col_meta = collusion_attack(authorized_model, aux_a, aux_b, col_cfg["epochs"], min(8, b), t["lr"], seed)
+    ensemble, col_meta = auxiliary_data_ensemble_collusion_proxy(authorized_model, aux_a, aux_b, col_cfg["epochs"], min(8, b), t["lr"], seed)
     u_colluded = evaluate_fine(ensemble, test_pool)["fine_macro_f1"]
     u_solo_a = evaluate_fine(_rebuild_solo(authorized_model, aux_a, col_cfg, t), test_pool)["fine_macro_f1"]
-    result["collusion"] = {
+    result["auxiliary_data_ensemble_collusion_proxy"] = {
         **col_meta,
         "u_colluded_fine_macro_f1": u_colluded,
         "u_solo_attacker_fine_macro_f1": u_solo_a,
@@ -99,7 +99,7 @@ def run_seed(seed: int, cfg: dict, train_centers, test_centers, aux_centers, com
 
 
 def _rebuild_solo(authorized_model, aux_a, col_cfg, t):
-    model, _ = adapter_reconstruction_attack(authorized_model, aux_a, col_cfg["epochs"], min(8, len(aux_a)), t["lr"], 0)
+    model, _ = auxiliary_data_adapter_finetuning_recovery(authorized_model, aux_a, col_cfg["epochs"], min(8, len(aux_a)), t["lr"], 0)
     return model
 
 

@@ -1,0 +1,6 @@
+method,n_seeds,confounded_symmetric_auc_mean,confounded_symmetric_auc_std
+adapter_deletion_and_retrain,3,1.0,0.0
+checkpoint_rollback,3,0.9877578176979375,0.021204081742692827
+full_retrain,3,1.0,0.0
+gradient_ascent_unlearning,3,1.0,0.0
+key_revocation_only,3,0.8206919494344644,0.2153477402662615

@@ -1,10 +1,15 @@
-# Phase 1 primary utility baseline, SYNTHETIC TIER ONLY.
+# Phase 1 primary utility baseline, NULL-SIGNAL FIXTURE ONLY
+# (medgate/data/synthetic.py -- see that module's docstring).
 #
-# This is a pipeline-validation run, not a scientific result: the fixture
-# (medgate/data/synthetic.py) draws images and labels independently at
-# random, so there is no real signal for any model to learn. Expected
-# outcome is nothing above chance level; a run that scores much ABOVE
-# chance here would indicate a leakage bug, not a good model.
+# This is a pipeline-validation run, not a scientific result: images and
+# labels are drawn independently at random, so there is no real signal for
+# any model to learn. Expected outcome is nothing above chance level; a
+# run that scores much ABOVE chance here would indicate a leakage bug, not
+# a good model. `random_frozen_lora` here is a NEGATIVE SANITY CONTROL
+# ONLY -- backbone frozen at random init -- never compare a pretrained
+# method against it; see configs/phase1_hierarchical.yaml for the fair
+# pretrained FedLoRA baselines, which need real learnable structure to be
+# meaningful and therefore run on the hierarchical fixture instead.
 # Real Fed-ISIC2019 numbers are BLOCKED-LICENSE (docs/execution_plan.md).
 data:
   source: synthetic
@@ -22,5 +27,5 @@ train:
   lr: 0.01
   fedprox_mu: 0.01
 seeds: [0, 1, 2, 3, 4]    # 5 seeds, feasible at this scale (statistical protocol asks for 5 where feasible)
-baselines: [centralized, local_only, fedavg, fedprox, fedlora]
+baselines: [centralized, local_only, fedavg, fedprox, random_frozen_lora]
 output_dir: experiments/phase1_synthetic

@@ -22,6 +22,7 @@ from medgate.attacks.membership_inference import loss_threshold_membership_infer
 from medgate.data.synthetic import (
     COARSE_CLASSES,
     FINE_CLASSES,
+    make_never_trained_class_pool,
     make_synthetic_train_test_centers,
     remove_fine_class,
     select_fine_class,
@@ -58,11 +59,13 @@ def run_scenario(scenario_name: str, seed: int, cfg: dict, train_centers, test_c
     model_kwargs = dict(num_coarse=len(COARSE_CLASSES), num_fine=len(FINE_CLASSES), **cfg["model"])
     t = cfg["train"]
     u = cfg["unlearning"]
+    d = cfg["data"]
 
     authorized_model = train_capability_isolation(
         "combined", train_centers, model_kwargs, t["rounds"], t["epochs_per_round"], t["batch_size"], t["lr"], seed
     )
 
+    never_trained_same_class = None
     if scenario_name == "institution":
         data_after_removal, removed_data, retained_test = build_institution_scenario(
             train_centers, test_centers, cfg["removal"]["institution_index"]
@@ -70,6 +73,13 @@ def run_scenario(scenario_name: str, seed: int, cfg: dict, train_centers, test_c
     elif scenario_name == "class":
         data_after_removal, removed_data, retained_test = build_class_scenario(
             train_centers, test_centers, cfg["removal"]["fine_class_index"]
+        )
+        # P0-3 confound fix (docs/execution_plan.md Phase 5): a pool of the
+        # SAME removed class that no model in this scenario -- authorized
+        # OR gold-standard -- ever trained on, so the primary forgetting
+        # score compares within one class instead of across different ones.
+        never_trained_same_class = make_never_trained_class_pool(
+            cfg["removal"]["fine_class_index"], num_samples=d["samples_per_center"], image_size=d["image_size"], seed=seed,
         )
     else:
         raise ValueError(scenario_name)
@@ -93,14 +103,31 @@ def run_scenario(scenario_name: str, seed: int, cfg: dict, train_centers, test_c
     results = {}
     for name, model in methods.items():
         retained_utility = evaluate_fine(model, retained_test)["fine_macro_f1"]
-        mi = loss_threshold_membership_inference(model, removed_data, retained_test)
-        results[name] = {
+        # PRIMARY forgetting score. For "institution" this compares removed
+        # vs retained-test directly (no class-composition confound: every
+        # institution shares the same label distribution, docs/execution_plan.md).
+        # For "class" this compares removed vs the WITHIN-CLASS never-trained
+        # control instead of retained-test (see never_trained_same_class above).
+        primary_nonmember = never_trained_same_class if never_trained_same_class is not None else retained_test
+        mi = loss_threshold_membership_inference(model, removed_data, primary_nonmember)
+        entry = {
             "retained_fine_macro_f1": retained_utility,
             "gap_to_gold_standard": retained_utility - gold_retained_utility,
-            "forgetting_auc": mi["attack_auc"],  # near 0.5 = removed data no longer distinguishable from never-seen data
+            "forgetting_symmetric_auc": mi["symmetric_auc"],  # PRIMARY score: 0.5=no signal (good forgetting), 1.0=fully distinguishable
+            "forgetting_attack_advantage": mi["attack_advantage"],
+            "forgetting_raw_auc_diagnostic_only": mi["attack_auc"],  # direction-sensitive; do not read as "closer to 0 is safe"
             "mean_removed_data_loss": mi["mean_member_loss"],
-            "mean_retained_test_loss": mi["mean_nonmember_loss"],
+            "mean_nonmember_loss": mi["mean_nonmember_loss"],
         }
+        if scenario_name == "class":
+            # CONFOUNDED result, preserved only as a documented negative
+            # example (project brief: never as evidence) -- removed data
+            # (one class) vs retained-test (the other seven classes), so
+            # any class-level loss asymmetry present even in an untrained
+            # model biases this number regardless of real memorization.
+            confounded_mi = loss_threshold_membership_inference(model, removed_data, retained_test)
+            entry["confounded_cross_class_forgetting_symmetric_auc_DO_NOT_USE_AS_EVIDENCE"] = confounded_mi["symmetric_auc"]
+        results[name] = entry
 
     return {"scenario": scenario_name, "seed": seed, "gold_retained_utility": gold_retained_utility, "methods": results}
 
@@ -129,7 +156,8 @@ def main():
             out_path.write_text(json.dumps(result, indent=2))
             print(f"{scenario_name:12s} seed={seed} ({result['wall_clock_seconds']:.1f}s) -> {out_path}")
             for name, m in result["methods"].items():
-                print(f"    {name:28s} retained_f1={m['retained_fine_macro_f1']:.3f} gap={m['gap_to_gold_standard']:+.3f} forget_auc={m['forgetting_auc']:.3f}")
+                print(f"    {name:28s} retained_f1={m['retained_fine_macro_f1']:.3f} gap={m['gap_to_gold_standard']:+.3f} "
+                      f"forget_symAUC={m['forgetting_symmetric_auc']:.3f} advantage={m['forgetting_attack_advantage']:.3f}")
 
 
 if __name__ == "__main__":

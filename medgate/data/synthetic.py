@@ -1,11 +1,23 @@
-"""Synthetic fixture mimicking Fed-ISIC2019's shape, NOT its content.
+"""THE NULL-SIGNAL FIXTURE. Images and labels are drawn independently at
+random (see SyntheticFedISIC.__init__ below) -- by construction there is
+NO learnable relationship between an image and its label. Its only valid
+use is a negative control: catching impossible above-chance behavior
+(a leakage bug) or a pipeline crash. It CANNOT show whether capability
+isolation, a pretrained baseline, or an attack actually works, because
+there is nothing to learn, isolate, or attack in the first place. Every
+result produced from this module must be reported as null-signal /
+pipeline-validation, never as evidence for or against a method.
 
-Used only until the real dataset is downloaded (license-gated, see
-scripts/download_fed_isic2019_INSTRUCTIONS.md). Mirrors the verified facts
-in docs/research_scope.md §5: 6 centers, 8 fine-grained classes, a 3-way
-coarse ontology. Images are small (32x32) on purpose — this fixture exists
-to exercise the training/aggregation code paths on CPU in seconds, not to
-stand in for real-data results.
+For anything that requires real learnable structure (fair pretrained
+baselines, the expected authorized>public/full-finetune>=FedLoRA ranking,
+attacks that need something to actually attack), use
+medgate/data/hierarchical_synthetic.py instead.
+
+Mirrors Fed-ISIC2019's shape (docs/research_scope.md §5) for pipeline
+compatibility only: 6 centers, 8 fine-grained classes, a 3-way coarse
+ontology, 32x32 images (small on purpose, for CPU speed). Used until the
+real dataset is downloaded (license-gated, see
+scripts/download_fed_isic2019_INSTRUCTIONS.md).
 """
 import torch
 
@@ -83,6 +95,26 @@ def select_fine_class(dataset: SyntheticFedISIC, fine_class_idx: int) -> torch.u
     for measuring residual membership signal after unlearning."""
     keep = (dataset.fine_labels == fine_class_idx).nonzero(as_tuple=True)[0]
     return subset_by_indices(dataset, keep)
+
+
+def make_never_trained_class_pool(fine_class_idx: int, num_samples: int = 32, image_size: int = 32, seed: int = 0) -> torch.utils.data.Dataset:
+    """A pool of examples of ONE fine class that is never included in any
+    train or test center this project generates elsewhere (distinct seed
+    offset, +90_000, chosen to not collide with make_synthetic_centers'
+    seed+c range or make_synthetic_train_test_centers' seed+10_000 test
+    offset). Used only for the WITHIN-CLASS member-vs-non-member
+    unlearning comparison (medgate/unlearning -- docs/execution_plan.md
+    Phase 5's class-level-removal confound fix): comparing removed
+    training examples of a class against OTHER examples of the SAME class
+    that no model (not even the gold-standard retrained one) ever saw,
+    rather than against retained-test data of DIFFERENT classes (which
+    confounds 'was this trained on' with 'is this the same class the
+    model was never asked to represent at all')."""
+    g = torch.Generator().manual_seed(seed + 90_000 + fine_class_idx)
+    images = torch.randn(num_samples, 3, image_size, image_size, generator=g)
+    fine_labels = torch.full((num_samples,), fine_class_idx, dtype=torch.long)
+    coarse_labels = torch.full((num_samples,), FINE_TO_COARSE_IDX[FINE_CLASSES[fine_class_idx]], dtype=torch.long)
+    return torch.utils.data.TensorDataset(images, fine_labels, coarse_labels)
 
 
 def make_synthetic_train_test_centers(
