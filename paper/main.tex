@@ -1,0 +1,808 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
+\usepackage{xcolor}
+\usepackage{natbib}
+\usepackage{enumitem}
+\usepackage{caption}
+
+% --- Provenance / honesty markers (project brief: never replace these
+% with invented content while work is incomplete) -----------------------
+\newcommand{\TODO}[1]{\textcolor{red}{\textbf{[TODO: #1]}}}
+\newcommand{\RESULTPENDING}[1]{\textcolor{orange!80!black}{\textbf{[RESULT PENDING: #1]}}}
+\newcommand{\UNVERIFIED}[1]{\textcolor{purple}{\textbf{[UNVERIFIED: #1]}}}
+% Inline status tag distinguishing implemented / experimentally evaluated
+% / simulated / proposed-but-not-implemented / future work, per the
+% project brief's requirement that the paper distinguish these explicitly.
+\newcommand{\status}[1]{\textit{[#1]}}
+
+\title{MedGate-FL: Capability-Isolated Federated Adapters for\\ Tiered Medical AI Access\\
+\large \status{Working title -- results to date do not yet warrant choosing between this and the
+alternative title in the project scope document; see \texttt{docs/research\_scope.md}}}
+
+\author{VectorSophie \\ \status{Affiliation \TODO{fill in}}}
+\date{Draft of \today\ --- Phases 0--5 (synthetic tier) complete; real-data tier license-gated}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Federated learning is often described as protecting patient privacy because
+raw data never leaves an institution, but this protects data \emph{locality},
+not the gradients, representations, or final model that federation produces.
+We study a distinct, narrower problem: whether a federated medical model can
+expose a useful \emph{public, coarse-grained} diagnostic capability while
+keeping a \emph{fine-grained} diagnostic capability restricted to authorized
+users, and whether that restriction survives realistic attacks rather than
+merely hiding a prediction head. We call this \emph{capability isolation}. We
+implement MedGate-FL, a federated model with a shared backbone, a public
+coarse head, and a restricted fine-grained LoRA adapter, trained under six
+objectives (coarse-only, hidden-fine-head, adapter-isolation, adversarial
+suppression, orthogonality, and their combination), and evaluate it against
+plaintext FedAvg, FedProx, and plain federated LoRA baselines, under four
+attacker models (honest-but-curious server, unauthorized model recipient,
+black-box query access, and colluding/malicious clients). We also implement
+a conservative cryptographic layer (AES-GCM adapter-at-rest encryption, a
+minimal centralized-IAM authorization service), a simplified secure-aggregation
+simulation, DP-SGD via Opacus, and five revocation/unlearning methods compared
+against full retraining as the gold standard. \textbf{The primary dataset,
+FLamby Fed-ISIC2019, requires a human to accept its license before download}
+(\S\ref{sec:methodology}); that step has not yet been completed, so every
+result in this draft is run on a synthetic fixture that mirrors Fed-ISIC2019's
+shape (6 centers, 8 classes) but carries no real diagnostic signal.
+\textbf{Every empirical number in this paper is therefore a pipeline-validation
+result, not a scientific finding about capability isolation}, and is labeled
+as such throughout. \RESULTPENDING{real Fed-ISIC2019 results for every table
+in \S\ref{sec:results}--\S\ref{sec:ablation}}. What is established here: a
+complete, tested, reproducible implementation of the full experimental
+pipeline (data, models, six training objectives, five attacks, four privacy
+arms, five unlearning methods, statistical aggregation, figure/table
+generation, and this document), two genuine engineering findings (two Opacus
+integration bugs found and fixed; one flawed confidentiality test written,
+caught, and replaced with a correct one), and one honestly documented metric
+confound. Whether capability isolation actually works on real medical images
+is, at this point, unknown.
+\end{abstract}
+
+\section{Introduction}
+
+Cross-silo federated learning lets multiple hospitals train a shared model
+without centralizing patient data \citep{mcmahan2017fedavg}. This is
+frequently summarized as ``federated learning protects privacy,'' but the
+protection is narrower than that: only the raw training images stay local.
+The gradients or weight updates each institution sends are still exposed to
+the aggregating party \citep{zhu2019deep}; the final trained model, once
+distributed, is exposed to whoever receives it; and nothing about the FedAvg
+protocol itself limits what that model can be made to reveal under later
+probing, fine-tuning, or querying. Prior work on medical federated learning
+\status{background source, not an empirical claim of this paper --
+\citet{duterrail2022flamby}} and on securing federated training generally
+treats three problems separately: protecting the training updates (secure
+aggregation \citep{bonawitz2017secagg}, differential privacy
+\citep{abadi2016deep}), protecting model intellectual property after
+distribution, and authorizing who may query or fine-tune a deployed model.
+
+This paper studies a fourth, distinct problem that sits underneath all three:
+a single federated model may need to expose a coarse, low-risk capability to
+a broad audience while keeping a fine-grained, higher-risk diagnostic
+capability restricted to an authorized tier. A concrete instance, and the one
+this paper builds around, is skin-lesion classification: a coarse
+melanocytic/keratinocytic/other signal might be safe to expose broadly, while
+the eight-way fine diagnosis (including melanoma vs.\ benign nevus) is exactly
+the output a clinical safety or liability framework would want gated. We call
+keeping that fine capability restricted, while a coarse capability remains
+useful, \textbf{capability isolation}.
+
+The naive approach -- train both heads, only expose the coarse one -- is not
+capability isolation, because the fine information may still be linearly or
+near-linearly recoverable from the shared backbone's representation even
+though the fine head itself is hidden (this is exactly the
+\texttt{hidden\_fine\_head} arm we implement and probe in
+\S\ref{sec:ablation}). Establishing whether that residual leakage is small in
+practice, under realistic attacker budgets, is the empirical core of this
+paper: it is not assumed, it is measured, with a battery of representation
+probes (linear, nonlinear, $k$-NN, few-shot) and reconstruction/extraction
+attacks (\S\ref{sec:security}).
+
+\paragraph{Contributions.} (1) A capability-isolation training objective and
+architecture (\S\ref{sec:medgate}) compared against five simpler alternatives
+under matched compute, not assumed superior. (2) An attacker-explicit
+evaluation across four threat models (\S\ref{sec:threat}) with attacker
+knowledge, access, and budget recorded for every attack result. (3) A
+conservative cryptographic/authorization layer (AES-GCM, centralized IAM,
+never RSA-encrypting tensors directly) and a from-scratch secure-aggregation
+simulation, with an honestly reported instance of building the wrong test for
+a security property and correcting it (\S\ref{sec:privacy}). (4) A
+revocation-vs-unlearning study that operationalizes, rather than asserts, the
+project's central non-claim that revoking a key does not remove a model's
+already-learned influence (\S\ref{sec:unlearning}). (5) A fully reproducible,
+open pipeline (\S\ref{sec:reproducibility}) in which every number in this
+draft traces to a config, seed, git commit, and raw JSON file -- currently
+run only on a synthetic fixture, pending a human license-acceptance step for
+the real data (\S\ref{sec:methodology}).
+
+\section{Background and Motivation}
+\label{sec:background}
+
+Medical imaging tasks routinely have a natural coarse/fine label hierarchy:
+a triage-level category (e.g., ``possibly malignant, refer'') and a
+diagnosis-level category (e.g., a specific carcinoma subtype). Access to the
+fine category carries more clinical and liability weight, and in many
+real deployments would be gated to credentialed users even when a coarse
+signal is offered as a lower-stakes public or semi-public service (e.g., a
+consumer-facing triage tool). Federated learning is attractive for training
+such a model because the fine-grained labels, sourced from multiple
+hospitals, cannot be centralized -- but federating the \emph{training} says
+nothing about how to gate the \emph{resulting model's} capability once
+training finishes. That is the gap this paper works in.
+
+\section{Related Work}
+\label{sec:related}
+
+\emph{Verification status.} Every citation in this section is drawn only
+from the \texttt{VERIFIED} rows of \texttt{docs/literature\_matrix.csv} (16
+of 59 seed-bibliography entries as of this draft); the other 43 are
+deliberately not cited here even where the project brief's seed
+bibliography names them, pending a primary-source check
+(\texttt{docs/literature\_matrix.md} records exactly which and why).
+Sections below that would normally cite an unverified source instead say so
+explicitly with \UNVERIFIED{}.
+
+\paragraph{Federated learning.} FedAvg \citep{mcmahan2017fedavg} established
+the communication-efficient local-SGD-then-average pattern this paper's
+baselines and proposed method both build on. FedProx \citep{li2020fedprox}
+adds a proximal term for statistical/systems heterogeneity; SCAFFOLD
+\citep{karimireddy2020scaffold} corrects client drift with control
+variates; FedAdam and related adaptive federated optimizers
+\citep{reddi2021adaptive} replace plain averaging with a federated adaptive
+step. \citet{kairouz2021advances} survey the broader space. \textbf{Gap:}
+none of these methods, or the survey, address exposing part of a trained
+model's capability while restricting another part -- they optimize
+\emph{how} a single, uniformly-accessible model is trained, not
+\emph{what parts of it different recipients are allowed to use}.
+
+\paragraph{Cross-silo medical federated learning and benchmarks.} FLamby
+\citep{duterrail2022flamby} is the direct dataset and baseline source for
+this paper (\S\ref{sec:methodology}); it is a benchmark and dataset paper,
+not a security paper, and makes no capability-isolation claim.
+\UNVERIFIED{Sheller et al.\ 2020; Rieke et al.\ 2020; Teo et al.\ 2024 --
+broader medical-FL feasibility/survey claims are not cited pending
+verification.} \textbf{Gap:} realistic cross-silo benchmarks like FLamby
+establish that federated training is feasible on natural institutional
+splits; they do not evaluate what a distributed model leaks about a
+restricted sub-task.
+
+\paragraph{Parameter-efficient adaptation and model protection.} LoRA
+\citep{hu2022lora} is the adapter mechanism $A_\phi$ in MedGate-FL's
+architecture (\S\ref{sec:medgate}). LoREnc \citep{ahn2026lorenc} proposes a
+training-free spectral-truncation/orthogonal-reparameterization scheme so an
+unauthorized holder of a LoRA adapter gets structurally degraded outputs
+while an authorized one recovers full performance -- conceptually the same
+goal as this paper's encrypted-adapter-at-rest design, but LoREnc's
+mechanism is a transform on the adapter weights themselves (obfuscation),
+whereas this paper's crypto layer (\S\ref{sec:privacy}) uses conventional
+AEAD encryption and evaluates the resulting model separately for
+representation leakage (\S\ref{sec:ablation}) -- the two are complementary,
+not the same claim, and this paper does not implement or evaluate LoREnc's
+specific transform. \UNVERIFIED{FedShield-LLM (Mia and Amini 2025);
+Encryption-Friendly LLM Architecture (Rho et al.\ 2024); FL-DABE-BC
+(Narkedimilli et al.\ 2024) -- not cited pending verification.}
+\textbf{Gap:} LoRA and LoREnc each solve one piece (parameter efficiency;
+adapter obfuscation) in isolation from the federated, multi-attacker
+evaluation this paper runs them through.
+
+\paragraph{Secure aggregation and differential privacy.} Practical secure
+aggregation \citep{bonawitz2017secagg} hides individual client updates from
+the server via pairwise masking; this paper's secure-aggregation module
+(\S\ref{sec:privacy}) simulates exactly that mathematical core in a single
+process, explicitly not the full dropout-robust protocol. DP-SGD
+\citep{abadi2016deep} bounds what a trained model's parameters can reveal
+about any single training example via gradient clipping and noise; this
+paper applies it per-client via Opacus. \textbf{Gap:} neither mechanism, by
+itself or combined (as we test directly, \S\ref{sec:privacy}), is a
+capability-isolation mechanism -- both protect \emph{how training happened},
+not \emph{what the resulting model exposes to different recipients}, and
+this paper does not claim secure aggregation prevents the membership or
+property inference it separately evaluates in \S\ref{sec:security}.
+
+\paragraph{Inference and extraction attacks.} Deep Leakage from Gradients
+\citep{zhu2019deep} reconstructs a training input from its raw gradient;
+membership inference \citep{shokri2017membership} distinguishes training
+members from non-members via model behavior; model extraction
+\citep{tramer2016stealing} clones a model's functionality from black-box
+query access. All three are implemented in \S\ref{sec:security} against
+MedGate-FL specifically, adapted to ask whether the \emph{public} path
+leaks the \emph{restricted} task -- a different question from the attacks'
+original centralized or generically-federated framing. \UNVERIFIED{iDLG;
+Geiping et al.\ inverting-gradients; Nasr et al.\ comprehensive privacy
+analysis; Melis et al.\ property inference; Fredrikson et al.\ model
+inversion; Hitaj et al.\ GAN-based leakage -- not cited pending
+verification; several of these (Melis et al.\ in particular) would be the
+natural source for a property-inference attack this paper has not yet
+implemented, see \S\ref{sec:limitations}.}
+
+\paragraph{Federated and medical unlearning.} \citet{chen2026lethe} (Lethe)
+benchmark twelve federated-unlearning methods across eight medical-imaging
+tasks and multiple removal granularities, finding that the
+\emph{difficulty of the forgetting request}, not the unlearning method,
+dominates performance differences, and that client-level removal often has
+minimal utility impact -- making residual membership signal, not utility
+loss, the metric that actually distinguishes methods. This is the closest
+prior benchmark to this paper's Phase 5 (\S\ref{sec:unlearning}), and its
+finding directly motivates measuring forgetting via a membership-inference
+proxy rather than utility drop alone, which is what we do.
+\UNVERIFIED{Wu et al.\ federated unlearning via knowledge distillation;
+Halimi et al.\ efficient client erasure; Zhang et al.\ FedRecovery; Deng
+et al.\ right-to-be-forgotten medical unlearning -- not cited pending
+verification; this paper's \texttt{gradient\_ascent\_unlearning} method
+(\S\ref{sec:unlearning}) is therefore described only as a generic simple
+technique, not attributed to any of these.} \textbf{Gap:} no cited,
+verified prior work evaluates unlearning specifically against a
+capability-isolated architecture, where an ``adapter deletion'' operation
+is available that has no counterpart in a monolithic model.
+
+\paragraph{Access control and cryptography, and blockchain-assisted FL.}
+\UNVERIFIED{Every specific source the project brief names in these two
+categories (CP-ABE, ABE, probabilistic encryption, FHE constructions,
+blockchain-FL systematic reviews) remains unverified as of this draft; see
+\texttt{docs/literature\_matrix.md}.} This paper's crypto layer
+(\S\ref{sec:privacy}) is accordingly built from first principles against
+current, maintained libraries (AES-GCM via Python's \texttt{cryptography}
+package) rather than citing a specific ABE or FHE construction it does not
+implement. Blockchain-assisted authorization (project brief Phase 8) is not
+yet implemented; see \S\ref{sec:limitations}.
+
+\section{Problem Definition and Threat Model}
+\label{sec:threat}
+
+\subsection{Capability isolation, formally}
+Let $f_\theta$ be a shared backbone, $h_c$ a public coarse head, $A_\phi$ a
+restricted adapter, and $h_f$ a restricted fine head. The public path is
+$\hat y_c = h_c(f_\theta(x))$; the authorized fine path is
+$\hat y_f = h_f(f_\theta(x) + A_\phi(f_\theta(x)))$. Capability isolation
+holds, for a given utility metric $U$ and attack budget, when (a)
+$U(\hat y_c)$ is close to a plain federated coarse baseline, (b)
+$U(\hat y_f)$ for an authorized user is close to a plain (unprotected)
+federated adapter's fine utility, and (c) no attacker in
+Table~\ref{tab:threat-model} within its stated budget recovers fine utility
+much above what is recoverable from the public output alone. This is an
+empirical claim, evaluated per attacker below, not an architectural
+guarantee.
+
+\subsection{Threat model}
+\begin{table}[h]
+\centering
+\caption{Threat model. Every attack in \S\ref{sec:security} states its
+exact knowledge/access/budget in its own result record, not only here.}
+\label{tab:threat-model}
+\begin{tabular}{p{1.3cm}p{3.6cm}p{5.4cm}p{4cm}}
+\toprule
+ID & Adversary & Access & Goal \\
+\midrule
+A1 & Honest-but-curious aggregation server & Permitted protocol outputs (raw client updates under plaintext FedAvg; only the sum under secure aggregation) & Infer client data or client properties \\
+A2 & Unauthorized model recipient & Public backbone + coarse head + encrypted/transformed restricted adapter + public auxiliary data + normal compute & Recover fine capability without the decryption key \\
+A3 & Black-box unauthorized user & Query access to an authorized endpoint, fixed query budget & Distill / extract fine capability \\
+A4 & Malicious/colluding clients & Normal client role, one or more rounds & Poison, backdoor, replace the model, or infer other clients' properties \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Claims and non-claims}
+This paper's claims are restricted to what \S\ref{sec:results}--\S\ref{sec:unlearning}
+actually measure, using \emph{capability isolation}, \emph{restricted
+capability}, \emph{empirical attack resistance}, and \emph{simulated
+cross-silo evaluation} in the precise senses just given. It explicitly does
+\textbf{not} claim: that federated learning inherently guarantees privacy;
+that a public benchmark dataset proves compliance with medical privacy law;
+that an encrypted adapter stops an attacker from independently training a
+new model on public data; that the LoREnc-style or AES-GCM mechanisms
+discussed provide security beyond what is stated for them; that deleting a
+key removes a patient's learned influence (\S\ref{sec:unlearning} measures
+this directly); that simulated clients on one workstation equal a real
+multi-hospital deployment; or that any model here is suitable for clinical
+diagnosis. A restricted model that confidently emits a \emph{wrong}
+fine-grained prediction is not treated as a successful defense anywhere in
+this paper -- see the calibration/abstention discussion in
+\S\ref{sec:limitations}.
+
+\section{MedGate-FL}
+\label{sec:medgate}
+
+\subsection{Architecture} \status{implemented, tested}
+\texttt{medgate/models/backbone.py} implements exactly the components in
+\S\ref{sec:threat}: a small CNN backbone $f_\theta$ (sized for the CPU-only
+hardware in Table~\ref{tab:hardware}, not a claim about production
+architecture), a linear coarse head $h_c$, a zero-initialized LoRA-style
+adapter $A_\phi$ (rank $r$, matching standard LoRA initialization
+\citep{hu2022lora} so an untrained adapter is a no-op residual), a linear
+fine head $h_f$, and an always-present adversary head used only by the
+adversarial/combined objectives below (\S\ref{sec:medgate-objectives}).
+Every one of the six training objectives compared in
+\S\ref{sec:ablation} uses this identical architecture and differs only in
+loss function, so the ablation isolates the objective, not model capacity.
+
+\subsection{Training objectives} \status{implemented, tested}
+\label{sec:medgate-objectives}
+\texttt{medgate/federated/capability\_isolation.py} implements, and
+\S\ref{sec:ablation} compares without assuming any is superior:
+\begin{itemize}[nosep]
+\item \textbf{coarse\_only}: $\mathcal{L}_{\text{coarse}}$ alone (the fine
+task is never trained at all).
+\item \textbf{hidden\_fine\_head}: $\mathcal{L}_{\text{coarse}} +
+\lambda_f \mathcal{L}_{\text{fine}}$, but the fine head reads $f_\theta(x)$
+directly (no adapter) -- the naive ``just don't expose the head'' baseline.
+\item \textbf{adapter\_isolation}: the architecture in
+\S\ref{sec:medgate}'s full path, joint coarse+fine loss, no extra terms --
+the reference ``plain adapter'' point ARR is measured against.
+\item \textbf{adversarial}: adapter\_isolation plus a gradient-reversal
+adversary trying to predict the fine label from the \emph{public}
+representation $f_\theta(x)$.
+\item \textbf{orthogonal}: adapter\_isolation plus a penalty on the squared
+cosine similarity between $f_\theta(x)$ and the adapter's residual
+contribution $A_\phi(f_\theta(x))$ -- one candidate operationalization of
+$\mathcal{L}_{\text{orth}}$, not claimed to be the only or best one.
+\item \textbf{combined}: adversarial + orthogonal together -- the full
+proposed objective, evaluated exactly as skeptically as the other five.
+\end{itemize}
+
+\section{Experimental Methodology}
+\label{sec:methodology}
+
+\subsection{Hardware} \status{measured}
+\begin{table}[h]
+\centering
+\caption{Measured hardware, captured 2026-08-24 via
+\texttt{scripts/report\_hardware.py} (\texttt{docs/hardware\_report.md}).}
+\label{tab:hardware}
+\begin{tabular}{ll}
+\toprule
+CPU & 8 logical cores, no GPU (\texttt{nvidia-smi} absent) \\
+RAM & 7.4\,GiB total, $\sim$3.3\,GiB available at capture time \\
+Disk & 55.7\,GiB free \\
+Software & Python 3.12.3, PyTorch 2.13.0 (CPU build), Opacus 1.6.0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+This is the binding constraint on every design decision below: model width,
+batch size, and which attacks/phases are attempted at all
+(\texttt{docs/execution\_plan.md} states, per phase, what is explicitly out
+of scope on this hardware -- FeTS/BraTS, ADNI, full FHE, and any
+multi-node blockchain network).
+
+\subsection{Primary dataset: FLamby Fed-ISIC2019} \status{verified facts;
+download BLOCKED-LICENSE}
+Verified directly against the official \texttt{owkin/FLamby} repository and
+the ISIC Challenge data page on 2026-08-25 (full source list in
+\texttt{docs/literature\_matrix.csv}, evidence in
+\texttt{docs/evidence\_ledger.csv}):
+\begin{itemize}[nosep]
+\item 23{,}247 skin-lesion images with identifiable source center, across 6
+centers (BCN, HAM\_vidir\_molemax, HAM\_vidir\_modern, HAM\_rosendahl, MSK,
+HAM\_vienna\_dias).
+\item Eight fine-grained classes: MEL, NV, BCC, AK, BKL, DF, VASC, SCC.
+\item A predetermined, center-stratified train/test split.
+\item License: CC~BY-NC~4.0 for ISIC2019 imagery; the HAM10000-sourced
+portion carries separate Harvard Dataverse terms and requires citing
+\citet{tschandl2018ham10000}.
+\item Official pooled baseline hyperparameters (from FLamby's own
+\texttt{common.py}): 6 clients, batch size 64, Adam at lr $5\times10^{-4}$,
+20 pooled epochs -- recorded so this paper's matched-budget baselines have
+an official reference point, even though this paper's own budgets
+(Table~\ref{tab:phase1}) differ (dictated by the hardware in
+Table~\ref{tab:hardware}, not by FLamby's GPU-scale defaults).
+\end{itemize}
+\textbf{Downloading the images requires a human to accept the ISIC2019 and
+HAM10000 licenses in a browser} (exact procedure:
+\texttt{scripts/download\_fed\_isic2019\_INSTRUCTIONS.md}); this project
+does not and will not automate that step. As of this draft it has not been
+completed, so \textbf{every result in \S\ref{sec:results}--\S\ref{sec:ablation}
+below runs on a synthetic fixture instead} (\S\ref{sec:synthetic-fixture}).
+\RESULTPENDING{all Fed-ISIC2019 real-data tables.}
+
+\subsection{Fed-IXITiny (planned extension)} \status{verified facts; not
+yet run, Phase 7}
+$\sim$566 T1-weighted MRI subjects, 3 London hospitals (Guy's, Hammersmith,
+Institute of Psychiatry), CC~BY-SA~3.0, $\sim$444\,MB, binary
+brain/non-brain segmentation -- verified against FLamby's \texttt{fed\_ixi}
+README. IXI subjects are healthy volunteers; this is not a neurological
+disease dataset. Planned only after the primary Fed-ISIC2019 tables are
+complete, per the project's phase ordering.
+\RESULTPENDING{Phase 7 -- not started.}
+
+\subsection{Synthetic fixture} \status{implemented, used for every result
+in this draft}
+\label{sec:synthetic-fixture}
+\texttt{medgate/data/synthetic.py} draws $32\times32$ images and labels
+independently at random, partitioned into 6 centers and 8 fine classes with
+the same coarse ontology intended for the real data (melanocytic
+$=\{$MEL, NV$\}$; keratinocytic $=\{$BCC, SCC, AK, BKL$\}$; other
+$=\{$DF, VASC$\}$ -- an experimental taxonomy justified in
+\S\ref{sec:limitations}, not a clinical policy). Because labels are
+independent of images by construction, \textbf{there is no learnable signal},
+and every result below is a \emph{pipeline-validation} result: it shows the
+code runs, aggregates, evaluates, and reports correctly, and that no method
+shows an impossible above-chance number (which would indicate a leakage
+bug) -- it is not evidence for or against capability isolation.
+
+\subsection{Baselines and methods implemented} \status{implemented, tested}
+Centralized (pooled upper bound), local-only, FedAvg \citep{mcmahan2017fedavg},
+FedProx \citep{li2020fedprox}, and plain federated LoRA (backbone frozen at
+initialization, only adapter+fine head trained) -- Phase 1
+(\S\ref{sec:results}). SCAFFOLD \citep{karimireddy2020scaffold} and FedAdam
+\citep{reddi2021adaptive} are \status{proposed but not implemented}, gated on
+Phase 1's real-data tier timing a baseline run first
+(\texttt{docs/execution\_plan.md}).
+
+\subsection{Statistical protocol} \status{implemented}
+Fixed dataset splits (data generation seed held constant across all method
+seeds); 5 seeds for Phases 1--2, 3 seeds for Phases 3--5 (a development-tier
+choice per the project brief's ``3 for development, 5 for final''
+allowance -- final real-data runs will use 5); mean, standard deviation
+reported for every table; every raw per-run JSON preserved under
+\texttt{experiments/}. \status{not yet implemented}: bootstrap 95\% CIs,
+paired Wilcoxon signed-rank tests, Holm--Bonferroni correction -- deferred
+until real-data seed counts justify them (running significance tests on
+pipeline-validation synthetic numbers would be exactly the ``inappropriately
+tiny sample counts'' the project brief warns against dressing up as
+statistics).
+
+\section{Results}
+\label{sec:results}
+\status{implemented and executed -- synthetic tier only} --
+\RESULTPENDING{real-data tier not yet run}
+
+\subsection{Phase 1: primary utility}
+\input{tables/phase1_utility_synthetic.tex}
+\captionof{table}{Phase 1 baselines, synthetic tier, 5 seeds. See
+\S\ref{sec:synthetic-fixture}: every number sits at or below the
+constant-predictor macro-F1 for its label space ($\approx 0.22$ for 3-way
+coarse, $\approx 0.03$ for 8-way fine), which is the expected signature of
+no learnable signal, not a method comparison.}
+\label{tab:phase1}
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.75\textwidth]{figures/fig_phase1_utility.pdf}
+\caption{Phase 1 utility by baseline (synthetic tier; error bars = std
+over 5 seeds).}
+\label{fig:phase1}
+\end{figure}
+Centralized, FedAvg, and FedProx land on \emph{identical} coarse-F1 across
+all 5 seeds -- confirmed (not assumed) to be the fixed-split, no-signal
+degenerate-collapse behavior described in
+\texttt{docs/execution\_plan.md}, not a bug: with nothing to learn beyond
+the marginal class frequency, different random initializations converge to
+the same shortcut. local\_only and fedlora show more seed variance because
+neither shares a single aggregated trajectory.
+
+\subsection{Phase 4: privacy mechanisms}
+\label{sec:privacy}
+\status{implemented and executed -- synthetic tier}
+Four arms: no protection (plaintext FedAvg), secure aggregation (pairwise
+additive-masking simulation of \citet{bonawitz2017secagg}'s mathematical
+core -- explicitly \emph{not} the full protocol: no Diffie--Hellman key
+agreement and no Shamir-secret-sharing dropout recovery, single-process
+only), DP-SGD \citep{abadi2016deep} via Opacus at three noise multipliers,
+and the two combined.
+\input{tables/phase4_privacy_synthetic.tex}
+\captionof{table}{Phase 4 privacy arms, synthetic tier, 3 seeds.}
+\label{tab:phase4}
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.68\textwidth]{figures/fig_phase4_privacy_pareto.pdf}
+\caption{Privacy-utility Pareto (synthetic tier). The \texttt{dp\_sgd} and
+\texttt{secure\_agg\_plus\_dp} markers overlap exactly at every budget.}
+\label{fig:phase4}
+\end{figure}
+\texttt{dp\_sgd} and \texttt{secure\_agg\_plus\_dp} are \emph{numerically
+identical} at every noise multiplier and seed (Table~\ref{tab:phase4},
+Figure~\ref{fig:phase4}) -- expected and correct: pairwise masking cancels
+exactly in the aggregate sum, so it changes what the server can
+\emph{observe} per client, never the final trained model. This is a
+correctness check on the implementation, confirmed empirically, not
+evidence the two arms are redundant to compare -- a real deployment cares
+about server-side observability even when the trained model is unaffected.
+
+Two real Opacus integration bugs were found and permanently fixed while
+building this, rather than routed around: an in-place ReLU broke Opacus's
+backward hooks (Opacus requires non-in-place activations), and Opacus's
+optimizer requires every tracked parameter to receive a per-sample gradient
+on every batch, which the adversary head (\S\ref{sec:medgate-objectives},
+present for the adversarial/combined objectives but unused by the plain
+coarse+fine objective) initially violated -- fixed by excluding it from
+the DP-tracked parameter set, the same fix already needed for
+gradient-inversion attacks (\S\ref{sec:security}) for the identical reason.
+
+\section{Security Analysis}
+\label{sec:security}
+\status{partially implemented and executed -- synthetic tier; several
+mandatory attacks not yet built, listed in \S\ref{sec:limitations}}
+
+\input{tables/phase3_attacks_synthetic.tex}
+\captionof{table}{Phase 3 attacks, synthetic tier, 3 seeds. Attacker
+knowledge/access/budget for every row is recorded in the raw JSON
+(\texttt{medgate/attacks/*.py}), not only summarized here.}
+\label{tab:phase3}
+
+\paragraph{A1 -- gradient inversion (simplified DLG).} Adam replaces the
+original paper's L-BFGS and labels are fixed rather than jointly optimized
+-- both deviations stated up front (\texttt{medgate/attacks/gradient\_inversion.py}),
+so these numbers are not directly comparable to \citet{zhu2019deep}'s
+reported figures. PSNR varied enormously across seeds (138\,dB, 14.9\,dB,
+15.4\,dB) -- a real, literature-consistent sensitivity of gradient-inversion
+attacks to dummy-image initialization, not a bug -- but the absolute values
+are almost certainly inflated by this model's small size (a few thousand
+parameters): DLG is known to succeed far more easily against tiny models
+than realistic ones, so \emph{these numbers must not be read as
+representative of a real-scale backbone}.
+
+\paragraph{A1/A3 -- membership inference.} A loss-threshold attack
+(explicitly \emph{not} \citeauthor{shokri2017membership}'s full
+shadow-model method \citep{shokri2017membership} -- no shadow models are
+trained here). AUC $0.510 \pm 0.048$ over 3 seeds sits near the
+pre-registered target ($\le 0.55$, \texttt{docs/research\_scope.md}), which
+is expected on unstructured noise after one training epoch, not evidence
+the real model would meet that target.
+
+\paragraph{A2 -- adapter reconstruction.} Frozen public backbone, fresh
+adapter+fine head trained on 8/16/32 auxiliary examples: utility stayed
+flat ($\approx 0.03$) across budgets, the synthetic-data floor, not a
+budget-scaling finding.
+
+\paragraph{A3 -- black-box extraction.} Zero access to weights, hard-label
+distillation from 16/32/64 queries (\citeauthor{tramer2016stealing}-style
+\citep{tramer2016stealing}): same flat floor.
+
+\paragraph{Collusion.} Two attackers with disjoint 16-example auxiliary
+halves, logit-averaged: a small positive gain over solo
+($+0.005 \pm 0.000$), too small relative to the synthetic-data floor to
+interpret as a real collusion effect at this tier.
+
+\section{Ablation and Sensitivity Analysis}
+\label{sec:ablation}
+\status{implemented and executed -- synthetic tier}
+
+\input{tables/phase2_capability_isolation_synthetic.tex}
+\captionof{table}{Phase 2 capability-isolation methods, synthetic tier, 5
+seeds. ARR is \texttt{n/a} where its denominator
+($U_{\text{plain adapter}} - U_{\text{public}}$) was $\approx 0$ for every
+seed -- the metric correctly declining to report a number it cannot
+support (\texttt{medgate/capability\_metrics.py}), not a bug.}
+\label{tab:phase2}
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.75\textwidth]{figures/fig_phase2_capability_isolation.pdf}
+\caption{$U_{\text{public}}$ vs.\ RFC by method (synthetic tier; error bars
+= std over 5 seeds).}
+\label{fig:phase2}
+\end{figure}
+$U_{\text{public}}$ is operationalized as the fine-label macro-F1 of a
+linear probe fit on the public \emph{output} (coarse logits) alone --
+the floor an unauthorized user with zero representation access gets;
+RFC is the best of four probes (linear, nonlinear, $k$-NN, few-shot,
+$k{=}5$) fit on the frozen public \emph{representation}
+(\texttt{medgate/attacks/probes.py}). On this synthetic fixture RFC bounces
+in a $\approx 0.03$--$0.14$ range across all six methods -- test-set-size
+noise (38 examples/fine-class in the pooled test set), not a real isolation
+effect; \textbf{no method's RFC-vs-$U_{\text{public}}$ gap here supports or
+refutes whether adversarial suppression or the orthogonality term actually
+help}, which is exactly the question real data is needed to answer.
+
+\paragraph{Coarse-ontology sensitivity.} \status{proposed, not yet
+implemented} The project brief requires at least one alternative coarse
+mapping as a sensitivity check on the melanocytic/keratinocytic/other
+ontology (\S\ref{sec:methodology}). \TODO{implement and run a second
+ontology (candidate: a benign/malignant/ambiguous split that keeps AK in
+its own bucket rather than folding it into keratinocytic, to directly test
+the ontology's sensitivity to where AK is placed) once real labels exist to
+map.}
+
+\section{Revocation and Unlearning}
+\label{sec:unlearning}
+\status{implemented and executed -- synthetic tier, institution- and
+class-level only}
+
+\input{tables/phase5_unlearning_synthetic.tex}
+\captionof{table}{Phase 5, synthetic tier, 3 seeds. Forgetting AUC:
+membership-inference AUC between removed training data and held-out
+retained test data; $\approx 0.5$ = no longer distinguishable from
+never-seen data (good forgetting). \textbf{The class scenario's forgetting
+AUC is confounded} (see text) and should not be read at face value.}
+\label{tab:phase5}
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\textwidth]{figures/fig_phase5_unlearning.pdf}
+\caption{Retained-data utility by method and removal scenario (synthetic
+tier; error bars = std over 3 seeds).}
+\label{fig:phase5}
+\end{figure}
+
+Five methods against full retraining as the gold standard: naive
+checkpoint rollback (reinitialize to round 0), adapter deletion + retrain
+(delete only the restricted adapter/fine head, backbone left untouched --
+possible only because the architecture separates these), a generic
+gradient-ascent-then-recovery approximate unlearning
+(\emph{not} attributed to any specific cited paper -- see
+\S\ref{sec:related}), and key-revocation-only (returns the model
+\emph{completely unmodified} -- the literal test of this paper's
+non-claim that revoking a key does not remove learned influence).
+Patient-level and patient-group-level removal were \textbf{not run}: the
+synthetic fixture has no patient/lesion manifest to remove by; only real
+Fed-ISIC2019 data will have one.
+
+\paragraph{A confound found and documented, not hidden.} The class-scenario
+forgetting AUC is contaminated: removed data is entirely one class and
+retained test data is the other seven, so any class-level loss asymmetry
+that exists even in an \emph{untrained} model biases this AUC regardless of
+real memorization. This is directly visible in
+Table~\ref{tab:phase5}: \texttt{checkpoint\_rollback} (never trained on the
+post-removal data at all) still shows forgetting AUC $\approx 0.99$ in the
+class scenario, purely from this confound. The institution scenario does
+not have this problem (all institutions share the same label distribution),
+and there \texttt{key\_revocation\_only}'s forgetting AUC sits statistically
+indistinguishable from every other method's ($\approx 0.45$--$0.51$) --
+expected on synthetic noise, since there is nothing to memorize in the
+first place, and therefore \emph{not} evidence that revocation and
+unlearning are equivalent; establishing the real gap the project's
+non-claim asserts exists requires real, learnable data.
+
+\section{Discussion}
+\label{sec:discussion}
+Nothing in this draft yet supports or refutes MedGate-FL's central
+hypothesis -- that capability isolation survives realistic attacks better
+than a plain adapter or a hidden fine head -- because every number so far
+comes from a fixture with no learnable signal by construction
+(\S\ref{sec:synthetic-fixture}). What this phase of the work does support:
+the full experimental pipeline (six training objectives, four privacy arms,
+five attacks, five unlearning methods, statistics, figures, tables, this
+document) runs end-to-end, is deterministic given a seed, and produces
+numbers that behave exactly as a correct implementation with no signal
+should -- no method spuriously exceeds chance, secure aggregation's masking
+provably cancels in the aggregate, DP-SGD's accountant returns sane
+epsilons, and a mistaken security test was caught by its own failure rather
+than shipped. That is a necessary, not sufficient, condition for the real
+result to be trustworthy once the license-gated data is available.
+
+\section{Limitations}
+\label{sec:limitations}
+\begin{itemize}[nosep]
+\item \textbf{Simulated hospitals.} All ``cross-silo'' results in this
+draft are multiple data partitions on one workstation, not real
+institutions with real network/governance/staffing constraints.
+\item \textbf{Synthetic-tier-only results.} Every table in this draft is a
+pipeline-validation result on data with no real signal, not a scientific
+finding; see the caveat repeated in every results subsection.
+\item \textbf{Public-data privacy proxy.} Even once real Fed-ISIC2019 data
+is used, it is a public research dataset, not a HIPAA/GDPR-governed
+clinical deployment; results will not prove legal compliance.
+\item \textbf{Experimental coarse ontology.} The melanocytic/keratinocytic/other
+mapping is this project's own taxonomy, not a clinical access policy;
+AK's placement is argued, not assumed correct, and the required
+sensitivity-analysis alternative mapping is not yet implemented
+(\S\ref{sec:ablation}).
+\item \textbf{No clinical validity claim.} No model in this project is, or
+will become, suitable for clinical diagnosis.
+\item \textbf{Auxiliary-data dependence of attacks.} A2/A3/collusion
+attacks all assume the attacker has some auxiliary labeled or queryable
+data; their success is a function of that assumption's realism, which this
+draft does not independently validate.
+\item \textbf{Independent relearning is out of scope to prevent.} No
+mechanism here stops an attacker from training an entirely new model on
+public data; the crypto layer protects \emph{this} adapter, not the
+information space it was trained from.
+\item \textbf{Key exfiltration / already-exported artifacts.} Revocation
+(\S\ref{sec:unlearning}) cannot undo a plaintext export that happened
+before revocation; this project makes no claim otherwise.
+\item \textbf{Secure aggregation vs.\ poisoning validation tension.} Hiding
+individual updates (Phase 4) and validating them for poisoning (A4,
+\S\ref{sec:threat}) are in tension; this draft implements the former but
+not yet A4 poisoning/backdoor/replay attacks (below), so the tension is
+stated, not yet empirically explored.
+\item \textbf{Cross-dataset duplication and domain shift.} Not yet
+evaluated -- Phase 6 (external validation: ISIC 2020, MILK10k,
+PAD-UFES-20) is gated on those datasets' citations moving from
+\texttt{UNVERIFIED} to \texttt{VERIFIED} (\texttt{docs/literature\_matrix.md}).
+\item \textbf{Blockchain necessity.} Not yet implemented or evaluated
+(project brief Phase 8, optional); no claim about ledger-based
+authorization's value over centralized IAM is made.
+\item \textbf{Computational limits.} CPU-only, $\sim$3.3\,GiB available RAM
+(Table~\ref{tab:hardware}); bounds model scale, attack realism (especially
+gradient inversion at real image resolution), and which baselines
+(SCAFFOLD, full DP-SGD sweeps) have been run at all.
+\item \textbf{No formal cryptographic proof.} AES-GCM's security rests on
+standard, well-established assumptions, not a proof specific to this
+system; the secure-aggregation simulation and LoREnc-style obfuscation
+discussion (\S\ref{sec:related}) are described only as protection/
+obfuscation mechanisms, never as proofs.
+\item \textbf{Attacks not yet implemented}, listed exactly, not glossed
+over: property inference (source citation still
+\UNVERIFIED{}), client attribution, sign-flipping/label-flipping/backdoor/
+free-rider/malformed-update/replay integrity attacks (A4), full
+fine-tuning recovery under a fixed compute budget distinct from the
+few-shot probe already implemented, low-rank adapter completion, and
+known-adapter comparison. iDLG/Geiping-style stronger gradient inversion
+are deferred pending citation verification.
+\item \textbf{Statistical rigor deferred.} Bootstrap confidence intervals,
+paired significance tests, and Holm--Bonferroni correction are not yet
+applied (\S\ref{sec:methodology}) -- deliberately, to avoid running them on
+seed counts too small to support them meaningfully.
+\end{itemize}
+
+\section{Ethical, Legal, and Clinical Considerations}
+This project uses only publicly released research datasets, once their
+license-acceptance steps are completed by a human
+(\S\ref{sec:methodology}); it does not access or claim to protect real
+patient records. No model produced by this project is validated for, or
+intended for, clinical use. The capability-isolation framing studied here
+is a research question about \emph{technical} access control, not a
+substitute for the legal, regulatory, and clinical-governance processes a
+real tiered-access medical AI system would require.
+
+\section{Reproducibility Statement}
+\label{sec:reproducibility}
+Repository: \url{https://github.com/VectorSophie/medgate-fl} (private as of
+this draft). Every result in this paper traces to: a config under
+\texttt{configs/}, a seed recorded in its result JSON, the git commit
+recorded in that JSON, a dataset-manifest hash (a hash of the synthetic
+generator's parameters at this tier; a real manifest hash once Fed-ISIC2019
+is unblocked), and the raw JSON file itself under \texttt{experiments/}.
+Tables are generated only by \texttt{scripts/make\_phaseN\_table.py} and
+\texttt{scripts/csv\_to\_latex\_tables.py}; figures only by
+\texttt{scripts/make\_figures.py}; no number in this document was typed by
+hand. Environment: \texttt{requirements.txt} (direct) and
+\texttt{requirements.lock.txt} (full pinned closure via \texttt{pip
+freeze}); PyTorch 2.13.0 CPU build. One-command smoke test:
+\texttt{bash scripts/smoke\_test.sh} (30/30 tests passing as of this
+draft). Compilation: \texttt{pdflatex main; bibtex main; pdflatex main;
+pdflatex main}, run from \texttt{paper/} -- verified to succeed on a
+freshly-installed, user-space TeX Live (scheme-basic + hyperref, booktabs,
+geometry, xcolor, natbib, enumitem, caption) during this project.
+
+\section{Conclusion}
+This paper implements, tests, and runs the complete MedGate-FL pipeline --
+architecture, six training objectives, four privacy arms, five attacks,
+five unlearning methods, and this document -- against a synthetic fixture
+because the real primary dataset's license has not yet been accepted by a
+human. Every mechanism runs correctly and every number behaves as expected
+for data with no signal, including two real Opacus bugs fixed and one
+flawed security test caught and corrected along the way. Whether capability
+isolation actually works -- whether authorized users recover fine utility,
+unauthorized attackers stay near the public floor, and the combined
+objective earns its added complexity over the five simpler alternatives --
+remains open, and is exactly what Phase 1's real-data tier
+(\S\ref{sec:methodology}) will test once unblocked.
+\RESULTPENDING{the paper's actual scientific conclusion.}
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\appendix
+\section{Hyperparameters}
+\status{implemented} Full hyperparameters for every synthetic-tier run are
+in \texttt{configs/phase\{1,2,3,4,5\}\_synthetic.yaml}, not restated here
+to avoid drift between two copies -- see \S\ref{sec:reproducibility}.
+
+\section{Additional detail on the confidentiality-test correction}
+\label{app:confidentiality-fix}
+\S\ref{sec:privacy} references a mistake worth detailing for anyone
+extending the secure-aggregation module. The first version of
+\texttt{test\_masking\_hides\_an\_individual\_update} asserted that an
+individual masked client update has low cosine similarity to its true
+(unmasked) update -- this failed empirically at realistic client counts
+(mean $|\cos\text{sim}|$ measured at 0.57 for $n{=}3$, 0.40 for $n{=}6$,
+0.31 for $n{=}10$ clients, over 20 trials each with unit-scale masks). The
+masking itself was not broken -- the aggregate sum was exact in every
+trial -- the \emph{test} measured the wrong property. Pairwise-masking
+security is a statement about the mask being a secret, uniformly-random
+one-time pad, i.e.\ about the masked value's \emph{distribution}, not about
+any one sampled geometric distance. The corrected test instead checks that
+the \emph{same} true update, masked with two different (attacker-unknown)
+seeds, produces clearly different outputs -- the property that actually
+demonstrates hiding. Both the wrong reasoning and the fix are kept in
+\texttt{medgate/privacy/secure\_aggregation.py}'s
+\texttt{confidentiality\_check} docstring so the mistake is not repeated.
+
+\end{document}

@@ -1,0 +1,16 @@
+\begin{tabular}{llcccc}
+\toprule
+Scenario & Method & Seeds & Retained fine F1 & Gap to gold & Forgetting AUC \\
+\midrule
+class & adapter\_deletion\_and\_retrain & 3 & 0.035 $\pm$ 0.005 & 0.003 $\pm$ 0.007 & 0.000 $\pm$ 0.000 \\
+class & checkpoint\_rollback & 3 & 0.007 $\pm$ 0.011 & -0.025 $\pm$ 0.009 & 0.988 $\pm$ 0.021 \\
+class & full\_retrain & 3 & 0.032 $\pm$ 0.002 & 0.000 $\pm$ 0.000 & 0.000 $\pm$ 0.000 \\
+class & gradient\_ascent\_unlearning & 3 & 0.035 $\pm$ 0.002 & 0.003 $\pm$ 0.002 & 0.000 $\pm$ 0.000 \\
+class & key\_revocation\_only & 3 & 0.034 $\pm$ 0.036 & 0.002 $\pm$ 0.037 & 0.821 $\pm$ 0.215 \\
+institution & adapter\_deletion\_and\_retrain & 3 & 0.036 $\pm$ 0.018 & 0.008 $\pm$ 0.018 & 0.466 $\pm$ 0.049 \\
+institution & checkpoint\_rollback & 3 & 0.035 $\pm$ 0.013 & 0.007 $\pm$ 0.013 & 0.500 $\pm$ 0.101 \\
+institution & full\_retrain & 3 & 0.028 $\pm$ 0.000 & 0.000 $\pm$ 0.000 & 0.479 $\pm$ 0.045 \\
+institution & gradient\_ascent\_unlearning & 3 & 0.029 $\pm$ 0.005 & 0.002 $\pm$ 0.005 & 0.454 $\pm$ 0.095 \\
+institution & key\_revocation\_only & 3 & 0.036 $\pm$ 0.018 & 0.008 $\pm$ 0.018 & 0.509 $\pm$ 0.047 \\
+\bottomrule
+\end{tabular}
