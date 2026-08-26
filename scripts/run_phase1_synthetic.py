@@ -11,6 +11,7 @@ Usage: PYTHONPATH=. python scripts/run_phase1_synthetic.py [config.yaml]
 """
 import hashlib
 import json
+import os
 import subprocess
 import sys
 import time
@@ -25,12 +26,33 @@ from medgate.metrics import evaluate_both
 
 
 def git_commit() -> str:
+    """HEAD SHA this run's provenance record will claim.
+
+    P0-1 (repair pass 4 review): a prior hierarchical run recorded a commit
+    that predated the code that actually produced it -- the script was
+    edited, run, and only committed afterward, so `git checkout <that SHA>`
+    reproduces different code than what ran. Root cause was that this
+    function returned HEAD unconditionally, blind to a dirty working tree.
+    Now it refuses by default when the tree is dirty; set ALLOW_DIRTY_RUN=1
+    to bypass for throwaway/dev runs. Archival results should never need to.
+    """
     try:
-        return subprocess.run(
+        head = subprocess.run(
             ["git", "rev-parse", "HEAD"], capture_output=True, text=True, timeout=5
-        ).stdout.strip() or "uncommitted"
+        ).stdout.strip()
     except FileNotFoundError:
         return "unknown"
+    if not head:
+        return "uncommitted"
+    dirty = subprocess.run(
+        ["git", "status", "--porcelain"], capture_output=True, text=True, timeout=5
+    ).stdout.strip()
+    if dirty and not os.environ.get("ALLOW_DIRTY_RUN"):
+        raise RuntimeError(
+            "working tree has uncommitted changes -- commit before an archival run "
+            "(or set ALLOW_DIRTY_RUN=1 for a non-archival dev run):\n" + dirty
+        )
+    return head + ("-dirty" if dirty else "")
 
 
 def manifest_hash(data_cfg: dict) -> str:

@@ -49,6 +49,14 @@ from scripts.run_phase1_synthetic import git_commit, manifest_hash
 
 def build_fixture(cfg, seed):
     d = cfg["data"]
+    # P0-2 (repair pass 4 review): this used to pass the per-run `seed` here,
+    # so the dataset/split varied with the model/training seed even though
+    # the config and every manifest claim a FIXED dataset across the sweep
+    # (see configs/phase1_hierarchical.yaml's data_seed comment and the
+    # paper's paired-seed protocol). data_seed is fixed across the whole
+    # `for seed in cfg["seeds"]` sweep in main(); `seed` still drives
+    # everything downstream of the data (pretrain/train/probe stochasticity).
+    data_seed = d["data_seed"]
     hcfg = HierarchicalConfig(
         image_size=d["image_size"],
         num_patients_per_institution=d["num_patients_per_institution"],
@@ -56,8 +64,8 @@ def build_fixture(cfg, seed):
         class_imbalance_strength=d["class_imbalance_strength"],
         sensitive_property_correlation=d["sensitive_property_correlation"],
     )
-    insts = make_hierarchical_institutions(hcfg, seed=seed)
-    train, val, test = split_by_patient(insts, train_frac=d["train_frac"], val_frac=d["val_frac"], seed=seed)
+    insts = make_hierarchical_institutions(hcfg, seed=data_seed)
+    train, val, test = split_by_patient(insts, train_frac=d["train_frac"], val_frac=d["val_frac"], seed=data_seed)
     # The 'test' split (test_frac = 1 - train_frac - val_frac) is further
     # halved BY PATIENT into a utility-test pool (fine/coarse macro-F1 --
     # no selection happens for utility, so no leakage risk) and an
@@ -65,7 +73,7 @@ def build_fixture(cfg, seed):
     # its winning probe on exactly once). train_frac=0.5/val_frac=0.0
     # reuses split_by_patient itself rather than a second splitting
     # routine -- val_frac=0.0 here means an empty (unused) second output.
-    utility_test, _unused, attack_test = split_by_patient(test, train_frac=0.5, val_frac=0.0, seed=seed + 900_000)
+    utility_test, _unused, attack_test = split_by_patient(test, train_frac=0.5, val_frac=0.0, seed=data_seed + 900_000)
     return (
         train, val, utility_test, attack_test,
         torch.utils.data.ConcatDataset(train),
