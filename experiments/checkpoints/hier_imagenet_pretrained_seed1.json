@@ -6,8 +6,8 @@
     "batch_size": 16,
     "lr": 0.01
   },
-  "git_commit": "5b4becc3a66f2ea2f992dab565b5e04b59ae19cc",
-  "pretrain_coarse_macro_f1": 0.7083333333333334,
+  "git_commit": "8fc02fb43296729bdd38059aaeaac16790bc1040",
+  "pretrain_coarse_macro_f1": 0.9107142857142857,
   "checkpoint_name": "hier_imagenet_pretrained_seed1",
-  "state_dict_sha256": "5c62a2a747a39c1b6cc031fe0351f7a80d39e9ba8a458905828e0eeaa882efb7"
+  "state_dict_sha256": "5f4ec4c44137342927b4151e8321b8255f5ef36ba87e7d2fa66541aac1681cd6"
 }

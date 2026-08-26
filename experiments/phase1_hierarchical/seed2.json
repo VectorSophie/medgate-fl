@@ -1,6 +1,6 @@
 {
   "seed": 2,
-  "git_commit": "5b4becc3a66f2ea2f992dab565b5e04b59ae19cc",
+  "git_commit": "8fc02fb43296729bdd38059aaeaac16790bc1040",
   "config": {
     "data": {
       "num_patients_per_institution": 12,
@@ -51,7 +51,7 @@
     "output_dir": "experiments/phase1_hierarchical"
   },
   "dataset_manifest_hash": "65f979681270702d",
-  "wall_clock_seconds": 338.1,
+  "wall_clock_seconds": 67.95,
   "results": [
     {
       "method": "random_frozen_lora",
@@ -66,32 +66,32 @@
         ]
       },
       "utility": {
-        "coarse_macro_f1": 0.16666666666666666,
+        "coarse_macro_f1": 0.09523809523809523,
         "coarse_balanced_accuracy": 0.3333333333333333,
-        "fine_macro_f1": 0.1,
-        "fine_balanced_accuracy": 0.2
+        "fine_macro_f1": 0.16666666666666666,
+        "fine_balanced_accuracy": 0.25
       },
-      "u_public": 0.06666666666666667,
+      "u_public": 0.08333333333333333,
       "probe_selection": {
-        "selected_probe": "knn_probe",
+        "selected_probe": "svm_probe",
         "selection_val_macro_f1_by_probe": {
-          "linear_probe": 0.3666666666666667,
-          "nonlinear_probe": 0.5599999999999999,
-          "knn_probe": 0.8939393939393939,
-          "fewshot_probe_k5": 0.20909090909090908,
-          "svm_probe": 0.5357575757575758,
-          "tree_probe": 0.5222222222222223
+          "linear_probe": 0.26666666666666666,
+          "nonlinear_probe": 0.5625,
+          "knn_probe": 0.7391304347826086,
+          "fewshot_probe_k5": 0.08333333333333333,
+          "svm_probe": 0.7962962962962963,
+          "tree_probe": 0.7333333333333334
         },
         "attack_test_result": {
-          "macro_f1": 0.4285714285714285,
-          "balanced_accuracy": 0.5,
+          "macro_f1": 0.297008547008547,
+          "balanced_accuracy": 0.38888888888888884,
           "n_train_examples": 126,
-          "fit_seconds": 0.0012
+          "fit_seconds": 0.0122
         }
       },
-      "residual_fine_capability": 0.4285714285714285,
-      "unauthorized_capability_gain": 0.36190476190476184,
-      "authorized_recovery_ratio": 0.18181818181818185
+      "residual_fine_capability": 0.297008547008547,
+      "unauthorized_capability_gain": 0.2136752136752137,
+      "authorized_recovery_ratio": 0.27999999999999997
     },
     {
       "method": "coarse_pretrained_fedlora",
@@ -105,33 +105,33 @@
           "fine_head"
         ]
       },
-      "checkpoint_sha256": "be9ceaaf3fdbd6a78c01ba1ec6940e18b9dac5a504d5c89a10f6859d554ebe40",
+      "checkpoint_sha256": "caefabbf11e807be22bbc969d15e5d38c3b6f694a174de62270ab289e7c4feaa",
       "utility": {
-        "coarse_macro_f1": 0.5555555555555555,
+        "coarse_macro_f1": 0.6190476190476191,
         "coarse_balanced_accuracy": 0.6666666666666666,
-        "fine_macro_f1": 0.25,
-        "fine_balanced_accuracy": 0.4
+        "fine_macro_f1": 0.38095238095238093,
+        "fine_balanced_accuracy": 0.5
       },
-      "u_public": 0.6055555555555555,
+      "u_public": 0.09523809523809523,
       "probe_selection": {
-        "selected_probe": "nonlinear_probe",
+        "selected_probe": "svm_probe",
         "selection_val_macro_f1_by_probe": {
-          "linear_probe": 0.4603174603174603,
-          "nonlinear_probe": 0.6044444444444445,
-          "knn_probe": 0.5092592592592592,
-          "fewshot_probe_k5": 0.42261904761904756,
-          "svm_probe": 0.5866666666666667,
-          "tree_probe": 0.5092592592592592
+          "linear_probe": 0.37418699186991866,
+          "nonlinear_probe": 0.39149468417761096,
+          "knn_probe": 0.39918699186991863,
+          "fewshot_probe_k5": 0.20833333333333334,
+          "svm_probe": 0.4019607843137255,
+          "tree_probe": 0.39333333333333337
         },
         "attack_test_result": {
-          "macro_f1": 0.6444444444444444,
-          "balanced_accuracy": 0.7083333333333334,
+          "macro_f1": 0.07665505226480837,
+          "balanced_accuracy": 0.15277777777777776,
           "n_train_examples": 126,
-          "fit_seconds": 0.4998
+          "fit_seconds": 0.004
         }
       },
-      "residual_fine_capability": 0.6444444444444444,
-      "unauthorized_capability_gain": 0.03888888888888886,
+      "residual_fine_capability": 0.07665505226480837,
+      "unauthorized_capability_gain": -0.018583042973286862,
       "authorized_recovery_ratio": 1.0
     },
     {
@@ -146,34 +146,34 @@
           "fine_head"
         ]
       },
-      "checkpoint_sha256": "ca298f7f45f7bc0cb8c20b60f60bf588a218ec13b9679a9c90b88e516ebcc6d5",
+      "checkpoint_sha256": "0c8caaad162a1e56e8b79afb1d09082c358a68b0130cfdbaa4e4b35ed4f862ab",
       "utility": {
-        "coarse_macro_f1": 0.5972222222222222,
-        "coarse_balanced_accuracy": 0.611111111111111,
-        "fine_macro_f1": 0.2698412698412698,
-        "fine_balanced_accuracy": 0.36666666666666664
+        "coarse_macro_f1": 0.8214285714285715,
+        "coarse_balanced_accuracy": 0.8333333333333334,
+        "fine_macro_f1": 0.27142857142857146,
+        "fine_balanced_accuracy": 0.3333333333333333
       },
-      "u_public": 0.15306122448979592,
+      "u_public": 0.06451612903225806,
       "probe_selection": {
-        "selected_probe": "nonlinear_probe",
+        "selected_probe": "linear_probe",
         "selection_val_macro_f1_by_probe": {
-          "linear_probe": 0.5535483870967741,
-          "nonlinear_probe": 0.6171428571428571,
-          "knn_probe": 0.33269841269841266,
-          "fewshot_probe_k5": 0.38380952380952377,
-          "svm_probe": 0.4277472527472527,
-          "tree_probe": 0.4428571428571429
+          "linear_probe": 0.7333333333333334,
+          "nonlinear_probe": 0.6057971014492753,
+          "knn_probe": 0.45800865800865803,
+          "fewshot_probe_k5": 0.31725146198830406,
+          "svm_probe": 0.5749019607843138,
+          "tree_probe": 0.3272727272727272
         },
         "attack_test_result": {
-          "macro_f1": 0.32835497835497834,
-          "balanced_accuracy": 0.47685185185185186,
+          "macro_f1": 0.2707482993197279,
+          "balanced_accuracy": 0.3055555555555556,
           "n_train_examples": 126,
-          "fit_seconds": 0.9943
+          "fit_seconds": 0.1025
         }
       },
-      "residual_fine_capability": 0.32835497835497834,
-      "unauthorized_capability_gain": 0.17529375386518242,
-      "authorized_recovery_ratio": 1.2046783625730992
+      "residual_fine_capability": 0.2707482993197279,
+      "unauthorized_capability_gain": 0.20623217028746982,
+      "authorized_recovery_ratio": 0.6538834951456313
     },
     {
       "method": "full_finetune",
@@ -189,226 +189,226 @@
           "fine_head"
         ]
       },
-      "checkpoint_sha256": "be9ceaaf3fdbd6a78c01ba1ec6940e18b9dac5a504d5c89a10f6859d554ebe40",
+      "checkpoint_sha256": "caefabbf11e807be22bbc969d15e5d38c3b6f694a174de62270ab289e7c4feaa",
       "utility": {
-        "coarse_macro_f1": 0.5555555555555555,
+        "coarse_macro_f1": 0.6,
         "coarse_balanced_accuracy": 0.6666666666666666,
-        "fine_macro_f1": 0.16666666666666666,
-        "fine_balanced_accuracy": 0.2
+        "fine_macro_f1": 0.3333333333333333,
+        "fine_balanced_accuracy": 0.5
       },
-      "u_public": 0.15873015873015875,
+      "u_public": 0.20476190476190473,
       "probe_selection": {
-        "selected_probe": "linear_probe",
+        "selected_probe": "svm_probe",
         "selection_val_macro_f1_by_probe": {
-          "linear_probe": 0.5092063492063492,
-          "nonlinear_probe": 0.5092063492063492,
-          "knn_probe": 0.46823529411764697,
-          "fewshot_probe_k5": 0.42142857142857143,
-          "svm_probe": 0.5092063492063492,
-          "tree_probe": 0.4357142857142858
+          "linear_probe": 0.7333333333333334,
+          "nonlinear_probe": 0.7142857142857143,
+          "knn_probe": 0.3667441860465116,
+          "fewshot_probe_k5": 0.3538461538461538,
+          "svm_probe": 1.0,
+          "tree_probe": 0.60625
         },
         "attack_test_result": {
-          "macro_f1": 0.34285714285714286,
-          "balanced_accuracy": 0.4583333333333333,
+          "macro_f1": 0.18095238095238098,
+          "balanced_accuracy": 0.3333333333333333,
           "n_train_examples": 126,
-          "fit_seconds": 2.0142
+          "fit_seconds": 0.0036
         }
       },
-      "residual_fine_capability": 0.34285714285714286,
-      "unauthorized_capability_gain": 0.1841269841269841,
-      "authorized_recovery_ratio": 0.08695652173913014
+      "residual_fine_capability": 0.18095238095238098,
+      "unauthorized_capability_gain": -0.023809523809523753,
+      "authorized_recovery_ratio": 0.7297297297297297
     },
     {
       "method": "coarse_only",
       "kind": "capability_isolation",
-      "checkpoint_sha256": "be9ceaaf3fdbd6a78c01ba1ec6940e18b9dac5a504d5c89a10f6859d554ebe40",
+      "checkpoint_sha256": "caefabbf11e807be22bbc969d15e5d38c3b6f694a174de62270ab289e7c4feaa",
       "utility": {
-        "coarse_macro_f1": 0.5555555555555555,
-        "coarse_balanced_accuracy": 0.6666666666666666,
-        "fine_macro_f1": 0.2261904761904762,
-        "fine_balanced_accuracy": 0.4
+        "coarse_macro_f1": 1.0,
+        "coarse_balanced_accuracy": 1.0,
+        "fine_macro_f1": 0.25,
+        "fine_balanced_accuracy": 0.25
       },
-      "u_public": 0.32063492063492066,
+      "u_public": 0.4313852813852814,
       "probe_selection": {
         "selected_probe": "svm_probe",
         "selection_val_macro_f1_by_probe": {
-          "linear_probe": 0.6825396825396826,
-          "nonlinear_probe": 0.4603174603174603,
-          "knn_probe": 0.4949494949494949,
-          "fewshot_probe_k5": 0.4404761904761904,
-          "svm_probe": 0.8809523809523809,
-          "tree_probe": 0.4603174603174603
+          "linear_probe": 0.4852747252747253,
+          "nonlinear_probe": 0.5330952380952381,
+          "knn_probe": 0.5111400227679297,
+          "fewshot_probe_k5": 0.12280701754385964,
+          "svm_probe": 0.8222222222222223,
+          "tree_probe": 0.7272727272727273
         },
         "attack_test_result": {
-          "macro_f1": 0.2523809523809524,
-          "balanced_accuracy": 0.4166666666666667,
+          "macro_f1": 0.2619047619047619,
+          "balanced_accuracy": 0.3333333333333333,
           "n_train_examples": 126,
           "fit_seconds": 0.0072
         }
       },
-      "residual_fine_capability": 0.2523809523809524,
-      "unauthorized_capability_gain": -0.06825396825396829,
-      "authorized_recovery_ratio": 1.3370786516853932
+      "residual_fine_capability": 0.2619047619047619,
+      "unauthorized_capability_gain": -0.1694805194805195,
+      "authorized_recovery_ratio": 3.5965665236051465
     },
     {
       "method": "hidden_fine_head",
       "kind": "capability_isolation",
-      "checkpoint_sha256": "be9ceaaf3fdbd6a78c01ba1ec6940e18b9dac5a504d5c89a10f6859d554ebe40",
+      "checkpoint_sha256": "caefabbf11e807be22bbc969d15e5d38c3b6f694a174de62270ab289e7c4feaa",
       "utility": {
-        "coarse_macro_f1": 0.5555555555555555,
+        "coarse_macro_f1": 0.6,
         "coarse_balanced_accuracy": 0.6666666666666666,
-        "fine_macro_f1": 0.16666666666666666,
-        "fine_balanced_accuracy": 0.2
+        "fine_macro_f1": 0.2,
+        "fine_balanced_accuracy": 0.25
       },
-      "u_public": 0.12063492063492064,
+      "u_public": 0.20644257703081234,
       "probe_selection": {
         "selected_probe": "nonlinear_probe",
         "selection_val_macro_f1_by_probe": {
-          "linear_probe": 0.4492063492063492,
-          "nonlinear_probe": 0.5777777777777777,
-          "knn_probe": 0.5,
-          "fewshot_probe_k5": 0.42142857142857143,
-          "svm_probe": 0.5092063492063492,
-          "tree_probe": 0.4
+          "linear_probe": 0.4476190476190476,
+          "nonlinear_probe": 0.7333333333333334,
+          "knn_probe": 0.22154471544715446,
+          "fewshot_probe_k5": 0.14285714285714285,
+          "svm_probe": 0.4476190476190476,
+          "tree_probe": 0.7333333333333334
         },
         "attack_test_result": {
-          "macro_f1": 0.5095238095238095,
-          "balanced_accuracy": 0.625,
+          "macro_f1": 0.3236111111111111,
+          "balanced_accuracy": 0.40277777777777773,
           "n_train_examples": 126,
-          "fit_seconds": 1.0645
+          "fit_seconds": 0.5513
         }
       },
-      "residual_fine_capability": 0.5095238095238095,
-      "unauthorized_capability_gain": 0.38888888888888884,
-      "authorized_recovery_ratio": 0.35582822085889565
+      "residual_fine_capability": 0.3236111111111111,
+      "unauthorized_capability_gain": 0.11716853408029879,
+      "authorized_recovery_ratio": -0.036918138041733585
     },
     {
       "method": "adapter_isolation",
       "kind": "capability_isolation",
-      "checkpoint_sha256": "be9ceaaf3fdbd6a78c01ba1ec6940e18b9dac5a504d5c89a10f6859d554ebe40",
+      "checkpoint_sha256": "caefabbf11e807be22bbc969d15e5d38c3b6f694a174de62270ab289e7c4feaa",
       "utility": {
-        "coarse_macro_f1": 0.5555555555555555,
+        "coarse_macro_f1": 0.6,
         "coarse_balanced_accuracy": 0.6666666666666666,
-        "fine_macro_f1": 0.16666666666666666,
-        "fine_balanced_accuracy": 0.2
+        "fine_macro_f1": 0.3333333333333333,
+        "fine_balanced_accuracy": 0.5
       },
-      "u_public": 0.15873015873015875,
+      "u_public": 0.20476190476190473,
       "probe_selection": {
-        "selected_probe": "linear_probe",
+        "selected_probe": "svm_probe",
         "selection_val_macro_f1_by_probe": {
-          "linear_probe": 0.5092063492063492,
-          "nonlinear_probe": 0.5092063492063492,
-          "knn_probe": 0.46823529411764697,
-          "fewshot_probe_k5": 0.42142857142857143,
-          "svm_probe": 0.5092063492063492,
-          "tree_probe": 0.4357142857142858
+          "linear_probe": 0.7333333333333334,
+          "nonlinear_probe": 0.7142857142857143,
+          "knn_probe": 0.3667441860465116,
+          "fewshot_probe_k5": 0.3538461538461538,
+          "svm_probe": 1.0,
+          "tree_probe": 0.60625
         },
         "attack_test_result": {
-          "macro_f1": 0.34285714285714286,
-          "balanced_accuracy": 0.4583333333333333,
+          "macro_f1": 0.18095238095238098,
+          "balanced_accuracy": 0.3333333333333333,
           "n_train_examples": 126,
-          "fit_seconds": 1.9725
+          "fit_seconds": 0.0046
         }
       },
-      "residual_fine_capability": 0.34285714285714286,
-      "unauthorized_capability_gain": 0.1841269841269841,
-      "authorized_recovery_ratio": 0.08695652173913014
+      "residual_fine_capability": 0.18095238095238098,
+      "unauthorized_capability_gain": -0.023809523809523753,
+      "authorized_recovery_ratio": 0.7297297297297297
     },
     {
       "method": "adversarial",
       "kind": "capability_isolation",
-      "checkpoint_sha256": "be9ceaaf3fdbd6a78c01ba1ec6940e18b9dac5a504d5c89a10f6859d554ebe40",
+      "checkpoint_sha256": "caefabbf11e807be22bbc969d15e5d38c3b6f694a174de62270ab289e7c4feaa",
       "utility": {
-        "coarse_macro_f1": 0.5555555555555555,
+        "coarse_macro_f1": 0.6,
         "coarse_balanced_accuracy": 0.6666666666666666,
-        "fine_macro_f1": 0.07142857142857142,
-        "fine_balanced_accuracy": 0.2
+        "fine_macro_f1": 0.3333333333333333,
+        "fine_balanced_accuracy": 0.5
       },
-      "u_public": 0.3404761904761905,
+      "u_public": 0.2599846390168971,
       "probe_selection": {
         "selected_probe": "linear_probe",
         "selection_val_macro_f1_by_probe": {
-          "linear_probe": 1.0,
-          "nonlinear_probe": 1.0,
-          "knn_probe": 0.5875420875420875,
-          "fewshot_probe_k5": 0.6547619047619048,
-          "svm_probe": 0.6547619047619048,
-          "tree_probe": 0.5092592592592592
+          "linear_probe": 0.7272727272727273,
+          "nonlinear_probe": 0.6638655462184874,
+          "knn_probe": 0.4246376811594203,
+          "fewshot_probe_k5": 0.3409090909090909,
+          "svm_probe": 0.66875,
+          "tree_probe": 0.4120879120879121
         },
         "attack_test_result": {
-          "macro_f1": 0.373469387755102,
-          "balanced_accuracy": 0.513888888888889,
+          "macro_f1": 0.24444444444444446,
+          "balanced_accuracy": 0.34722222222222215,
           "n_train_examples": 126,
-          "fit_seconds": 0.5436
+          "fit_seconds": 0.1678
         }
       },
-      "residual_fine_capability": 0.373469387755102,
-      "unauthorized_capability_gain": 0.032993197278911535,
-      "authorized_recovery_ratio": 2.973684210526316
+      "residual_fine_capability": 0.24444444444444446,
+      "unauthorized_capability_gain": -0.015540194572452648,
+      "authorized_recovery_ratio": 0.6063492063492062
     },
     {
       "method": "orthogonal",
       "kind": "capability_isolation",
-      "checkpoint_sha256": "be9ceaaf3fdbd6a78c01ba1ec6940e18b9dac5a504d5c89a10f6859d554ebe40",
+      "checkpoint_sha256": "caefabbf11e807be22bbc969d15e5d38c3b6f694a174de62270ab289e7c4feaa",
       "utility": {
-        "coarse_macro_f1": 0.5555555555555555,
+        "coarse_macro_f1": 0.6,
         "coarse_balanced_accuracy": 0.6666666666666666,
-        "fine_macro_f1": 0.16666666666666666,
-        "fine_balanced_accuracy": 0.2
+        "fine_macro_f1": 0.3333333333333333,
+        "fine_balanced_accuracy": 0.5
       },
-      "u_public": 0.12063492063492064,
+      "u_public": 0.22597402597402597,
       "probe_selection": {
-        "selected_probe": "knn_probe",
+        "selected_probe": "linear_probe",
         "selection_val_macro_f1_by_probe": {
-          "linear_probe": 0.5092063492063492,
-          "nonlinear_probe": 0.49829725829725824,
-          "knn_probe": 0.608235294117647,
-          "fewshot_probe_k5": 0.42142857142857143,
-          "svm_probe": 0.4492063492063492,
-          "tree_probe": 0.4657952069716776
+          "linear_probe": 1.0,
+          "nonlinear_probe": 0.7333333333333334,
+          "knn_probe": 0.3957446808510638,
+          "fewshot_probe_k5": 0.24571428571428572,
+          "svm_probe": 1.0,
+          "tree_probe": 0.7209302325581395
         },
         "attack_test_result": {
-          "macro_f1": 0.42467532467532465,
-          "balanced_accuracy": 0.4953703703703704,
+          "macro_f1": 0.16666666666666666,
+          "balanced_accuracy": 0.2916666666666667,
           "n_train_examples": 126,
-          "fit_seconds": 0.0018
+          "fit_seconds": 0.0223
         }
       },
-      "residual_fine_capability": 0.42467532467532465,
-      "unauthorized_capability_gain": 0.304040404040404,
-      "authorized_recovery_ratio": 0.35582822085889565
+      "residual_fine_capability": 0.16666666666666666,
+      "unauthorized_capability_gain": -0.05930735930735931,
+      "authorized_recovery_ratio": 0.6927374301675977
     },
     {
       "method": "combined",
       "kind": "capability_isolation",
-      "checkpoint_sha256": "be9ceaaf3fdbd6a78c01ba1ec6940e18b9dac5a504d5c89a10f6859d554ebe40",
+      "checkpoint_sha256": "caefabbf11e807be22bbc969d15e5d38c3b6f694a174de62270ab289e7c4feaa",
       "utility": {
-        "coarse_macro_f1": 0.5555555555555555,
+        "coarse_macro_f1": 0.6,
         "coarse_balanced_accuracy": 0.6666666666666666,
-        "fine_macro_f1": 0.16666666666666666,
-        "fine_balanced_accuracy": 0.2
+        "fine_macro_f1": 0.3333333333333333,
+        "fine_balanced_accuracy": 0.5
       },
-      "u_public": 0.2897435897435897,
+      "u_public": 0.28253968253968254,
       "probe_selection": {
-        "selected_probe": "linear_probe",
+        "selected_probe": "svm_probe",
         "selection_val_macro_f1_by_probe": {
-          "linear_probe": 0.8118421052631578,
-          "nonlinear_probe": 0.6171428571428571,
-          "knn_probe": 0.48054298642533944,
-          "fewshot_probe_k5": 0.40119047619047615,
-          "svm_probe": 0.5825396825396825,
-          "tree_probe": 0.44000000000000006
+          "linear_probe": 0.7209302325581395,
+          "nonlinear_probe": 0.6666666666666666,
+          "knn_probe": 0.44000000000000006,
+          "fewshot_probe_k5": 0.3048780487804878,
+          "svm_probe": 0.7333333333333334,
+          "tree_probe": 0.5057446808510638
         },
         "attack_test_result": {
-          "macro_f1": 0.3190476190476191,
-          "balanced_accuracy": 0.4583333333333333,
+          "macro_f1": 0.25817307692307695,
+          "balanced_accuracy": 0.375,
           "n_train_examples": 126,
-          "fit_seconds": 1.4772
+          "fit_seconds": 0.0069
         }
       },
-      "residual_fine_capability": 0.3190476190476191,
-      "unauthorized_capability_gain": 0.029304029304029366,
-      "authorized_recovery_ratio": 3.096774193548389
+      "residual_fine_capability": 0.25817307692307695,
+      "unauthorized_capability_gain": -0.024366605616605586,
+      "authorized_recovery_ratio": 0.5161290322580645
     }
   ]
 }

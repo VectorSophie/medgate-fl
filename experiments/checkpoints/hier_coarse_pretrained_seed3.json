@@ -6,8 +6,8 @@
     "batch_size": 16,
     "lr": 0.01
   },
-  "git_commit": "5b4becc3a66f2ea2f992dab565b5e04b59ae19cc",
-  "pretrain_coarse_macro_f1": 0.48888888888888893,
+  "git_commit": "8fc02fb43296729bdd38059aaeaac16790bc1040",
+  "pretrain_coarse_macro_f1": 1.0,
   "checkpoint_name": "hier_coarse_pretrained_seed3",
-  "state_dict_sha256": "323e90b52e47845e69b769797f2e1953d2cb5ac2b8c8f9c3015610eeeda1ad9c"
+  "state_dict_sha256": "1e4d2b2774142fcc892c9c5cde367c1efba9ad49c0a71e51b8156069cad2077e"
 }

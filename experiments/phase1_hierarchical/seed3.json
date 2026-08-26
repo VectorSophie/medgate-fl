@@ -1,6 +1,6 @@
 {
   "seed": 3,
-  "git_commit": "5b4becc3a66f2ea2f992dab565b5e04b59ae19cc",
+  "git_commit": "8fc02fb43296729bdd38059aaeaac16790bc1040",
   "config": {
     "data": {
       "num_patients_per_institution": 12,
@@ -51,7 +51,7 @@
     "output_dir": "experiments/phase1_hierarchical"
   },
   "dataset_manifest_hash": "65f979681270702d",
-  "wall_clock_seconds": 150.56,
+  "wall_clock_seconds": 114.52,
   "results": [
     {
       "method": "random_frozen_lora",
@@ -73,25 +73,25 @@
       },
       "u_public": 0.08333333333333333,
       "probe_selection": {
-        "selected_probe": "knn_probe",
+        "selected_probe": "svm_probe",
         "selection_val_macro_f1_by_probe": {
-          "linear_probe": 0.08,
-          "nonlinear_probe": 0.3515217391304347,
-          "knn_probe": 0.5935897435897436,
-          "fewshot_probe_k5": 0.047619047619047616,
-          "svm_probe": 0.18,
-          "tree_probe": 0.45
+          "linear_probe": 0.26666666666666666,
+          "nonlinear_probe": 0.7473504273504273,
+          "knn_probe": 0.6057971014492753,
+          "fewshot_probe_k5": 0.34285714285714286,
+          "svm_probe": 0.8222222222222223,
+          "tree_probe": 0.4446808510638298
         },
         "attack_test_result": {
-          "macro_f1": 0.473469387755102,
-          "balanced_accuracy": 0.5416666666666666,
+          "macro_f1": 0.2642857142857143,
+          "balanced_accuracy": 0.3055555555555555,
           "n_train_examples": 126,
-          "fit_seconds": 0.002
+          "fit_seconds": 0.0044
         }
       },
-      "residual_fine_capability": 0.473469387755102,
-      "unauthorized_capability_gain": 0.3901360544217687,
-      "authorized_recovery_ratio": 1.6666666666666665
+      "residual_fine_capability": 0.2642857142857143,
+      "unauthorized_capability_gain": 0.18095238095238098,
+      "authorized_recovery_ratio": 0.21874999999999997
     },
     {
       "method": "coarse_pretrained_fedlora",
@@ -105,33 +105,33 @@
           "fine_head"
         ]
       },
-      "checkpoint_sha256": "323e90b52e47845e69b769797f2e1953d2cb5ac2b8c8f9c3015610eeeda1ad9c",
+      "checkpoint_sha256": "1e4d2b2774142fcc892c9c5cde367c1efba9ad49c0a71e51b8156069cad2077e",
       "utility": {
-        "coarse_macro_f1": 0.48888888888888893,
-        "coarse_balanced_accuracy": 0.5555555555555555,
-        "fine_macro_f1": 0.13333333333333333,
-        "fine_balanced_accuracy": 0.16666666666666666
+        "coarse_macro_f1": 1.0,
+        "coarse_balanced_accuracy": 1.0,
+        "fine_macro_f1": 0.4642857142857143,
+        "fine_balanced_accuracy": 0.5
       },
-      "u_public": 0.23333333333333334,
+      "u_public": 0.41111111111111115,
       "probe_selection": {
-        "selected_probe": "knn_probe",
+        "selected_probe": "svm_probe",
         "selection_val_macro_f1_by_probe": {
-          "linear_probe": 0.3864468864468864,
-          "nonlinear_probe": 0.3224489795918367,
-          "knn_probe": 0.4803184431667403,
-          "fewshot_probe_k5": 0.39999999999999997,
-          "svm_probe": 0.3761904761904762,
-          "tree_probe": 0.46015037593984964
+          "linear_probe": 0.4642857142857143,
+          "nonlinear_probe": 0.6,
+          "knn_probe": 0.5809523809523809,
+          "fewshot_probe_k5": 0.26666666666666666,
+          "svm_probe": 0.8222222222222223,
+          "tree_probe": 0.5875968992248062
         },
         "attack_test_result": {
-          "macro_f1": 0.45555555555555555,
-          "balanced_accuracy": 0.5138888888888888,
+          "macro_f1": 0.3611111111111111,
+          "balanced_accuracy": 0.5,
           "n_train_examples": 126,
-          "fit_seconds": 0.0055
+          "fit_seconds": 0.004
         }
       },
-      "residual_fine_capability": 0.45555555555555555,
-      "unauthorized_capability_gain": 0.2222222222222222,
+      "residual_fine_capability": 0.3611111111111111,
+      "unauthorized_capability_gain": -0.050000000000000044,
       "authorized_recovery_ratio": 1.0
     },
     {
@@ -146,34 +146,34 @@
           "fine_head"
         ]
       },
-      "checkpoint_sha256": "1d9e3f0a06621aaad4ad8c3b2fa7c147849fa935f9291af2bb22b75e7d35a9cb",
+      "checkpoint_sha256": "273dc528686c86a76ca3e6a0ca37b13bdf948256e94591110253cc0a57e5e0cf",
       "utility": {
-        "coarse_macro_f1": 0.7824463118580766,
-        "coarse_balanced_accuracy": 0.8148148148148149,
-        "fine_macro_f1": 0.27280701754385966,
-        "fine_balanced_accuracy": 0.3611111111111111
+        "coarse_macro_f1": 0.7388663967611336,
+        "coarse_balanced_accuracy": 0.7222222222222223,
+        "fine_macro_f1": 0.291005291005291,
+        "fine_balanced_accuracy": 0.4722222222222222
       },
-      "u_public": 0.09795918367346938,
+      "u_public": 0.10256410256410257,
       "probe_selection": {
-        "selected_probe": "nonlinear_probe",
+        "selected_probe": "svm_probe",
         "selection_val_macro_f1_by_probe": {
-          "linear_probe": 0.3974882260596546,
-          "nonlinear_probe": 0.5992063492063492,
-          "knn_probe": 0.4016483516483516,
-          "fewshot_probe_k5": 0.3523809523809524,
-          "svm_probe": 0.44047619047619047,
-          "tree_probe": 0.4401002506265664
+          "linear_probe": 0.6584302325581395,
+          "nonlinear_probe": 0.7391304347826086,
+          "knn_probe": 0.37433862433862436,
+          "fewshot_probe_k5": 0.31359649122807015,
+          "svm_probe": 0.9137254901960784,
+          "tree_probe": 0.4256933542647829
         },
         "attack_test_result": {
-          "macro_f1": 0.20625,
-          "balanced_accuracy": 0.2638888888888889,
+          "macro_f1": 0.20833333333333334,
+          "balanced_accuracy": 0.2222222222222222,
           "n_train_examples": 126,
-          "fit_seconds": 0.3629
+          "fit_seconds": 0.0043
         }
       },
-      "residual_fine_capability": 0.20625,
-      "unauthorized_capability_gain": 0.1082908163265306,
-      "authorized_recovery_ratio": 4.942813765182186
+      "residual_fine_capability": 0.20833333333333334,
+      "unauthorized_capability_gain": 0.10576923076923077,
+      "authorized_recovery_ratio": 0.520956399437412
     },
     {
       "method": "full_finetune",
@@ -189,226 +189,226 @@
           "fine_head"
         ]
       },
-      "checkpoint_sha256": "323e90b52e47845e69b769797f2e1953d2cb5ac2b8c8f9c3015610eeeda1ad9c",
+      "checkpoint_sha256": "1e4d2b2774142fcc892c9c5cde367c1efba9ad49c0a71e51b8156069cad2077e",
       "utility": {
         "coarse_macro_f1": 1.0,
         "coarse_balanced_accuracy": 1.0,
-        "fine_macro_f1": 0.16666666666666666,
-        "fine_balanced_accuracy": 0.25
+        "fine_macro_f1": 0.6118421052631579,
+        "fine_balanced_accuracy": 0.6666666666666666
       },
-      "u_public": 0.08333333333333333,
+      "u_public": 0.37222222222222223,
       "probe_selection": {
         "selected_probe": "knn_probe",
         "selection_val_macro_f1_by_probe": {
-          "linear_probe": 0.3608058608058608,
-          "nonlinear_probe": 0.39285714285714285,
-          "knn_probe": 0.5666666666666667,
-          "fewshot_probe_k5": 0.4476190476190477,
-          "svm_probe": 0.48571428571428565,
-          "tree_probe": 0.4476190476190477
+          "linear_probe": 0.6,
+          "nonlinear_probe": 0.48333333333333334,
+          "knn_probe": 0.7333333333333334,
+          "fewshot_probe_k5": 0.2222222222222222,
+          "svm_probe": 0.5875968992248062,
+          "tree_probe": 0.42857142857142855
         },
         "attack_test_result": {
-          "macro_f1": 0.45952380952380956,
-          "balanced_accuracy": 0.5694444444444444,
+          "macro_f1": 0.24761904761904763,
+          "balanced_accuracy": 0.34722222222222215,
           "n_train_examples": 126,
-          "fit_seconds": 0.0011
+          "fit_seconds": 0.0014
         }
       },
-      "residual_fine_capability": 0.45952380952380956,
-      "unauthorized_capability_gain": 0.37619047619047624,
-      "authorized_recovery_ratio": 1.6666666666666665
+      "residual_fine_capability": 0.24761904761904763,
+      "unauthorized_capability_gain": -0.1246031746031746,
+      "authorized_recovery_ratio": 2.6027676950998178
     },
     {
       "method": "coarse_only",
       "kind": "capability_isolation",
-      "checkpoint_sha256": "323e90b52e47845e69b769797f2e1953d2cb5ac2b8c8f9c3015610eeeda1ad9c",
+      "checkpoint_sha256": "1e4d2b2774142fcc892c9c5cde367c1efba9ad49c0a71e51b8156069cad2077e",
       "utility": {
-        "coarse_macro_f1": 0.8666666666666667,
-        "coarse_balanced_accuracy": 0.8888888888888888,
-        "fine_macro_f1": 0.26,
-        "fine_balanced_accuracy": 0.41666666666666663
+        "coarse_macro_f1": 1.0,
+        "coarse_balanced_accuracy": 1.0,
+        "fine_macro_f1": 0.2,
+        "fine_balanced_accuracy": 0.25
       },
-      "u_public": 0.2857142857142857,
+      "u_public": 0.4611111111111111,
       "probe_selection": {
-        "selected_probe": "tree_probe",
+        "selected_probe": "linear_probe",
         "selection_val_macro_f1_by_probe": {
-          "linear_probe": 0.5595238095238095,
-          "nonlinear_probe": 0.33505402160864345,
-          "knn_probe": 0.5555555555555556,
-          "fewshot_probe_k5": 0.5555555555555556,
-          "svm_probe": 0.5314285714285714,
-          "tree_probe": 0.5833333333333334
+          "linear_probe": 0.7333333333333334,
+          "nonlinear_probe": 0.4642857142857143,
+          "knn_probe": 0.42226391494684173,
+          "fewshot_probe_k5": 0.4333333333333333,
+          "svm_probe": 0.6,
+          "tree_probe": 0.46428571428571425
         },
         "attack_test_result": {
-          "macro_f1": 0.7027777777777778,
-          "balanced_accuracy": 0.736111111111111,
+          "macro_f1": 0.5,
+          "balanced_accuracy": 0.5555555555555555,
           "n_train_examples": 126,
-          "fit_seconds": 0.2819
+          "fit_seconds": 3.2175
         }
       },
-      "residual_fine_capability": 0.7027777777777778,
-      "unauthorized_capability_gain": 0.41706349206349214,
-      "authorized_recovery_ratio": 0.16874999999999984
+      "residual_fine_capability": 0.5,
+      "unauthorized_capability_gain": 0.03888888888888892,
+      "authorized_recovery_ratio": -82.24999999999883
     },
     {
       "method": "hidden_fine_head",
       "kind": "capability_isolation",
-      "checkpoint_sha256": "323e90b52e47845e69b769797f2e1953d2cb5ac2b8c8f9c3015610eeeda1ad9c",
+      "checkpoint_sha256": "1e4d2b2774142fcc892c9c5cde367c1efba9ad49c0a71e51b8156069cad2077e",
       "utility": {
         "coarse_macro_f1": 1.0,
         "coarse_balanced_accuracy": 1.0,
-        "fine_macro_f1": 0.16666666666666666,
-        "fine_balanced_accuracy": 0.25
+        "fine_macro_f1": 0.6666666666666666,
+        "fine_balanced_accuracy": 0.75
       },
-      "u_public": 0.20833333333333331,
+      "u_public": 0.41111111111111115,
       "probe_selection": {
-        "selected_probe": "tree_probe",
+        "selected_probe": "knn_probe",
         "selection_val_macro_f1_by_probe": {
-          "linear_probe": 0.30952380952380953,
-          "nonlinear_probe": 0.39285714285714285,
-          "knn_probe": 0.5555555555555556,
-          "fewshot_probe_k5": 0.39999999999999997,
-          "svm_probe": 0.48571428571428565,
-          "tree_probe": 0.5588235294117647
+          "linear_probe": 0.48333333333333334,
+          "nonlinear_probe": 0.33333333333333337,
+          "knn_probe": 0.7333333333333334,
+          "fewshot_probe_k5": 0.22564102564102564,
+          "svm_probe": 0.6,
+          "tree_probe": 0.7333333333333334
         },
         "attack_test_result": {
-          "macro_f1": 0.29761904761904756,
-          "balanced_accuracy": 0.40277777777777773,
+          "macro_f1": 0.2952380952380952,
+          "balanced_accuracy": 0.34722222222222215,
           "n_train_examples": 126,
-          "fit_seconds": 0.2757
+          "fit_seconds": 0.0021
         }
       },
-      "residual_fine_capability": 0.29761904761904756,
-      "unauthorized_capability_gain": 0.08928571428571425,
-      "authorized_recovery_ratio": 0.5555555555555556
+      "residual_fine_capability": 0.2952380952380952,
+      "unauthorized_capability_gain": -0.11587301587301596,
+      "authorized_recovery_ratio": 4.805970149253732
     },
     {
       "method": "adapter_isolation",
       "kind": "capability_isolation",
-      "checkpoint_sha256": "323e90b52e47845e69b769797f2e1953d2cb5ac2b8c8f9c3015610eeeda1ad9c",
+      "checkpoint_sha256": "1e4d2b2774142fcc892c9c5cde367c1efba9ad49c0a71e51b8156069cad2077e",
       "utility": {
         "coarse_macro_f1": 1.0,
         "coarse_balanced_accuracy": 1.0,
-        "fine_macro_f1": 0.16666666666666666,
-        "fine_balanced_accuracy": 0.25
+        "fine_macro_f1": 0.6118421052631579,
+        "fine_balanced_accuracy": 0.6666666666666666
       },
-      "u_public": 0.08333333333333333,
+      "u_public": 0.37222222222222223,
       "probe_selection": {
         "selected_probe": "knn_probe",
         "selection_val_macro_f1_by_probe": {
-          "linear_probe": 0.3608058608058608,
-          "nonlinear_probe": 0.39285714285714285,
-          "knn_probe": 0.5666666666666667,
-          "fewshot_probe_k5": 0.4476190476190477,
-          "svm_probe": 0.48571428571428565,
-          "tree_probe": 0.4476190476190477
+          "linear_probe": 0.6,
+          "nonlinear_probe": 0.48333333333333334,
+          "knn_probe": 0.7333333333333334,
+          "fewshot_probe_k5": 0.2222222222222222,
+          "svm_probe": 0.5875968992248062,
+          "tree_probe": 0.42857142857142855
         },
         "attack_test_result": {
-          "macro_f1": 0.45952380952380956,
-          "balanced_accuracy": 0.5694444444444444,
+          "macro_f1": 0.24761904761904763,
+          "balanced_accuracy": 0.34722222222222215,
           "n_train_examples": 126,
-          "fit_seconds": 0.0012
+          "fit_seconds": 0.0013
         }
       },
-      "residual_fine_capability": 0.45952380952380956,
-      "unauthorized_capability_gain": 0.37619047619047624,
-      "authorized_recovery_ratio": 1.6666666666666665
+      "residual_fine_capability": 0.24761904761904763,
+      "unauthorized_capability_gain": -0.1246031746031746,
+      "authorized_recovery_ratio": 2.6027676950998178
     },
     {
       "method": "adversarial",
       "kind": "capability_isolation",
-      "checkpoint_sha256": "323e90b52e47845e69b769797f2e1953d2cb5ac2b8c8f9c3015610eeeda1ad9c",
+      "checkpoint_sha256": "1e4d2b2774142fcc892c9c5cde367c1efba9ad49c0a71e51b8156069cad2077e",
       "utility": {
-        "coarse_macro_f1": 0.47222222222222215,
-        "coarse_balanced_accuracy": 0.5,
-        "fine_macro_f1": 0.15,
-        "fine_balanced_accuracy": 0.25
+        "coarse_macro_f1": 1.0,
+        "coarse_balanced_accuracy": 1.0,
+        "fine_macro_f1": 0.6118421052631579,
+        "fine_balanced_accuracy": 0.6666666666666666
       },
-      "u_public": 0.2833333333333333,
+      "u_public": 0.482972582972583,
       "probe_selection": {
-        "selected_probe": "tree_probe",
+        "selected_probe": "linear_probe",
         "selection_val_macro_f1_by_probe": {
-          "linear_probe": 0.5314285714285714,
-          "nonlinear_probe": 0.3442460317460318,
-          "knn_probe": 0.4857142857142857,
-          "fewshot_probe_k5": 0.5523809523809523,
-          "svm_probe": 0.29047619047619044,
-          "tree_probe": 0.5555555555555556
+          "linear_probe": 0.6,
+          "nonlinear_probe": 0.6,
+          "knn_probe": 0.5739837398373984,
+          "fewshot_probe_k5": 0.26666666666666666,
+          "svm_probe": 0.5333333333333333,
+          "tree_probe": 0.2658536585365853
         },
         "attack_test_result": {
-          "macro_f1": 0.6444444444444444,
-          "balanced_accuracy": 0.6805555555555555,
+          "macro_f1": 0.4238095238095238,
+          "balanced_accuracy": 0.5555555555555555,
           "n_train_examples": 126,
-          "fit_seconds": 0.3339
+          "fit_seconds": 3.0008
         }
       },
-      "residual_fine_capability": 0.6444444444444444,
-      "unauthorized_capability_gain": 0.36111111111111105,
-      "authorized_recovery_ratio": 0.888888888888889
+      "residual_fine_capability": 0.4238095238095238,
+      "unauthorized_capability_gain": -0.059163059163059195,
+      "authorized_recovery_ratio": -6.896260922576705
     },
     {
       "method": "orthogonal",
       "kind": "capability_isolation",
-      "checkpoint_sha256": "323e90b52e47845e69b769797f2e1953d2cb5ac2b8c8f9c3015610eeeda1ad9c",
+      "checkpoint_sha256": "1e4d2b2774142fcc892c9c5cde367c1efba9ad49c0a71e51b8156069cad2077e",
       "utility": {
         "coarse_macro_f1": 1.0,
         "coarse_balanced_accuracy": 1.0,
-        "fine_macro_f1": 0.3333333333333333,
-        "fine_balanced_accuracy": 0.5
+        "fine_macro_f1": 0.6118421052631579,
+        "fine_balanced_accuracy": 0.6666666666666666
       },
-      "u_public": 0.2956730769230769,
+      "u_public": 0.2888888888888889,
       "probe_selection": {
-        "selected_probe": "knn_probe",
+        "selected_probe": "linear_probe",
         "selection_val_macro_f1_by_probe": {
-          "linear_probe": 0.3224489795918367,
-          "nonlinear_probe": 0.3761904761904762,
-          "knn_probe": 0.5523809523809523,
-          "fewshot_probe_k5": 0.39999999999999997,
-          "svm_probe": 0.450776397515528,
-          "tree_probe": 0.4476190476190477
+          "linear_probe": 0.6,
+          "nonlinear_probe": 0.33333333333333337,
+          "knn_probe": 0.44155844155844154,
+          "fewshot_probe_k5": 0.2333333333333333,
+          "svm_probe": 0.5809523809523809,
+          "tree_probe": 0.4352159468438538
         },
         "attack_test_result": {
-          "macro_f1": 0.7523809523809524,
-          "balanced_accuracy": 0.7916666666666666,
+          "macro_f1": 0.41111111111111115,
+          "balanced_accuracy": 0.5138888888888888,
           "n_train_examples": 126,
-          "fit_seconds": 0.0015
+          "fit_seconds": 0.691
         }
       },
-      "residual_fine_capability": 0.7523809523809524,
-      "unauthorized_capability_gain": 0.45670787545787545,
-      "authorized_recovery_ratio": -0.23198420533070074
+      "residual_fine_capability": 0.41111111111111115,
+      "unauthorized_capability_gain": 0.12222222222222223,
+      "authorized_recovery_ratio": 1.8412717313646103
     },
     {
       "method": "combined",
       "kind": "capability_isolation",
-      "checkpoint_sha256": "323e90b52e47845e69b769797f2e1953d2cb5ac2b8c8f9c3015610eeeda1ad9c",
+      "checkpoint_sha256": "1e4d2b2774142fcc892c9c5cde367c1efba9ad49c0a71e51b8156069cad2077e",
       "utility": {
-        "coarse_macro_f1": 0.6190476190476191,
-        "coarse_balanced_accuracy": 0.6666666666666666,
-        "fine_macro_f1": 0.38095238095238093,
+        "coarse_macro_f1": 1.0,
+        "coarse_balanced_accuracy": 1.0,
+        "fine_macro_f1": 0.4,
         "fine_balanced_accuracy": 0.5
       },
-      "u_public": 0.2361111111111111,
+      "u_public": 0.3333333333333333,
       "probe_selection": {
-        "selected_probe": "tree_probe",
+        "selected_probe": "linear_probe",
         "selection_val_macro_f1_by_probe": {
-          "linear_probe": 0.40952380952380957,
-          "nonlinear_probe": 0.4873015873015873,
-          "knn_probe": 0.5134502923976608,
-          "fewshot_probe_k5": 0.525,
-          "svm_probe": 0.4036363636363636,
-          "tree_probe": 0.5555555555555556
+          "linear_probe": 0.8222222222222223,
+          "nonlinear_probe": 0.7714285714285715,
+          "knn_probe": 0.34415584415584416,
+          "fewshot_probe_k5": 0.27777777777777773,
+          "svm_probe": 0.5508771929824561,
+          "tree_probe": 0.34415584415584416
         },
         "attack_test_result": {
-          "macro_f1": 0.36666666666666664,
+          "macro_f1": 0.41111111111111115,
           "balanced_accuracy": 0.4305555555555555,
           "n_train_examples": 126,
-          "fit_seconds": 0.3648
+          "fit_seconds": 3.078
         }
       },
-      "residual_fine_capability": 0.36666666666666664,
-      "unauthorized_capability_gain": 0.13055555555555554,
-      "authorized_recovery_ratio": -1.4092664092664091
+      "residual_fine_capability": 0.41111111111111115,
+      "unauthorized_capability_gain": 0.07777777777777783,
+      "authorized_recovery_ratio": 0.5090909090909093
     }
   ]
 }

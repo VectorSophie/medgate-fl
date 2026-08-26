@@ -1,6 +1,6 @@
 {
   "seed": 0,
-  "git_commit": "5b4becc3a66f2ea2f992dab565b5e04b59ae19cc",
+  "git_commit": "8fc02fb43296729bdd38059aaeaac16790bc1040",
   "config": {
     "data": {
       "num_patients_per_institution": 12,
@@ -51,7 +51,7 @@
     "output_dir": "experiments/phase1_hierarchical"
   },
   "dataset_manifest_hash": "65f979681270702d",
-  "wall_clock_seconds": 78.33,
+  "wall_clock_seconds": 102.78,
   "results": [
     {
       "method": "random_frozen_lora",
@@ -86,7 +86,7 @@
           "macro_f1": 0.40470085470085465,
           "balanced_accuracy": 0.4166666666666667,
           "n_train_examples": 126,
-          "fit_seconds": 0.4224
+          "fit_seconds": 0.732
         }
       },
       "residual_fine_capability": 0.40470085470085465,
@@ -127,7 +127,7 @@
           "macro_f1": 0.15931697612732096,
           "balanced_accuracy": 0.2546296296296296,
           "n_train_examples": 126,
-          "fit_seconds": 0.4003
+          "fit_seconds": 0.6999
         }
       },
       "residual_fine_capability": 0.15931697612732096,
@@ -168,7 +168,7 @@
           "macro_f1": 0.2927515833919775,
           "balanced_accuracy": 0.34722222222222215,
           "n_train_examples": 126,
-          "fit_seconds": 0.1145
+          "fit_seconds": 0.1028
         }
       },
       "residual_fine_capability": 0.2927515833919775,
@@ -211,7 +211,7 @@
           "macro_f1": 0.17532467532467533,
           "balanced_accuracy": 0.25,
           "n_train_examples": 126,
-          "fit_seconds": 0.0033
+          "fit_seconds": 0.0097
         }
       },
       "residual_fine_capability": 0.17532467532467533,
@@ -243,7 +243,7 @@
           "macro_f1": 0.21645021645021645,
           "balanced_accuracy": 0.3333333333333333,
           "n_train_examples": 126,
-          "fit_seconds": 0.004
+          "fit_seconds": 0.0049
         }
       },
       "residual_fine_capability": 0.21645021645021645,
@@ -275,7 +275,7 @@
           "macro_f1": 0.21645021645021645,
           "balanced_accuracy": 0.3333333333333333,
           "n_train_examples": 126,
-          "fit_seconds": 0.0035
+          "fit_seconds": 0.0101
         }
       },
       "residual_fine_capability": 0.21645021645021645,
@@ -307,7 +307,7 @@
           "macro_f1": 0.17532467532467533,
           "balanced_accuracy": 0.25,
           "n_train_examples": 126,
-          "fit_seconds": 0.0038
+          "fit_seconds": 0.0045
         }
       },
       "residual_fine_capability": 0.17532467532467533,
@@ -339,7 +339,7 @@
           "macro_f1": 0.21645021645021645,
           "balanced_accuracy": 0.3333333333333333,
           "n_train_examples": 126,
-          "fit_seconds": 0.0047
+          "fit_seconds": 0.0054
         }
       },
       "residual_fine_capability": 0.21645021645021645,
@@ -371,7 +371,7 @@
           "macro_f1": 0.21645021645021645,
           "balanced_accuracy": 0.3333333333333333,
           "n_train_examples": 126,
-          "fit_seconds": 0.0041
+          "fit_seconds": 0.0038
         }
       },
       "residual_fine_capability": 0.21645021645021645,
@@ -403,7 +403,7 @@
           "macro_f1": 0.21645021645021645,
           "balanced_accuracy": 0.3333333333333333,
           "n_train_examples": 126,
-          "fit_seconds": 0.0055
+          "fit_seconds": 0.0036
         }
       },
       "residual_fine_capability": 0.21645021645021645,
